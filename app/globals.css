@@ -185,3 +185,20 @@
 .landing-slide-right { animation: landingSlideRight 1.5s linear infinite; }
 .landing-spinner { animation: landingSpin 1s linear infinite; }
 .page-fade-in { animation: pageFadeIn 0.2s ease-out forwards; }
+
+@keyframes bgOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, 30px) scale(1.1); }
+}
+@keyframes bgOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, -40px) scale(1.15); }
+}
+@keyframes bgOrb3 {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.animate-bg-orb-1 { animation: bgOrb1 15s ease-in-out infinite; }
+.animate-bg-orb-2 { animation: bgOrb2 18s ease-in-out infinite; }
+.animate-bg-orb-3 { animation: bgOrb3 12s ease-in-out infinite; }
