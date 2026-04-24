@@ -128,3 +128,60 @@
     @apply font-sans;
   }
 }
+
+/* Landing page CSS animations */
+@keyframes landingFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes landingFadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes landingFadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes landingScaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes landingSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes landingSpinReverse {
+  to { transform: rotate(-360deg); }
+}
+@keyframes landingPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes landingSlideRight {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(400%); }
+}
+@keyframes landingFadeInLeft {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes landingDropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.landing-fade-in { animation: landingFadeIn 0.3s ease-out both; }
+.landing-fade-in-up { animation: landingFadeInUp 0.3s ease-out both; }
+.landing-fade-in-down { animation: landingFadeInDown 0.3s ease-out both; }
+.landing-scale-in { animation: landingScaleIn 0.3s ease-out both; }
+.landing-fade-in-left { animation: landingFadeInLeft 0.3s ease-out both; }
+.landing-dropdown-in { animation: landingDropdownIn 0.15s ease-out both; }
+.landing-spin { animation: landingSpin 3s linear infinite; }
+.landing-spin-reverse { animation: landingSpinReverse 2s linear infinite; }
+.landing-pulse { animation: landingPulse 1.5s ease-in-out infinite; }
+.landing-slide-right { animation: landingSlideRight 1.5s linear infinite; }
+.landing-spinner { animation: landingSpin 1s linear infinite; }
+.page-fade-in { animation: pageFadeIn 0.2s ease-out forwards; }
