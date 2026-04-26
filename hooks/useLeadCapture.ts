@@ -105,6 +105,14 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
         throw new Error('limit_reached')
       }
       if (!data?.success) throw new Error(data?.error || 'Failed to complete lead')
+
+      // Fire LeadConnector webhook fire-and-forget
+      fetch('/api/leadconnector', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent_id: agentId, lead_id: currentLeadId }),
+      }).catch(console.warn)
+
       return { id: currentLeadId, formData }
     },
   })

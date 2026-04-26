@@ -72,6 +72,9 @@ export function AgentLandingClient({ profile }: Props) {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
       await leadCapture.completeLead.mutateAsync(data)
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Lead')
+      }
       setStep('loading')
 
       const result = await leadCapture.generateReport.mutateAsync()
