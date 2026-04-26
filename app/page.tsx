@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Database, BarChart3, Palette, ArrowRight, Shield, Zap, Database as Db, CheckCircle } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
+import { MarketingHeader } from '@/components/marketing/marketing-header'
 
 export const metadata = {
   title: 'Property Appraisals for Real Estate Agents',
@@ -62,8 +63,10 @@ const FEATURES = [
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-zinc-950">
+      <MarketingHeader />
+
       {/* Hero */}
-      <section className="relative overflow-hidden min-h-screen flex items-center">
+      <section id="how-it-works" className="relative overflow-hidden min-h-screen flex items-center">
         <AnimatedBackground />
 
         <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
@@ -133,7 +136,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="py-24 bg-zinc-900/50 border-t border-zinc-800/50">
+      <section id="features" className="py-24 bg-zinc-900/50 border-t border-zinc-800/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
@@ -167,8 +170,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-gradient-to-b from-zinc-900 to-zinc-950 border-t border-zinc-800/50">
+      {/* CTA / Pricing */}
+      <section id="pricing" className="py-24 bg-gradient-to-b from-zinc-900 to-zinc-950 border-t border-zinc-800/50">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded text-xs font-medium mb-6 border border-emerald-500/20">
@@ -194,13 +197,11 @@ export default function HomePage() {
 
               <div className="flex flex-col sm:flex-row items-center gap-4 text-zinc-500 text-sm">
                 {['30-day free trial', 'Cancel anytime', 'Full access'].map((item, i) => (
-                  <>
-                    <span key={item} className="flex items-center gap-1.5">
-                      <CheckCircle className="h-4 w-4 text-emerald-500" strokeWidth={1.5} />
-                      {item}
-                    </span>
-                    {i < 2 && <span key={`dot-${i}`} className="hidden sm:block text-zinc-700">•</span>}
-                  </>
+                  <span key={item} className="flex items-center gap-4 text-zinc-500 text-sm">
+                    {i > 0 && <span className="hidden sm:block text-zinc-700">•</span>}
+                    <CheckCircle className="h-4 w-4 text-emerald-500" strokeWidth={1.5} />
+                    {item}
+                  </span>
                 ))}
               </div>
             </div>
