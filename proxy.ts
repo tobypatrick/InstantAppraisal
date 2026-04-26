@@ -38,10 +38,12 @@ export async function proxy(request: NextRequest) {
     hostname.startsWith('my.') || devDomain === 'agent'
 
   if (isDashboard) {
-    // Protect all dashboard routes
-    if (!user && !url.pathname.startsWith('/auth') && url.pathname !== '/subscription-expired') {
-      url.pathname = '/auth/login'
-      return NextResponse.redirect(url)
+    // Protect all dashboard routes — auth lives on the marketing domain
+    if (!user && url.pathname !== '/subscription-expired') {
+      const loginUrl = devDomain
+        ? new URL(`/auth/login?redirect=${encodeURIComponent(url.pathname)}`, url.origin)
+        : new URL(`https://instantappraisal.co/auth/login?redirect=${encodeURIComponent('https://dashboard.instantappraisal.co' + url.pathname)}`)
+      return NextResponse.redirect(loginUrl)
     }
     // Rewrite to dashboard route group
     if (!url.pathname.startsWith('/dashboard')) {
