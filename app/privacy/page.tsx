@@ -1,5 +1,6 @@
 export const metadata = {
-  title: 'Privacy Policy | Instant Appraisal',
+  title: 'Privacy Policy',
+  description: 'InstantAppraisal privacy policy — how we collect, use, and protect your personal information.',
 }
 
 export default function PrivacyPage() {

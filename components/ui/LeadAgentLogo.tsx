@@ -7,23 +7,18 @@ interface LeadAgentLogoProps {
 }
 
 export function LeadAgentLogo({ height = 28, dark = false, className }: LeadAgentLogoProps) {
+  const aspectRatio = 375 / 194.88
+  const width = Math.round(height * aspectRatio)
+
   return (
-    <div className={cn('flex items-center gap-2', className)} style={{ height }}>
-      <div
-        className={cn(
-          'rounded-md flex items-center justify-center font-bold',
-          dark ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'
-        )}
-        style={{ width: height, height, fontSize: height * 0.55 }}
-      >
-        IA
-      </div>
-      <span
-        className={cn('font-semibold', dark ? 'text-white' : 'text-slate-900')}
-        style={{ fontSize: height * 0.6 }}
-      >
-        InstantAppraisal
-      </span>
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={dark ? '/logo-white.svg' : '/logo-black.svg'}
+      alt="InstantAppraisal"
+      width={width}
+      height={height}
+      className={cn('object-contain', className)}
+      style={{ width, height }}
+    />
   )
 }

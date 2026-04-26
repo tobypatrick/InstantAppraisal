@@ -1,14 +1,46 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Geist } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
 import { Providers } from '@/components/providers'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
 export const metadata: Metadata = {
-  title: 'InstantAppraisal',
-  description: 'Instant property appraisals for real estate agents',
+  title: {
+    default: 'InstantAppraisal — Property Appraisals for Real Estate Agents',
+    template: '%s | InstantAppraisal',
+  },
+  description: 'Generate professional property appraisals instantly. Powered by PropTrack data and AI. Built for Australian real estate agents.',
+  keywords: ['property appraisal', 'real estate', 'Australia', 'PropTrack', 'instant appraisal', 'property valuation'],
+  authors: [{ name: 'InstantAppraisal' }],
+  creator: 'InstantAppraisal',
+  metadataBase: new URL('https://instantappraisal.co'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_AU',
+    url: 'https://instantappraisal.co',
+    siteName: 'InstantAppraisal',
+    title: 'InstantAppraisal — Property Appraisals for Real Estate Agents',
+    description: 'Generate professional property appraisals instantly. Powered by PropTrack data and AI.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'InstantAppraisal' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'InstantAppraisal — Property Appraisals for Real Estate Agents',
+    description: 'Generate professional property appraisals instantly. Powered by PropTrack data and AI.',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
@@ -17,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={geist.variable} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>
           {children}

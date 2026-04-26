@@ -1,5 +1,6 @@
 export const metadata = {
-  title: 'Terms & Conditions | Instant Appraisal',
+  title: 'Terms & Conditions',
+  description: 'InstantAppraisal terms and conditions of use.',
 }
 
 export default function TermsPage() {

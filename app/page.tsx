@@ -3,8 +3,12 @@ import { Database, BarChart3, Palette, ArrowRight, Shield, Zap, Database as Db, 
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 
 export const metadata = {
-  title: 'Instant Appraisal | Property Reports for Real Estate Agents',
-  description: 'Generate high-intent leads with real-time PropTrack intelligence. Start your 30-Day Free Trial today.',
+  title: 'Property Appraisals for Real Estate Agents',
+  description: 'Generate professional property appraisals instantly using PropTrack data. Capture high-intent leads with a branded landing page. Start your free trial today.',
+  openGraph: {
+    title: 'InstantAppraisal — Property Appraisals for Real Estate Agents',
+    description: 'Generate professional property appraisals instantly using PropTrack data. Capture high-intent leads with a branded landing page.',
+  },
 }
 
 function AnimatedBackground() {
@@ -208,7 +212,7 @@ export default function HomePage() {
       <footer className="bg-zinc-950 border-t border-zinc-800/50 py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <LeadAgentLogo height={18} />
+            <LeadAgentLogo height={18} dark />
             <p className="text-zinc-600 text-xs">
               © {new Date().getFullYear()} Instant Appraisal. All rights reserved.
             </p>
