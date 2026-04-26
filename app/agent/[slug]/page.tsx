@@ -17,7 +17,14 @@ export default async function AgentLandingPage({ params }: PageProps) {
     notFound()
   }
 
-  const profile = { ...data[0], selected_template: data[0].selected_template || 'minimalist' }
+  const raw = data[0]
+  // Resolve storage path → full public URL if not already a full URL
+  let agencyLogoUrl = raw.agency_logo_url || null
+  if (agencyLogoUrl && !agencyLogoUrl.startsWith('http')) {
+    const { data: { publicUrl } } = supabase.storage.from('agent-assets').getPublicUrl(agencyLogoUrl)
+    agencyLogoUrl = publicUrl
+  }
+  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', agency_logo_url: agencyLogoUrl }
   const gtmId: string | null = profile.google_tag_manager_id || null
   const pixelId: string | null = profile.facebook_pixel_id || null
 

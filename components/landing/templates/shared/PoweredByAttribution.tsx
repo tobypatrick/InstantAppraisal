@@ -26,9 +26,9 @@ export function PoweredByAttribution({ pageBgColor }: PoweredByAttributionProps)
         }`}
       >
         <span className="text-xs font-medium tracking-wide">Powered by</span>
-        <LeadAgentLogo 
-          height={14} 
-          dark={!isDark}
+        <LeadAgentLogo
+          height={20}
+          dark={isDark}
           className={isDark ? "opacity-40" : "opacity-60"}
         />
       </a>

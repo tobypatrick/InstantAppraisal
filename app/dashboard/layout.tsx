@@ -14,11 +14,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!user) redirect('/auth/login')
 
-  const { data: profile } = await supabase
+  const { data: rawProfile } = await supabase
     .from('profiles')
     .select('id, full_name, agency_name, slug, header_bg_color, page_bg_color, profile_picture_url, agency_logo_url, first_login, selected_template, phone_number, vsl_youtube_url')
     .eq('id', user.id)
     .maybeSingle()
+
+  // Resolve storage paths → full public URLs
+  const resolveStorageUrl = (path: string | null) => {
+    if (!path || path.startsWith('http')) return path
+    return supabase.storage.from('agent-assets').getPublicUrl(path).data.publicUrl
+  }
+  const profile = rawProfile ? {
+    ...rawProfile,
+    agency_logo_url: resolveStorageUrl(rawProfile.agency_logo_url),
+    profile_picture_url: resolveStorageUrl(rawProfile.profile_picture_url),
+  } : null
 
   // Check if user is admin
   const { data: roleData } = await supabase

@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { getContrastTextColor } from '@/lib/color-utils'
 
 interface TemplateHeaderProps {
@@ -9,6 +12,10 @@ interface TemplateHeaderProps {
 export function TemplateHeader({ agencyLogoUrl, agencyName, headerBgColor }: TemplateHeaderProps) {
   const textColorClass = getContrastTextColor(headerBgColor)
   const isDarkBg = textColorClass.includes('white')
+  const [logoFailed, setLogoFailed] = useState(false)
+
+  const showLogo = agencyLogoUrl && !logoFailed
+  const nameLabel = agencyName || 'InstantAppraisal'
 
   return (
     <header
@@ -17,16 +24,16 @@ export function TemplateHeader({ agencyLogoUrl, agencyName, headerBgColor }: Tem
     >
       <div className="container mx-auto px-4 h-14 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          {agencyLogoUrl ? (
+          {showLogo ? (
             <img
               src={agencyLogoUrl}
-              alt={agencyName || 'Agency'}
+              alt={nameLabel}
               className="h-8 max-w-[160px] object-contain"
-              onError={(e) => { e.currentTarget.style.display = 'none' }}
+              onError={() => setLogoFailed(true)}
             />
           ) : (
             <span className={`text-sm font-semibold tracking-wide ${isDarkBg ? 'text-white' : 'text-slate-900'}`}>
-              {agencyName || 'InstantAppraisal'}
+              {nameLabel}
             </span>
           )}
         </div>
