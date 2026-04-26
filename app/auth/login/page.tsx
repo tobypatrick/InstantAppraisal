@@ -26,7 +26,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16">
           <Link href="/" className="flex items-center gap-3 mb-8">
-            <LeadAgentLogo height={24} dark />
+            <LeadAgentLogo height={36} dark />
           </Link>
           <h1 className="text-3xl xl:text-4xl font-semibold text-white mb-4 leading-tight tracking-tight">
             Capture property leads with your personalised landing page
@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 py-12 bg-background overflow-y-auto">
         <div className="w-full max-w-sm">
           <Link href="/" className="lg:hidden flex items-center justify-center mb-8">
-            <LeadAgentLogo height={20} />
+            <LeadAgentLogo height={32} />
           </Link>
 
           <h2 className="text-xl font-semibold text-foreground mb-1 text-center lg:text-left">

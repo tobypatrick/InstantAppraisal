@@ -58,7 +58,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
             profile?.agency_logo_url ? (
               <img src={profile.agency_logo_url} alt={profile.agency_name || 'Agency'} className="h-6 max-w-[160px] object-contain brightness-0 invert" />
             ) : (
-              <LeadAgentLogo height={18} dark />
+              <LeadAgentLogo height={28} dark />
             )
           )}
         </a>

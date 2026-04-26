@@ -33,7 +33,7 @@ export function MarketingHeader() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
-            <LeadAgentLogo height={20} dark />
+            <LeadAgentLogo height={36} dark />
           </Link>
 
           {/* Desktop nav */}

@@ -213,7 +213,7 @@ export default function HomePage() {
       <footer className="bg-zinc-950 border-t border-zinc-800/50 py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <LeadAgentLogo height={18} dark />
+            <LeadAgentLogo height={28} dark />
             <p className="text-zinc-600 text-xs">
               © {new Date().getFullYear()} Instant Appraisal. All rights reserved.
             </p>

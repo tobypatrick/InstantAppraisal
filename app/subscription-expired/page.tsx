@@ -43,7 +43,7 @@ export default function SubscriptionExpiredPage() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          <LeadAgentLogo height={24} className="mx-auto mb-6" />
+          <LeadAgentLogo height={36} className="mx-auto mb-6" />
           <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded text-sm font-medium mb-4 border border-amber-200">
             <AlertTriangle className="h-4 w-4" />
             Your subscription has expired

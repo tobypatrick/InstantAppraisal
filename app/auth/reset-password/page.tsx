@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <InstantAppraisalLogo height={32} />
+          <InstantAppraisalLogo height={40} />
         </div>
         <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           {isDone ? (
