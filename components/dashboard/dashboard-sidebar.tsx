@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, QrCode, BarChart3, Settings, HelpCircle, LogOut, Shield, CreditCard } from 'lucide-react'
+import { LayoutDashboard, Users, QrCode, BarChart3, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck } from 'lucide-react'
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuItem, SidebarHeader,
@@ -88,6 +88,12 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
           <SidebarGroup className="mt-4">
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <Link href="/dashboard/admin" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/dashboard/admin' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                    <ShieldCheck className="h-4 w-4 shrink-0" strokeWidth={1.25} />
+                    {!collapsed && <span className="text-[13px] font-medium">Admin</span>}
+                  </Link>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <Link href="/admin/audit-log" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
                     <Shield className="h-4 w-4 shrink-0" strokeWidth={1.25} />
