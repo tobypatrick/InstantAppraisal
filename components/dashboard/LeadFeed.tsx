@@ -6,8 +6,10 @@ import { format, formatDistanceToNow } from 'date-fns'
 import {
   Users, Mail, Phone, MapPin, Calendar, FileText,
   Globe, QrCode, ExternalLink, Filter,
-  ArrowUpDown, X, Check,
+  ArrowUpDown, X, Check, Tag,
 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from './StatusBadge'
@@ -28,6 +30,25 @@ import {
 type SortOption = 'newest' | 'oldest'
 type StatusFilter = 'all' | 'complete' | 'partial'
 type SourceFilter = 'all' | 'facebook' | 'google' | 'qr' | 'direct'
+type PipelineStatus = 'contacted' | 'meeting_booked' | 'listed' | 'lost' | null
+type PipelineFilter = 'all' | 'contacted' | 'meeting_booked' | 'listed' | 'lost' | 'none'
+
+const PIPELINE_STATUS_CONFIG = {
+  contacted: { label: 'Contacted', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+  meeting_booked: { label: 'Meeting Booked', className: 'bg-purple-50 text-purple-700 border-purple-200' },
+  listed: { label: 'Listed', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  lost: { label: 'Lost', className: 'bg-red-50 text-red-700 border-red-200' },
+}
+
+function PipelineStatusBadge({ status }: { status: PipelineStatus }) {
+  if (!status) return null
+  const config = PIPELINE_STATUS_CONFIG[status]
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${config.className}`}>
+      {config.label}
+    </span>
+  )
+}
 
 const getSourceCategory = (lead: Lead): SourceFilter => {
   const source = lead.utm_source?.toLowerCase() || ''
@@ -49,29 +70,43 @@ const LeadFeedComponent = () => {
   const { leads, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useFlatLeads()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [highlightedLead, setHighlightedLead] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [pipelineFilter, setPipelineFilter] = useState<PipelineFilter>('all')
+
+  const updatePipelineStatus = async (leadId: string, status: PipelineStatus) => {
+    const supabase = createClient()
+    await supabase.from('leads').update({ pipeline_status: status }).eq('id', leadId)
+    queryClient.invalidateQueries({ queryKey: ['leads'] })
+    if (selectedLead?.id === leadId) {
+      setSelectedLead(prev => prev ? { ...prev, pipeline_status: status } : null)
+    }
+  }
 
   const filteredLeads = useMemo(() => {
     let result = [...leads]
     if (statusFilter !== 'all') result = result.filter(lead => lead.status === statusFilter)
     if (sourceFilter !== 'all') result = result.filter(lead => getSourceCategory(lead) === sourceFilter)
+    if (pipelineFilter === 'none') result = result.filter(lead => !lead.pipeline_status)
+    else if (pipelineFilter !== 'all') result = result.filter(lead => lead.pipeline_status === pipelineFilter)
     result.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime()
       const dateB = new Date(b.created_at).getTime()
       return sortBy === 'newest' ? dateB - dateA : dateA - dateB
     })
     return result
-  }, [leads, statusFilter, sourceFilter, sortBy])
+  }, [leads, statusFilter, sourceFilter, pipelineFilter, sortBy])
 
-  const activeFiltersCount = (statusFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0)
+  const activeFiltersCount = (statusFilter !== 'all' ? 1 : 0) + (sourceFilter !== 'all' ? 1 : 0) + (pipelineFilter !== 'all' ? 1 : 0)
 
   const clearFilters = () => {
     setStatusFilter('all')
     setSourceFilter('all')
+    setPipelineFilter('all')
     setSortBy('newest')
   }
 
@@ -161,6 +196,19 @@ const LeadFeedComponent = () => {
                 <SelectItem value="direct">Direct</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={pipelineFilter} onValueChange={(v) => v && setPipelineFilter(v as PipelineFilter)}>
+              <SelectTrigger className="h-9 w-[130px] text-xs">
+                <SelectValue placeholder="Pipeline" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Pipeline</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="meeting_booked">Meeting Booked</SelectItem>
+                <SelectItem value="listed">Listed</SelectItem>
+                <SelectItem value="lost">Lost</SelectItem>
+                <SelectItem value="none">No Status</SelectItem>
+              </SelectContent>
+            </Select>
             <DropdownMenu>
               <DropdownMenuTrigger className="h-9 px-3 inline-flex items-center text-xs border border-slate-200 rounded-md bg-white hover:bg-slate-50 transition-colors font-medium">
                 <ArrowUpDown className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
@@ -226,6 +274,7 @@ const LeadFeedComponent = () => {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <StatusBadge status={lead.status} />
+                  <PipelineStatusBadge status={lead.pipeline_status} />
                   {lead.report_url && (
                     <Button
                       variant="ghost"
@@ -319,6 +368,29 @@ const LeadFeedComponent = () => {
                 <label className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Status</label>
                 <div className="mt-2"><StatusBadge status={selectedLead.status} /></div>
               </div>
+
+              {selectedLead.status === 'complete' && (
+                <div>
+                  <label className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Pipeline Status</label>
+                  <div className="mt-2">
+                    <Select
+                      value={selectedLead.pipeline_status || 'none'}
+                      onValueChange={(v) => updatePipelineStatus(selectedLead.id, v === 'none' ? null : v as PipelineStatus)}
+                    >
+                      <SelectTrigger className="h-9 text-xs w-full">
+                        <SelectValue placeholder="Set pipeline status..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Status</SelectItem>
+                        <SelectItem value="contacted">Contacted</SelectItem>
+                        <SelectItem value="meeting_booked">Meeting Booked</SelectItem>
+                        <SelectItem value="listed">Listed</SelectItem>
+                        <SelectItem value="lost">Lost</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
 
               {(selectedLead.contact_name || selectedLead.contact_email || selectedLead.contact_phone) && (
                 <div className="space-y-3">

@@ -14,6 +14,7 @@ export interface Lead {
   report_url: string | null
   utm_source: string | null
   interest_level: string | null
+  pipeline_status: 'contacted' | 'meeting_booked' | 'listed' | 'lost' | null
 }
 
 const PAGE_SIZE = 20
@@ -44,7 +45,7 @@ export function useLeads() {
 
         let query = supabase
           .from('leads')
-          .select('id, address, contact_name, contact_email, contact_phone, status, created_at, report_url, utm_source, interest_level')
+          .select('id, address, contact_name, contact_email, contact_phone, status, created_at, report_url, utm_source, interest_level, pipeline_status')
           .eq('agent_id', user.id)
           .order('created_at', { ascending: false })
           .limit(PAGE_SIZE)
