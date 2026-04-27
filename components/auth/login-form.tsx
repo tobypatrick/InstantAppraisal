@@ -34,17 +34,30 @@ export function LoginForm({ onSwitchToSignup, onForgotPassword }: LoginFormProps
       if (error) throw error
       window.location.href = getDashboardUrl()
     } catch (error: any) {
-      try {
-        const { data } = await supabase.functions.invoke('check-auth-method', { body: { email } })
-        if (data?.needs_password) {
-          setGoogleUserDetected(true)
-          setIsLoading(false)
-          return
+      const isInvalidCredentials = error.message?.toLowerCase().includes('invalid login credentials')
+
+      if (isInvalidCredentials) {
+        try {
+          const res = await fetch('/api/auth/check-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          })
+          const { exists } = await res.json()
+          if (!exists) {
+            toast.error('No account found', { description: "There's no account with this email. Did you mean to create one?" })
+            setIsLoading(false)
+            return
+          }
+        } catch {
+          // fall through
         }
-      } catch {
-        // fall through to normal error
+        toast.error('Incorrect password', { description: 'That password is wrong. Try again or reset your password.' })
+      } else if (error.message?.toLowerCase().includes('rate limit') || error.status === 429) {
+        toast.error('Too many attempts', { description: 'Please wait a minute before trying again.' })
+      } else {
+        toast.error('Sign in failed', { description: error.message || 'Please check your credentials and try again.' })
       }
-      toast.error('Sign in failed', { description: error.message || 'Please check your credentials and try again.' })
       setIsLoading(false)
     }
   }
