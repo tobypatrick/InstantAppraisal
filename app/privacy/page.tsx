@@ -8,12 +8,12 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[700px] px-6 py-16">
         <h1 className="text-2xl font-semibold tracking-tight mb-1">Privacy Policy</h1>
-        <p className="text-sm text-muted-foreground mb-10">Last updated: 4 March 2025</p>
+        <p className="text-sm text-muted-foreground mb-10">Last updated: 28 April 2026</p>
 
         <div className="space-y-8 text-sm leading-relaxed text-foreground/90">
           <section>
             <h2 className="text-base font-semibold mb-2">1. Overview</h2>
-            <p>Strud Marketing Pty Ltd (ABN 18 658 709 721) ("we", "us", "our") operates Instant Appraisal. This Privacy Policy explains how we collect, use, store, and disclose personal information in accordance with the Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs).</p>
+            <p>InstantAppraisal ("we", "us", "our") operates the Instant Appraisal platform. This Privacy Policy explains how we collect, use, store, and disclose personal information in accordance with the Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs).</p>
           </section>
 
           <section>
@@ -37,7 +37,12 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">4. Disclosure of Information</h2>
+            <h2 className="text-base font-semibold mb-2">4. Data Ownership</h2>
+            <p className="mb-3">All lead data collected through the Platform — including vendor contact details, property addresses, and appraisal enquiry data — is owned by InstantAppraisal. We retain the right to use anonymised, aggregated data for Platform improvement, analytics, and product development. Subscribing agents are granted access to lead data for the purpose of follow-up only and do not acquire ownership of that data.</p>
+          </section>
+
+          <section>
+            <h2 className="text-base font-semibold mb-2">5. Disclosure of Information</h2>
             <p className="mb-3">We may share your information with:</p>
             <ul className="list-disc pl-5 space-y-1.5">
               <li>PropTrack Pty Ltd (ABN 43 127 386 298), as required to provide property valuation data</li>
@@ -49,52 +54,54 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">5. PropTrack Data</h2>
-            <p>Property valuation estimates displayed through Instant Appraisal are sourced from PropTrack Pty Ltd under licence from state and territory Valuer General offices. This information is supplied by Strud Marketing Pty Ltd (ABN 18 658 709 721) on behalf of PropTrack Pty Ltd (ABN 43 127 386 298). Full data source disclaimers are available in our{' '}
+            <h2 className="text-base font-semibold mb-2">6. PropTrack Data</h2>
+            <p>Property valuation estimates displayed through Instant Appraisal are sourced from PropTrack Pty Ltd under licence from state and territory Valuer General offices. Full data source disclaimers are available in our{' '}
               <a href="https://instantappraisal.co/terms" className="text-primary underline underline-offset-2 hover:text-primary/80">Terms &amp; Conditions</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">6. Data Storage and Security</h2>
+            <h2 className="text-base font-semibold mb-2">7. Data Storage and Security</h2>
             <p>Data is stored on secure servers. We take reasonable steps to protect personal information from misuse, interference, loss, and unauthorised access. Stripe handles all payment data under PCI-DSS compliance standards.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">7. Retention</h2>
+            <h2 className="text-base font-semibold mb-2">8. Retention</h2>
             <p>We retain agent subscriber data for the duration of the subscription and for 7 years thereafter for legal and accounting purposes. Lead data (vendor enquiries) is retained for 12 months unless the subscribing agent requests earlier deletion.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">8. Access and Correction</h2>
+            <h2 className="text-base font-semibold mb-2">9. Access and Correction</h2>
             <p>You have the right to request access to or correction of personal information we hold about you. To make a request, contact us at{' '}
-              <a href="mailto:hello@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">hello@instantappraisal.co</a>. We will respond within 30 days.
+              <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>. We will respond within 30 days.
             </p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">9. Complaints</h2>
+            <h2 className="text-base font-semibold mb-2">10. Complaints</h2>
             <p>If you believe we have breached the Australian Privacy Principles, you may lodge a complaint with us at{' '}
-              <a href="mailto:hello@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">hello@instantappraisal.co</a>. If your complaint is not resolved, you may contact the Office of the Australian Information Commissioner (OAIC) at{' '}
+              <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>. If your complaint is not resolved, you may contact the Office of the Australian Information Commissioner (OAIC) at{' '}
               <a href="https://www.oaic.gov.au" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">www.oaic.gov.au</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">10. Cookies</h2>
+            <h2 className="text-base font-semibold mb-2">11. Cookies</h2>
             <p>The Platform uses cookies for session management and analytics. You may disable cookies in your browser settings, though some Platform functionality may be affected.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">11. Changes to This Policy</h2>
+            <h2 className="text-base font-semibold mb-2">12. Changes to This Policy</h2>
             <p>We may update this Privacy Policy from time to time. Continued use of the Platform after updates constitutes acceptance of the revised policy.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">12. Contact</h2>
-            <p className="mb-2">Privacy enquiries: <a href="mailto:hello@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">hello@instantappraisal.co</a></p>
-            <p className="mb-1">Strud Marketing Pty Ltd</p>
-            <p>ABN: 18 658 709 721</p>
+            <h2 className="text-base font-semibold mb-2">13. Contact</h2>
+            <p className="mb-2">Privacy enquiries: <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a></p>
+          </section>
+
+          <section className="pt-4 border-t border-border">
+            <p className="text-muted-foreground text-xs">The Platform is operated by Strud Marketing Pty Ltd (ABN 18 658 709 721) trading as InstantAppraisal.</p>
           </section>
         </div>
       </div>

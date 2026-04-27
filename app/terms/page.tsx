@@ -8,7 +8,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-[700px] px-6 py-16">
         <h1 className="text-2xl font-semibold tracking-tight mb-1">Terms &amp; Conditions</h1>
-        <p className="text-sm text-muted-foreground mb-10">Last updated: 4 March 2025</p>
+        <p className="text-sm text-muted-foreground mb-10">Last updated: 28 April 2026</p>
 
         <div className="space-y-8 text-sm leading-relaxed text-foreground/90">
           <section>
@@ -32,7 +32,15 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">5. Data and PropTrack Licensing</h2>
+            <h2 className="text-base font-semibold mb-2">5. Data Ownership</h2>
+            <p className="mb-3">All lead data collected through the Platform — including vendor contact details, property addresses, and appraisal enquiry data — is owned by InstantAppraisal. By using the Platform, subscribing agents acknowledge that:</p>
+            <p className="mb-3">(a) Lead data is provided to agents for the purpose of follow-up only and does not transfer ownership of that data to the agent.</p>
+            <p className="mb-3">(b) InstantAppraisal retains the right to use anonymised, aggregated data for Platform improvement, analytics, and product development.</p>
+            <p>(c) Agents must handle lead data in accordance with the Australian Privacy Act 1988 (Cth) and must not on-sell or misuse the contact information of enquirers.</p>
+          </section>
+
+          <section>
+            <h2 className="text-base font-semibold mb-2">6. Data and PropTrack Licensing</h2>
             <p className="mb-4">Property valuation data displayed through the Platform is sourced from PropTrack Pty Ltd under licence from state and territory Valuer General offices. By using the Platform, you acknowledge the following:</p>
             <p className="mb-4">(a) This information is supplied by Strud Marketing Pty Ltd (ABN 18 658 709 721) on behalf of PropTrack Pty Ltd (ABN 43 127 386 298).</p>
             <p className="mb-4">(b) Property data must not be used for direct marketing purposes or in breach of applicable privacy laws.</p>
@@ -83,28 +91,32 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">6. Intellectual Property</h2>
-            <p>All content, design, and software on the Platform (excluding PropTrack data) is owned by Strud Marketing Pty Ltd. You may not reproduce, distribute, or create derivative works without written permission.</p>
+            <h2 className="text-base font-semibold mb-2">7. Intellectual Property</h2>
+            <p>All content, design, and software on the Platform (excluding PropTrack data) is owned by InstantAppraisal. You may not reproduce, distribute, or create derivative works without written permission.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">7. Limitation of Liability</h2>
-            <p>The Platform is provided &quot;as is&quot;. Property estimate ranges are indicative only and do not constitute a formal valuation. Strud Marketing Pty Ltd accepts no liability for decisions made on the basis of data displayed through the Platform. To the maximum extent permitted by law, our liability to you is limited to the amount paid by you in the month in which the relevant issue arose.</p>
+            <h2 className="text-base font-semibold mb-2">8. Limitation of Liability</h2>
+            <p>The Platform is provided &quot;as is&quot;. Property estimate ranges are indicative only and do not constitute a formal valuation. InstantAppraisal accepts no liability for decisions made on the basis of data displayed through the Platform. To the maximum extent permitted by law, our liability to you is limited to the amount paid by you in the month in which the relevant issue arose.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">8. Termination</h2>
+            <h2 className="text-base font-semibold mb-2">9. Termination</h2>
             <p>We reserve the right to suspend or terminate your account for breach of these terms, non-payment, or conduct that damages the reputation of the Platform or PropTrack.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">9. Governing Law</h2>
+            <h2 className="text-base font-semibold mb-2">10. Governing Law</h2>
             <p>These terms are governed by the laws of Queensland, Australia. Any disputes will be subject to the exclusive jurisdiction of the courts of Queensland.</p>
           </section>
 
           <section>
-            <h2 className="text-base font-semibold mb-2">10. Contact</h2>
-            <p>For questions regarding these terms, contact <a href="mailto:hello@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">hello@instantappraisal.co</a>.</p>
+            <h2 className="text-base font-semibold mb-2">11. Contact</h2>
+            <p>For questions regarding these terms, contact <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>.</p>
+          </section>
+
+          <section className="pt-4 border-t border-border">
+            <p className="text-muted-foreground text-xs">The Platform is operated by Strud Marketing Pty Ltd (ABN 18 658 709 721) trading as InstantAppraisal.</p>
           </section>
         </div>
       </div>

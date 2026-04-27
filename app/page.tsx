@@ -215,7 +215,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <LeadAgentLogo height={28} dark />
             <p className="text-zinc-600 text-xs">
-              © {new Date().getFullYear()} Instant Appraisal. All rights reserved.
+              © 2022–{new Date().getFullYear()} Instant Appraisal. All rights reserved.
             </p>
             <div className="flex gap-6">
               <Link href="/privacy" className="text-zinc-500 hover:text-zinc-300 text-xs transition-colors">Privacy Policy</Link>
