@@ -72,6 +72,10 @@ export function AgentLandingClient({ profile }: Props) {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
       await leadCapture.completeLead.mutateAsync(data)
+      // Send vendor confirmation email (fire and forget)
+      createClient().functions.invoke('send-vendor-confirmation', {
+        body: { lead_id: leadCapture.currentLeadId, agent_id: profile.id },
+      }).catch(console.warn)
       if (typeof window !== 'undefined' && (window as any).fbq) {
         (window as any).fbq('track', 'Lead')
       }

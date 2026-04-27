@@ -2,6 +2,7 @@ import { TemplateHeader } from "./shared/TemplateHeader";
 import { FormSteps } from "./shared/FormSteps";
 import { VideoEmbed } from "./shared/VideoEmbed";
 import { PoweredByAttribution } from "./shared/PoweredByAttribution";
+import { ReportPreview } from "./shared/ReportPreview";
 import { getContrastTextColor } from "@/lib/color-utils";
 import type { TemplateProps } from "./shared/TemplateTypes";
 
@@ -107,6 +108,11 @@ export function MinimalistTemplate({
             leadId={leadId}
           />
         </div>
+
+        {/* Report Preview */}
+        {step === 'address' && (
+          <ReportPreview textColorClass={textColorClass} mutedTextClass={mutedTextClass} />
+        )}
 
         {/* VSL below the fold */}
         {profile.vsl_youtube_url && step === "address" && (
