@@ -13,10 +13,11 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          const domain = process.env.NODE_ENV === 'production' ? '.instantappraisal.co' : undefined
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, { ...options, domain })
           )
         },
       },
@@ -38,6 +39,14 @@ export async function proxy(request: NextRequest) {
     hostname.startsWith('my.') || devDomain === 'agent'
 
   if (isDashboard) {
+    // Redirect /dashboard/* → /* for clean URLs (e.g. /dashboard/settings → /settings)
+    if (url.pathname.startsWith('/dashboard/') || url.pathname === '/dashboard') {
+      const cleanPath = url.pathname.replace(/^\/dashboard/, '') || '/'
+      const redirectUrl = url.clone()
+      redirectUrl.pathname = cleanPath
+      return NextResponse.redirect(redirectUrl)
+    }
+
     // Protect all dashboard routes — auth lives on the marketing domain
     if (!user && url.pathname !== '/subscription-expired') {
       const loginUrl = devDomain
@@ -45,14 +54,19 @@ export async function proxy(request: NextRequest) {
         : new URL(`https://instantappraisal.co/auth/login?redirect=${encodeURIComponent('https://dashboard.instantappraisal.co' + url.pathname)}`)
       return NextResponse.redirect(loginUrl)
     }
-    // Rewrite to dashboard route group
-    if (!url.pathname.startsWith('/dashboard')) {
-      url.pathname = `/dashboard${url.pathname}`
+
+    // Rewrite clean path → internal /dashboard/* route
+    // Don't rewrite /subscription-expired — it's served directly from app/subscription-expired/page.tsx
+    if (!url.pathname.startsWith('/dashboard') && url.pathname !== '/subscription-expired') {
+      url.pathname = url.pathname === '/'
+        ? '/dashboard/overview'
+        : `/dashboard${url.pathname}`
       supabaseResponse = NextResponse.rewrite(url)
     }
   } else if (isAgent) {
     // Public agent pages — rewrite to agent route group
-    if (!url.pathname.startsWith('/agent')) {
+    // Don't rewrite API routes or Next.js internals
+    if (!url.pathname.startsWith('/agent') && !url.pathname.startsWith('/api/')) {
       url.pathname = `/agent${url.pathname}`
       supabaseResponse = NextResponse.rewrite(url)
     }

@@ -14,32 +14,44 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!user) redirect('/auth/login')
 
-  const { data: rawProfile } = await supabase
-    .from('profiles')
-    .select('id, full_name, agency_name, slug, header_bg_color, page_bg_color, profile_picture_url, agency_logo_url, first_login, selected_template, phone_number, vsl_youtube_url')
-    .eq('id', user.id)
-    .maybeSingle()
+  // Parallel: profile + billing + admin check
+  const [profileResult, billingResult, roleResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name, agency_name, slug, header_bg_color, page_bg_color, profile_picture_url, agency_logo_url, first_login, selected_template, phone_number, vsl_youtube_url')
+      .eq('id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('billing')
+      .select('subscription_status')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle(),
+  ])
+
+  const isAdmin = !!roleResult.data
+
+  // Block inactive subscriptions — admins always get access
+  const subscriptionStatus = billingResult.data?.subscription_status ?? null
+  const isActive = isAdmin || ['active', 'trialing'].includes(subscriptionStatus ?? '')
+  if (!isActive) redirect('/subscription-expired')
 
   // Resolve storage paths → full public URLs
   const resolveStorageUrl = (path: string | null) => {
     if (!path || path.startsWith('http')) return path
     return supabase.storage.from('agent-assets').getPublicUrl(path).data.publicUrl
   }
+  const rawProfile = profileResult.data
   const profile = rawProfile ? {
     ...rawProfile,
     agency_logo_url: resolveStorageUrl(rawProfile.agency_logo_url),
     profile_picture_url: resolveStorageUrl(rawProfile.profile_picture_url),
   } : null
-
-  // Check if user is admin
-  const { data: roleData } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('role', 'admin')
-    .maybeSingle()
-
-  const isAdmin = !!roleData
 
   return (
     <DashboardShell profile={profile} isAdmin={isAdmin}>
