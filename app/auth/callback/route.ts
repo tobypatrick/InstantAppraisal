@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
       cookies: {
         getAll: () => cookieStore.getAll(),
         setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+          const domain = process.env.NODE_ENV === 'production' ? '.instantappraisal.co' : undefined
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, { ...options, domain }))
         },
       },
     }

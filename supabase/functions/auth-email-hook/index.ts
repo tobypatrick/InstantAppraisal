@@ -129,9 +129,21 @@ Deno.serve(async (req) => {
   // { user: { email, ... }, email_data: { email_action_type, token, token_hash, redirect_to, site_url, ... } }
   const emailType = payload?.email_data?.email_action_type
   const recipientEmail = payload?.user?.email
-  const confirmationUrl = payload?.email_data?.redirect_to || payload?.email_data?.site_url || SITE_URL
+  const tokenHash = payload?.email_data?.token_hash
   const token = payload?.email_data?.token
   const newEmail = payload?.user?.new_email || payload?.email_data?.new_email
+
+  // Sanitise redirect URL — Supabase may send localhost if Site URL wasn't set yet
+  let rawRedirectTo = payload?.email_data?.redirect_to || payload?.email_data?.site_url || SITE_URL
+  const redirectTo = (rawRedirectTo.includes('localhost') || rawRedirectTo.startsWith('/'))
+    ? `${SITE_URL}/auth/callback`
+    : rawRedirectTo
+
+  // Build the real Supabase verify URL — this processes the token then forwards to redirectTo with a code
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const confirmationUrl = tokenHash
+    ? `${supabaseUrl}/auth/v1/verify?token=${tokenHash}&type=${emailType}&redirect_to=${encodeURIComponent(redirectTo)}`
+    : redirectTo
 
   console.log('Auth email hook received', { emailType, recipient: recipientEmail })
 

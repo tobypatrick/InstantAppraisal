@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { getContrastTextColor } from '@/lib/color-utils'
+import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 
 interface TemplateHeaderProps {
   agencyLogoUrl?: string | null
@@ -32,9 +33,7 @@ export function TemplateHeader({ agencyLogoUrl, agencyName, headerBgColor }: Tem
               onError={() => setLogoFailed(true)}
             />
           ) : (
-            <span className={`text-sm font-semibold tracking-wide ${isDarkBg ? 'text-white' : 'text-slate-900'}`}>
-              {nameLabel}
-            </span>
+            <LeadAgentLogo height={28} dark={isDarkBg} />
           )}
         </div>
       </div>

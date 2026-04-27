@@ -129,6 +129,15 @@
   }
 }
 
+/* Dashboard sidebar — always dark, applies to both desktop and mobile sheet portal */
+[data-sidebar="sidebar"] {
+  --sidebar: oklch(0 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(1 0 0 / 8%);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+}
+
 /* Landing page CSS animations */
 @keyframes landingFadeIn {
   from { opacity: 0; }

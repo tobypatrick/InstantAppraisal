@@ -1,8 +1,9 @@
 'use client'
 
-import { Settings, LogOut, ExternalLink, ChevronDown, Home } from 'lucide-react'
+import { Settings, LogOut, ExternalLink, ChevronDown, Home, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { getMarketingUrl, getAgentPageUrl } from '@/lib/subdomain'
 
 interface Profile {
@@ -21,8 +22,10 @@ export function DashboardHeader({ profile, onSignOut }: DashboardHeaderProps) {
   const agentPageUrl = profile?.slug ? getAgentPageUrl(profile.slug) : null
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm">
-      <div className="flex-1" />
+    <header className="h-14 flex items-center justify-between px-4 md:px-6 border-b border-slate-200/60 bg-white/80 backdrop-blur-sm">
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="md:hidden" />
+      </div>
       <div className="flex items-center gap-3">
         {agentPageUrl && (
           <Button variant="ghost" size="sm" className="hidden md:inline-flex h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100" onClick={() => window.open(agentPageUrl, '_blank')}>
@@ -46,7 +49,7 @@ export function DashboardHeader({ profile, onSignOut }: DashboardHeaderProps) {
             <DropdownMenuItem onClick={() => window.location.href = getMarketingUrl()} className="flex items-center gap-2 cursor-pointer">
               <Home className="h-4 w-4" strokeWidth={1.25} /><span>Home</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.href = '/dashboard/settings'} className="flex items-center gap-2 cursor-pointer">
+            <DropdownMenuItem onClick={() => window.location.href = '/settings'} className="flex items-center gap-2 cursor-pointer">
               <Settings className="h-4 w-4" strokeWidth={1.25} /><span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

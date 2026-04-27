@@ -3,7 +3,6 @@
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
-import { MobileBottomNav } from '@/components/dashboard/mobile-bottom-nav'
 import { createClient } from '@/lib/supabase/client'
 import { getMarketingUrl } from '@/lib/subdomain'
 
@@ -31,19 +30,14 @@ export function DashboardShell({ profile, isAdmin, children }: DashboardShellPro
 
   return (
     <SidebarProvider>
-      <div className="h-screen flex flex-col w-full bg-background overflow-hidden">
-        <div className="hidden md:block">
-          <DashboardHeader profile={profile} onSignOut={handleSignOut} />
-        </div>
+      <div className="h-dvh flex flex-col w-full bg-background overflow-hidden">
+        <DashboardHeader profile={profile} onSignOut={handleSignOut} />
         <div className="flex flex-1 overflow-hidden">
-          <div className="hidden md:block">
-            <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
-          </div>
-          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto">
+          <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto">
             {children}
           </main>
         </div>
-        <MobileBottomNav />
       </div>
     </SidebarProvider>
   )

@@ -67,7 +67,7 @@ export function PricingTable({ currentTier, currentInterval, onCheckout }: Prici
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto">
+      <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto pt-4">
         {tiers.map((tier) => {
           const isCurrentTier = currentTier === tier.key
           const isCurrentInterval = currentInterval === selectedInterval
@@ -79,17 +79,18 @@ export function PricingTable({ currentTier, currentInterval, onCheckout }: Prici
           const monthlyEquivalent = isAnnual ? tier.annual.monthlyEquivalent : tier.monthly.price
 
           return (
-            <Card key={tier.key} className={cn('relative border transition-all', tier.popular && 'border-primary shadow-sm', isExactMatch && 'border-green-500 bg-green-50/30')}>
+            <div key={tier.key} className="relative pt-3">
               {tier.popular && !isExactMatch && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
+                <Badge className="absolute top-0 left-1/2 -translate-x-1/2 z-10" variant="default">
                   <Zap className="h-3 w-3 mr-1" />Popular
                 </Badge>
               )}
               {isExactMatch && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600">
+                <Badge className="absolute top-0 left-1/2 -translate-x-1/2 z-10 bg-green-600">
                   <Check className="h-3 w-3 mr-1" />Your Plan
                 </Badge>
               )}
+            <Card className={cn('border transition-all h-full', tier.popular && 'border-primary shadow-sm', isExactMatch && 'border-green-500 bg-green-50/30')}>
               <CardHeader className="text-center pb-2">
                 <CardTitle className="text-xl">{tier.name}</CardTitle>
                 <CardDescription>{tier.reportLimit} reports/month</CardDescription>
@@ -143,6 +144,7 @@ export function PricingTable({ currentTier, currentInterval, onCheckout }: Prici
                 </Button>
               </CardFooter>
             </Card>
+            </div>
           )
         })}
       </div>

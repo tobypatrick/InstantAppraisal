@@ -27,12 +27,12 @@ interface DashboardSidebarProps {
 }
 
 const navItems = [
-  { title: 'Overview', url: '/dashboard/overview', icon: LayoutDashboard },
-  { title: 'Leads', url: '/dashboard/leads', icon: Users },
-  { title: 'Marketing', url: '/dashboard/marketing', icon: QrCode },
-  { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3 },
-  { title: 'Billing', url: '/dashboard/billing', icon: CreditCard },
-  { title: 'Settings', url: '/dashboard/settings', icon: Settings },
+  { title: 'Overview', url: '/overview', icon: LayoutDashboard },
+  { title: 'Leads', url: '/leads', icon: Users },
+  { title: 'Marketing', url: '/marketing', icon: QrCode },
+  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'Billing', url: '/billing', icon: CreditCard },
+  { title: 'Settings', url: '/settings', icon: Settings },
 ]
 
 export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSidebarProps) {
@@ -44,22 +44,17 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
   return (
     <Sidebar
       className="border-r-0"
-      style={{ backgroundColor: '#000000', width: collapsed ? '56px' : '240px' }}
+      style={{ width: collapsed ? '56px' : '240px' }}
       collapsible="icon"
     >
       <SidebarHeader className="p-4 pb-6">
         <a href={getMarketingUrl()} className="flex items-center gap-3">
           {collapsed ? (
-            <svg viewBox="0 0 28 28" className="w-7 h-7 shrink-0" fill="none">
-              <rect width="28" height="28" rx="4" fill="rgba(255,255,255,0.1)" />
-              <text x="14" y="18.5" textAnchor="middle" fill="white" fontFamily="system-ui" fontWeight="bold" fontSize="11">IA</text>
-            </svg>
+            <img src="/favicon.svg" alt="IA" className="w-7 h-7 shrink-0" />
+          ) : profile?.agency_logo_url ? (
+            <img src={profile.agency_logo_url} alt={profile.agency_name || 'Agency'} className="h-6 max-w-[160px] object-contain brightness-0 invert" />
           ) : (
-            profile?.agency_logo_url ? (
-              <img src={profile.agency_logo_url} alt={profile.agency_name || 'Agency'} className="h-6 max-w-[160px] object-contain brightness-0 invert" />
-            ) : (
-              <LeadAgentLogo height={28} dark />
-            )
+            <img src="/logo-white.svg" alt="InstantAppraisal" className="h-7 w-auto max-w-[160px] object-contain" />
           )}
         </a>
       </SidebarHeader>
@@ -94,7 +89,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <Link href="/dashboard/admin/audit-log" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/dashboard/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                  <Link href="/admin/audit-log" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
                     <Shield className="h-4 w-4 shrink-0" strokeWidth={1.25} />
                     {!collapsed && <span className="text-[13px] font-medium">Audit Log</span>}
                   </Link>

@@ -14,8 +14,9 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
+            const domain = process.env.NODE_ENV === 'production' ? '.instantappraisal.co' : undefined
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, { ...options, domain })
             )
           } catch {
             // Called from a Server Component — middleware handles session refresh
