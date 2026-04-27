@@ -59,6 +59,7 @@ serve(async (req) => {
     await resend.emails.send({
       from: `${agentName} via InstantAppraisal <noreply@${fromDomain}>`,
       to: [lead.contact_email],
+      reply_to: contactEmail || undefined,
       subject: `Your Instant Property Appraisal — ${lead.address}`,
       html,
     });
