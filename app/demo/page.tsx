@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, MapPin, Phone, Star } from 'lucide-react'
+import { ArrowRight, MapPin, Star } from 'lucide-react'
 import { MarketingHeader } from '@/components/marketing/marketing-header'
 
 export const metadata = {
@@ -86,22 +86,15 @@ export default function DemoPage() {
           {/* Agent landing page — full mock */}
           <div style={{ background: '#020617' }}>
 
-            {/* Header */}
+            {/* Header — centered logo only, matching the real template */}
             <div className="relative" style={{ background: '#0f172a' }}>
-              <div className="px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+              <div className="px-5 py-3.5 flex items-center justify-center border-b border-white/5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
                     <span className="text-white text-xs font-black">SR</span>
                   </div>
-                  <div>
-                    <p className="text-white text-sm font-bold leading-tight">Smith Real Estate</p>
-                    <p className="text-white/40 text-[10px]">Licensed Agent</p>
-                  </div>
+                  <span className="text-white text-sm font-bold">Smith Real Estate</span>
                 </div>
-                <a href="tel:0412345678" className="flex items-center gap-1.5 text-white/60 text-xs hover:text-white/90">
-                  <Phone className="h-3 w-3" />
-                  0412 345 678
-                </a>
               </div>
 
               {/* Annotation 1 — header */}

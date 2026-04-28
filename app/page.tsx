@@ -352,6 +352,113 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Page Preview — two-column mockup ── */}
+      <section className="py-28 bg-zinc-950 border-t border-zinc-800/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-14 items-start">
+
+            {/* Browser mockup */}
+            <div className="sticky top-24">
+              <div className="rounded-xl overflow-hidden border border-zinc-700 shadow-2xl shadow-black/60">
+                {/* Browser bar */}
+                <div className="bg-zinc-800 px-4 py-3 flex items-center gap-3">
+                  <div className="flex gap-1.5 shrink-0">
+                    <div className="w-3 h-3 rounded-full bg-red-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
+                    <div className="w-3 h-3 rounded-full bg-green-400/80" />
+                  </div>
+                  <div className="flex-1 bg-zinc-700/60 rounded px-3 py-1.5 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="text-xs text-zinc-300 font-mono">my.instantappraisal.co/sarah-smith</span>
+                  </div>
+                </div>
+
+                {/* Agent page */}
+                <div style={{ background: '#020617' }}>
+                  {/* Centered header — no phone, logo only */}
+                  <div style={{ background: '#0f172a' }} className="px-4 py-3 flex items-center justify-center border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
+                        <span className="text-white text-[9px] font-black">SR</span>
+                      </div>
+                      <span className="text-white text-sm font-bold">Smith Real Estate</span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="px-6 py-10 text-center">
+                    <h2 className="text-white text-lg font-bold mb-2 leading-tight">
+                      Discover Your Property&apos;s<br />New Market Value
+                    </h2>
+                    <p className="text-white/50 text-xs mb-6">
+                      Get a free, no-obligation property report in 30 seconds.
+                    </p>
+
+                    <div className="bg-white rounded-lg px-3 py-3 flex items-center gap-2 mb-3 shadow">
+                      <div className="w-3 h-3 rounded-full bg-slate-200 shrink-0" />
+                      <span className="text-slate-400 text-xs">Enter your property address...</span>
+                    </div>
+                    <div className="bg-emerald-500 rounded-lg py-3">
+                      <span className="text-white text-xs font-semibold">Get My Free Report →</span>
+                    </div>
+
+                    <p className="text-white/20 text-[10px] mt-5">
+                      Prepared by Sarah Smith · Smith Real Estate
+                    </p>
+                  </div>
+
+                  <div className="pb-5 flex justify-center">
+                    <div className="border border-white/10 rounded-full px-3 py-1 flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="text-white/30 text-[9px]">Powered by PropTrack</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Callouts */}
+            <div>
+              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-3">Live Demo</p>
+              <h2 className="text-2xl md:text-3xl font-semibold text-white mb-10 tracking-tight leading-snug">
+                What your homeowners see
+              </h2>
+
+              <div className="space-y-8">
+                {[
+                  { n: '01', title: 'Your agency logo and colours', desc: 'Upload your logo and set your brand colours. Your page looks 100% yours with your URL.' },
+                  { n: '02', title: 'PropTrack address search', desc: "Powered by Australia's most trusted property data. Homeowners search their address in seconds." },
+                  { n: '03', title: 'Instant report delivery', desc: 'An estimated value range is delivered immediately. No waiting, no phone calls required.' },
+                  { n: '04', title: 'Lead capture built in', desc: 'Contact details are captured before the report is shown. Every enquiry lands in your dashboard.' },
+                  { n: '05', title: 'Full PropTrack report', desc: 'Comparable sales, market insights, price history, nearby schools: the complete picture.' },
+                ].map((item) => (
+                  <div key={item.n} className="flex gap-4">
+                    <div className="shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-0.5">
+                      <span className="text-emerald-400 text-[10px] font-bold">{item.n}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-white text-sm font-semibold mb-1">{item.title}</h3>
+                      <p className="text-zinc-400 text-sm leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-10">
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-6 h-11 rounded text-sm transition-colors"
+                >
+                  <MousePointerClick className="h-4 w-4" strokeWidth={2} />
+                  See the full demo
+                </Link>
+                <p className="text-zinc-600 text-xs mt-3">No account needed. Takes 30 seconds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Features — coloured accent cards ── */}
       <section id="features" className="py-28 bg-zinc-950 border-t border-zinc-800/50">
         <div className="container mx-auto px-4">
