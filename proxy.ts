@@ -1,13 +1,16 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Skip auth if Supabase credentials aren't configured (e.g. local preview without .env)
+  let user = null
+  if (supabaseUrl && supabaseAnonKey) {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -21,11 +24,11 @@ export async function middleware(request: NextRequest) {
           )
         },
       },
-    }
-  )
-
-  // Refresh session — must not add any logic between createServerClient and getUser
-  const { data: { user } } = await supabase.auth.getUser()
+    })
+    // Refresh session — must not add any logic between createServerClient and getUser
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  }
 
   const hostname = request.headers.get('host') ?? ''
   const url = request.nextUrl.clone()
