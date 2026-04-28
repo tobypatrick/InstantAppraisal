@@ -54,6 +54,8 @@ serve(async (req) => {
       body,
       ctaText: lead.report_url ? "View Your Property Report" : undefined,
       ctaUrl: lead.report_url || undefined,
+      showLogo: false,
+      footerText: "You received this email because you requested a property report through an Instant Appraisal powered page.",
     });
 
     await resend.emails.send({

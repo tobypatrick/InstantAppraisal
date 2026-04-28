@@ -17,9 +17,11 @@ interface EmailTemplateOptions {
   body: string;
   ctaText?: string;
   ctaUrl?: string;
+  showLogo?: boolean;
+  footerText?: string;
 }
 
-export function buildEmail({ body, ctaText, ctaUrl }: EmailTemplateOptions): string {
+export function buildEmail({ body, ctaText, ctaUrl, showLogo = true, footerText }: EmailTemplateOptions): string {
   const ctaBlock =
     ctaText && ctaUrl
       ? `
@@ -60,11 +62,11 @@ export function buildEmail({ body, ctaText, ctaUrl }: EmailTemplateOptions): str
       <td align="center" style="padding:40px 20px;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;">
           <!-- Logo -->
-          <tr>
+          ${showLogo ? `<tr>
             <td style="padding:0 0 32px 0;">
               <img src="https://instantappraisal.co/logo-black.png" alt="InstantAppraisal" width="160" style="display:block;height:auto;max-width:160px;border:0;" />
             </td>
-          </tr>
+          </tr>` : ''}
           <!-- Body -->
           <tr>
             <td style="font-size:16px;line-height:1.6;color:#333333;">
@@ -76,8 +78,7 @@ export function buildEmail({ body, ctaText, ctaUrl }: EmailTemplateOptions): str
           <tr>
             <td style="padding:40px 0 0 0;">
               <p style="margin:0;font-size:13px;line-height:1.5;color:#9ca3af;">
-                You are receiving this because you have an Instant Appraisal account.
-                <a href="https://dashboard.instantappraisal.co/settings" style="color:#9ca3af;text-decoration:underline;">Manage your preferences</a>
+                ${footerText ?? `You are receiving this because you have an Instant Appraisal account. <a href="https://dashboard.instantappraisal.co/settings" style="color:#9ca3af;text-decoration:underline;">Manage your preferences</a>`}
               </p>
             </td>
           </tr>
