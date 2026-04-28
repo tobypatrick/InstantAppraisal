@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('role', 'admin')
     .maybeSingle()
 
-  if (!role) redirect('/overview')
+  if (!role) redirect('/dashboard/overview')
 
   return <>{children}</>
 }
