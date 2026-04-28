@@ -9,6 +9,7 @@ export function getMarketingUrl() {
 
 export function getDashboardUrl() {
   if (process.env.NODE_ENV === 'development') return 'http://localhost:3000/dashboard/overview'
+  if (process.env.NEXT_PUBLIC_DASHBOARD_URL) return process.env.NEXT_PUBLIC_DASHBOARD_URL
   return `https://${DASHBOARD_HOST}`
 }
 
