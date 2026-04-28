@@ -6,8 +6,8 @@ import { Menu, X, ArrowRight } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
   { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Demo', href: '/demo' },
 ]
