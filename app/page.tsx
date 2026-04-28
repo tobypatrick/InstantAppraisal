@@ -3,7 +3,7 @@ import {
   Database, BarChart3, Palette, ArrowRight, Shield, Zap, Database as Db,
   CheckCircle, TrendingUp, Home, Clock, Users, LayoutGrid, DollarSign,
   GraduationCap, ChevronDown, Star, MousePointerClick, FileText, Bell,
-  Webhook, Globe, Lock,
+  Webhook, Globe, Lock, Mail, Filter, Tag, Download, Eye,
 } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { MarketingHeader } from '@/components/marketing/marketing-header'
@@ -108,6 +108,15 @@ const FEATURES = [
     description: 'Every lead captured on your page belongs to you. View, filter, export, and follow up — all from your private dashboard.',
     highlight: 'Your data',
   },
+]
+
+const DASHBOARD_FEATURES = [
+  { icon: Eye, label: 'Full lead history', desc: 'Every enquiry with name, email, phone, address, and report status' },
+  { icon: Filter, label: 'Filter & search', desc: 'Filter by source, date range, report status, or pipeline stage' },
+  { icon: Tag, label: 'Pipeline status', desc: 'Mark leads as Contacted, Meeting Booked, Listed, or Lost' },
+  { icon: BarChart3, label: 'Source analytics', desc: 'See which campaigns and channels are driving the most leads' },
+  { icon: Bell, label: 'Real-time updates', desc: 'New leads appear the moment they submit — no refresh needed' },
+  { icon: Download, label: 'Export leads', desc: 'Download your lead list as a CSV at any time' },
 ]
 
 const REPORT_SECTIONS = [
@@ -244,13 +253,22 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col items-center gap-4 landing-fade-in-up" style={{ animationDelay: '0.25s' }}>
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-10 h-14 text-base rounded transition-colors"
-              >
-                Start 30-Day Free Trial
-                <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-10 h-14 text-base rounded transition-colors"
+                >
+                  Start 30-Day Free Trial
+                  <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
+                </Link>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-6 h-14 text-base rounded transition-colors"
+                >
+                  <MousePointerClick className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
+                  See a live demo
+                </Link>
+              </div>
               <p className="text-zinc-500 text-sm">30-day free trial · No credit card required · Cancel anytime</p>
               <Link href="/auth/login" className="text-zinc-500 hover:text-white text-sm transition-colors">
                 Already have an account?{' '}
@@ -299,7 +317,6 @@ export default function HomePage() {
           <div className="max-w-5xl mx-auto grid md:grid-cols-4 gap-6">
             {HOW_IT_WORKS.map((step, i) => (
               <div key={step.step} className="relative">
-                {/* Connector line */}
                 {i < HOW_IT_WORKS.length - 1 && (
                   <div className="hidden md:block absolute top-6 left-[calc(100%_-_12px)] w-full h-px bg-gradient-to-r from-zinc-700 to-transparent z-10" />
                 )}
@@ -320,7 +337,7 @@ export default function HomePage() {
           <div className="text-center mt-10">
             <Link href="/demo" className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors">
               <MousePointerClick className="h-4 w-4" strokeWidth={1.5} />
-              See a live demo page
+              See what the homeowner experience looks like
             </Link>
           </div>
         </div>
@@ -362,6 +379,115 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Your Dashboard ── */}
+      <section className="py-24 bg-zinc-950 border-t border-zinc-800/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
+              <div>
+                <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-3">Your Dashboard</p>
+                <h2 className="text-3xl md:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">
+                  Every lead in one place. Always up to date.
+                </h2>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                  Your private dashboard gives you a real-time view of every homeowner who has requested a report — their name, contact details, property address, report status, and the channel that brought them in.
+                </p>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                  Filter by source, search by address, and track each lead through your pipeline from first contact to signed listing. No more spreadsheets.
+                </p>
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors"
+                >
+                  Start your free trial
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {DASHBOARD_FEATURES.map(({ icon: Icon, label, desc }) => (
+                  <div
+                    key={label}
+                    className="bg-zinc-900/60 border border-zinc-800 rounded p-4 hover:border-zinc-700 transition-colors"
+                  >
+                    <Icon className="h-4 w-4 mb-2 text-emerald-400" strokeWidth={1.5} />
+                    <p className="text-xs font-medium text-white mb-1">{label}</p>
+                    <p className="text-[11px] leading-relaxed text-zinc-500">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Automated Emails ── */}
+      <section className="py-24 bg-zinc-900/50 border-t border-zinc-800/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-emerald-400 text-xs font-semibold uppercase tracking-widest mb-3">Automated Emails</p>
+              <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 tracking-tight">
+                Follow-up starts before you lift a finger
+              </h2>
+              <p className="text-zinc-400 text-base max-w-lg mx-auto">
+                Two emails fire automatically the moment a lead is captured — one to you, one to the homeowner.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Agent notification */}
+              <div className="bg-zinc-900/80 border border-zinc-800 rounded p-8">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded flex items-center justify-center border border-blue-500/20">
+                    <Bell className="h-5 w-5 text-blue-400" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Sent to you</p>
+                    <h3 className="text-sm font-semibold text-white">New Lead Notification</h3>
+                  </div>
+                </div>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+                  The instant a homeowner submits their details you receive an email with their full name, phone number, email address, property address, and a direct link to view the lead in your dashboard.
+                </p>
+                <ul className="space-y-2">
+                  {["Contact name & phone number", "Property address searched", "Lead source (Facebook, Google, etc.)", "Link to their PropTrack report", "Direct link to your dashboard"].map(item => (
+                    <li key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" strokeWidth={1.5} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Vendor confirmation */}
+              <div className="bg-zinc-900/80 border border-zinc-800 rounded p-8">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 bg-emerald-500/10 rounded flex items-center justify-center border border-emerald-500/20">
+                    <Mail className="h-5 w-5 text-emerald-400" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Sent to the homeowner</p>
+                    <h3 className="text-sm font-semibold text-white">Vendor Confirmation</h3>
+                  </div>
+                </div>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-5">
+                  The homeowner automatically receives a personalised email from you — with your name, agency, phone number, and a link to their report. It looks like you sent it yourself, keeping your brand front and centre.
+                </p>
+                <ul className="space-y-2">
+                  {["Personalised with your name & agency", "Includes their property address", "Link to view their full PropTrack report", "Your phone & email for direct contact", "Reply-to is your own email address"].map(item => (
+                    <li key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" strokeWidth={1.5} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── What's in the report ── */}
       <section className="py-24 bg-zinc-950 border-t border-zinc-800/50">
         <div className="container mx-auto px-4">
@@ -372,11 +498,14 @@ export default function HomePage() {
                 <h2 className="text-3xl md:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">
                   A report homeowners actually want to read
                 </h2>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                  Homeowners receive a comprehensive PropTrack property report instantly — covering everything from estimated value to comparable sales and local buyer demand. It's professional, it's data-driven, and it has your name on it.
+                <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                  Homeowners receive a comprehensive PropTrack property report instantly — covering everything from estimated value to comparable sales and live buyer demand. It's professional, data-driven, and has your name on it.
                 </p>
-                <p className="text-zinc-400 text-sm leading-relaxed">
+                <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                   When you follow up, they already trust you. You're the agent who gave them something valuable before they even called.
+                </p>
+                <p className="text-zinc-500 text-xs">
+                  Reports are sourced under licence from PropTrack Pty Ltd (ABN 43 127 386 298) using data from state and territory Valuer General offices.
                 </p>
               </div>
 
@@ -393,6 +522,25 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Demo CTA banner ── */}
+      <section className="py-16 bg-gradient-to-r from-zinc-900 via-zinc-800/50 to-zinc-900 border-t border-b border-zinc-800/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="text-white font-semibold text-lg mb-1">Want to see the homeowner experience?</p>
+              <p className="text-zinc-400 text-sm">Walk through the full flow — branded page, address search, report preview, and lead capture.</p>
+            </div>
+            <Link
+              href="/demo"
+              className="shrink-0 inline-flex items-center gap-2 bg-white text-zinc-950 font-semibold px-8 h-12 rounded hover:bg-zinc-100 transition-colors text-sm"
+            >
+              <MousePointerClick className="h-4 w-4" strokeWidth={2} />
+              View Live Demo
+            </Link>
           </div>
         </div>
       </section>
@@ -501,13 +649,22 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col items-center gap-6">
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-10 h-14 text-base rounded transition-colors"
-              >
-                Start 30-Day Free Trial
-                <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-10 h-14 text-base rounded transition-colors"
+                >
+                  Start 30-Day Free Trial
+                  <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
+                </Link>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-6 h-14 text-base rounded transition-colors"
+                >
+                  <MousePointerClick className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
+                  View Demo
+                </Link>
+              </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 text-zinc-500 text-sm">
                 {['30-day free trial', 'No credit card required', 'Cancel anytime'].map((item, i) => (
