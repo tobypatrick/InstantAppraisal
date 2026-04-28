@@ -1,8 +1,83 @@
-import { proxy, config as proxyConfig } from './proxy'
-import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export default function middleware(request: NextRequest) {
-  return proxy(request)
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          const domain = process.env.NODE_ENV === 'production' ? '.instantappraisal.co' : undefined
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, { ...options, domain })
+          )
+        },
+      },
+    }
+  )
+
+  // Refresh session — must not add any logic between createServerClient and getUser
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const hostname = request.headers.get('host') ?? ''
+  const url = request.nextUrl.clone()
+
+  // Local dev: use ?domain=dashboard|agent query param to simulate subdomains
+  const devDomain = url.searchParams.get('domain')
+
+  const isDashboard =
+    hostname.startsWith('dashboard.') || devDomain === 'dashboard'
+  const isAgent =
+    hostname.startsWith('my.') || devDomain === 'agent'
+
+  if (isDashboard) {
+    // Redirect /dashboard/* → /* for clean URLs (e.g. /dashboard/settings → /settings)
+    if (url.pathname.startsWith('/dashboard/') || url.pathname === '/dashboard') {
+      const cleanPath = url.pathname.replace(/^\/dashboard/, '') || '/'
+      const redirectUrl = url.clone()
+      redirectUrl.pathname = cleanPath
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Protect all dashboard routes — auth lives on the marketing domain
+    if (!user && url.pathname !== '/subscription-expired') {
+      const loginUrl = devDomain
+        ? new URL(`/auth/login?redirect=${encodeURIComponent(url.pathname)}`, url.origin)
+        : new URL(`https://instantappraisal.co/auth/login?redirect=${encodeURIComponent('https://dashboard.instantappraisal.co' + url.pathname)}`)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Rewrite clean path → internal /dashboard/* route
+    // Don't rewrite /subscription-expired — it's served directly from app/subscription-expired/page.tsx
+    if (!url.pathname.startsWith('/dashboard') && url.pathname !== '/subscription-expired') {
+      url.pathname = url.pathname === '/'
+        ? '/dashboard/overview'
+        : `/dashboard${url.pathname}`
+      supabaseResponse = NextResponse.rewrite(url)
+    }
+  } else if (isAgent) {
+    // Public agent pages — rewrite to agent route group
+    // Don't rewrite API routes or Next.js internals
+    if (!url.pathname.startsWith('/agent') && !url.pathname.startsWith('/api/')) {
+      url.pathname = `/agent${url.pathname}`
+      supabaseResponse = NextResponse.rewrite(url)
+    }
+  }
+  // else: marketing domain — serve as-is
+
+  return supabaseResponse
 }
 
-export const config = proxyConfig
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
