@@ -112,7 +112,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-semibold mb-2">11. Contact</h2>
-            <p>For questions regarding these terms, contact <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>.</p>
+            <p>For questions regarding these terms, contact <a href="mailto:team@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">team@instantappraisal.co</a>.</p>
           </section>
 
           <section className="pt-4 border-t border-border">

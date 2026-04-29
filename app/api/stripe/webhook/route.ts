@@ -90,7 +90,7 @@ async function handleSubscriptionChange(
     ? new Date(subscription.current_period_end * 1000).toISOString()
     : null
 
-  const { error: updateError } = await supabase.rpc('update_user_billing', {
+  const { error: rpcError } = await supabase.rpc('update_user_billing', {
     p_user_id: user.id,
     p_stripe_customer_id: customerId,
     p_subscription_status: status,
@@ -104,8 +104,31 @@ async function handleSubscriptionChange(
     p_current_period_end: currentPeriodEnd,
   })
 
-  if (updateError) {
-    logStep('ERROR: Failed to update billing', { error: updateError.message })
+  if (rpcError) {
+    logStep('RPC failed — falling back to direct upsert', { error: rpcError.message })
+    // Fallback: direct upsert in case the RPC doesn't exist on this Supabase project
+    const { error: upsertError } = await supabase.from('billing').upsert(
+      {
+        user_id: user.id,
+        stripe_customer_id: customerId,
+        subscription_status: status,
+        subscription_tier: tier,
+        trial_end_date: trialEndDate,
+        trial_used: trialUsed,
+        cancelled_at: status === 'canceled' ? new Date().toISOString() : null,
+        billing_interval: interval,
+        price_id: priceId,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    )
+    if (upsertError) {
+      logStep('ERROR: Direct upsert also failed', { error: upsertError.message })
+      return
+    }
+    logStep('Fallback upsert succeeded', { userId: user.id, status, tier })
     return
   }
 

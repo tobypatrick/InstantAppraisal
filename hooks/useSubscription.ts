@@ -94,13 +94,17 @@ export function useSubscription() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) throw new Error('Not authenticated')
 
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-      body: { tier, interval },
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ tier, interval }),
     })
 
-    if (error) throw error
-    if (data?.message) toast(data.message)
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? 'Failed to create checkout session')
     if (data?.url) window.location.href = data.url
   }, [supabase])
 
@@ -108,11 +112,13 @@ export function useSubscription() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) throw new Error('Not authenticated')
 
-    const { data, error } = await supabase.functions.invoke('customer-portal', {
+    const res = await fetch('/api/stripe/portal', {
+      method: 'POST',
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
 
-    if (error) throw error
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error ?? 'Failed to open billing portal')
     if (data?.url) window.open(data.url, '_blank')
   }, [supabase])
 

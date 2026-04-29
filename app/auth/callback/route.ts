@@ -27,13 +27,19 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error && data.session && next === 'checkout') {
-      // New signup — create Stripe Checkout session via Supabase function
+      // New signup — create Stripe Checkout session via Next.js API route
       try {
-        const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-          headers: { Authorization: `Bearer ${data.session.access_token}` },
-          body: { tier: 'pro', interval: 'month' },
+        const baseUrl = request.nextUrl.origin
+        const res = await fetch(`${baseUrl}/api/stripe/checkout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${data.session.access_token}`,
+          },
+          body: JSON.stringify({ tier: 'pro', interval: 'month' }),
         })
-        if (!checkoutError && checkoutData?.url) {
+        const checkoutData = await res.json()
+        if (res.ok && checkoutData?.url) {
           return NextResponse.redirect(checkoutData.url)
         }
       } catch {

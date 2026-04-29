@@ -65,12 +65,16 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
 
       if (data.session) {
         try {
-          const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-            body: { tier: 'pro', interval: 'month' },
+          const res = await fetch('/api/stripe/checkout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.session.access_token}`,
+            },
+            body: JSON.stringify({ tier: 'pro', interval: 'month' }),
           })
-          if (checkoutError) throw checkoutError
-          if (checkoutData?.url) { window.location.href = checkoutData.url; return }
+          const checkoutData = await res.json()
+          if (res.ok && checkoutData?.url) { window.location.href = checkoutData.url; return }
         } catch {
           window.location.href = getDashboardUrl()
           return

@@ -73,14 +73,14 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold mb-2">9. Access and Correction</h2>
             <p>You have the right to request access to or correction of personal information we hold about you. To make a request, contact us at{' '}
-              <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>. We will respond within 30 days.
+              <a href="mailto:team@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">team@instantappraisal.co</a>. We will respond within 30 days.
             </p>
           </section>
 
           <section>
             <h2 className="text-base font-semibold mb-2">10. Complaints</h2>
             <p>If you believe we have breached the Australian Privacy Principles, you may lodge a complaint with us at{' '}
-              <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a>. If your complaint is not resolved, you may contact the Office of the Australian Information Commissioner (OAIC) at{' '}
+              <a href="mailto:team@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">team@instantappraisal.co</a>. If your complaint is not resolved, you may contact the Office of the Australian Information Commissioner (OAIC) at{' '}
               <a href="https://www.oaic.gov.au" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">www.oaic.gov.au</a>.
             </p>
           </section>
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-base font-semibold mb-2">13. Contact</h2>
-            <p className="mb-2">Privacy enquiries: <a href="mailto:admin@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">admin@instantappraisal.co</a></p>
+            <p className="mb-2">Privacy enquiries: <a href="mailto:team@instantappraisal.co" className="text-primary underline underline-offset-2 hover:text-primary/80">team@instantappraisal.co</a></p>
           </section>
 
           <section className="pt-4 border-t border-border">

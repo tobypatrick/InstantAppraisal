@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Forward inbound emails to the admin's personal inbox
 const FORWARD_TO = process.env.INBOUND_FORWARD_TO ?? 'toby.patrick@strudmarketing.com.au'
-const ADMIN_ADDRESS = 'admin@instantappraisal.co'
+const ADMIN_ADDRESS = 'team@instantappraisal.co'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
 
     const { email_id, from, to, subject } = payload.data
 
-    // Only forward emails addressed to admin@instantappraisal.co
+    // Only forward emails addressed to team@instantappraisal.co
     const toAddresses: string[] = to ?? []
     const isForAdmin = toAddresses.some((addr: string) =>
-      addr.toLowerCase().includes('admin@instantappraisal.co')
+      addr.toLowerCase().includes('team@instantappraisal.co')
     )
     if (!isForAdmin) {
       return NextResponse.json({ ok: true })

@@ -126,7 +126,7 @@ export default function SubscriptionExpiredPage() {
             Sign out
           </button>
           <span className="text-muted-foreground/40">·</span>
-          <a href="mailto:support@instantappraisal.co" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <a href="mailto:team@instantappraisal.co" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Need help?
           </a>
         </div>

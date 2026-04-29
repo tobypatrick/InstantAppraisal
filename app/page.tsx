@@ -134,14 +134,18 @@ const REPORT_SECTIONS = [
 
 const PRICING_PLANS = [
   {
-    name: 'Launch',
-    price: 47,
-    description: 'Perfect for individual agents getting started with digital lead generation.',
+    name: 'Pro',
+    price: 99,
+    annualPrice: 74,
+    description: 'For agents ready to build a consistent pipeline of appraisal leads.',
     features: [
-      '1 branded landing page',
-      'PropTrack property reports',
+      '20 PropTrack property reports/month',
+      'Branded landing page with your URL',
       'Lead dashboard and notifications',
       'Vendor confirmation emails',
+      'Facebook Pixel and GTM integration',
+      'LeadConnector / CRM webhook',
+      'Pipeline status tracking',
       'UTM source tracking',
       'Email support',
     ],
@@ -149,34 +153,20 @@ const PRICING_PLANS = [
     highlighted: false,
   },
   {
-    name: 'Pro',
-    price: 97,
-    description: 'For agents serious about scaling their appraisal pipeline.',
+    name: 'Elite',
+    price: 199,
+    annualPrice: 149,
+    description: 'For high-volume agents who want the full suite and priority support.',
     features: [
-      'Everything in Launch',
-      'Multi-channel attribution',
-      'Facebook Pixel and GTM integration',
-      'LeadConnector / CRM webhook',
-      'Pipeline status tracking',
-      'Priority support',
+      '100 PropTrack property reports/month',
+      'Everything in Pro',
+      'Multiple landing pages',
+      'Advanced analytics and reporting',
+      'Dedicated onboarding session',
+      'Priority phone and email support',
     ],
     cta: 'Start Free Trial',
     highlighted: true,
-  },
-  {
-    name: 'Elite',
-    price: 247,
-    description: 'For top-performing agents and teams who want the full suite.',
-    features: [
-      'Everything in Pro',
-      'Multiple landing pages',
-      'Agency branding',
-      'Advanced analytics',
-      'Dedicated onboarding',
-      'Phone support',
-    ],
-    cta: 'Start Free Trial',
-    highlighted: false,
   },
 ]
 
@@ -325,11 +315,8 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-5xl mx-auto grid md:grid-cols-4 gap-10">
-            {HOW_IT_WORKS.map((step, i) => (
+            {HOW_IT_WORKS.map((step) => (
               <div key={step.step} className="relative">
-                {i < HOW_IT_WORKS.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(100%_-_8px)] w-full h-px bg-zinc-200 z-10" />
-                )}
                 <div className="text-7xl font-black text-zinc-100 leading-none mb-4 select-none">{step.step}</div>
                 <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center mb-4 border border-emerald-100">
                   <step.icon className="h-5 w-5 text-emerald-600" strokeWidth={1.5} />
@@ -611,7 +598,7 @@ export default function HomePage() {
                 {/* Mock email */}
                 <div className="p-5 bg-white/[0.02]">
                   <div className="bg-zinc-900 rounded-lg border border-zinc-700/50 p-4 text-[10px] space-y-1 mb-5 font-mono">
-                    <p><span className="text-zinc-500">From:</span> <span className="text-zinc-300">noreply@instantappraisal.co</span></p>
+                    <p><span className="text-zinc-500">From:</span> <span className="text-zinc-300">team@instantappraisal.co</span></p>
                     <p><span className="text-zinc-500">To:</span> <span className="text-zinc-300">you@youragency.com.au</span></p>
                     <p><span className="text-zinc-500">Subject:</span> <span className="text-white font-semibold">New lead: James Wilson, 14 Ocean Dr Manly</span></p>
                   </div>
@@ -728,7 +715,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             {PRICING_PLANS.map((plan) => (
               <div
                 key={plan.name}
@@ -749,10 +736,13 @@ export default function HomePage() {
 
                 <div className="mb-6">
                   <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white' : 'text-zinc-900'}`}>{plan.name}</p>
-                  <div className="flex items-end gap-1 mb-3">
+                  <div className="flex items-end gap-1 mb-1">
                     <span className={`text-3xl font-bold ${plan.highlighted ? 'text-white' : 'text-zinc-900'}`}>${plan.price}</span>
                     <span className={`text-sm mb-1 ${plan.highlighted ? 'text-zinc-500' : 'text-zinc-400'}`}>/month</span>
                   </div>
+                  <p className={`text-xs mb-3 ${plan.highlighted ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                    Or ${plan.annualPrice}/mo billed annually
+                  </p>
                   <p className={`text-xs leading-relaxed ${plan.highlighted ? 'text-zinc-400' : 'text-zinc-500'}`}>{plan.description}</p>
                 </div>
 
