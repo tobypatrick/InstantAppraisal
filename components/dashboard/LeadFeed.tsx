@@ -33,6 +33,29 @@ type SourceFilter = 'all' | 'facebook' | 'google' | 'qr' | 'direct'
 type PipelineStatus = 'contacted' | 'meeting_booked' | 'listed' | 'lost' | null
 type PipelineFilter = 'all' | 'contacted' | 'meeting_booked' | 'listed' | 'lost' | 'none'
 
+const STATUS_LABELS: Record<StatusFilter, string> = {
+  all: 'Status: All',
+  complete: 'Status: Complete',
+  partial: 'Status: Partial',
+}
+
+const SOURCE_LABELS: Record<SourceFilter, string> = {
+  all: 'Source: All',
+  facebook: 'Source: Facebook',
+  google: 'Source: Google',
+  qr: 'Source: QR Code',
+  direct: 'Source: Direct',
+}
+
+const PIPELINE_LABELS: Record<PipelineFilter, string> = {
+  all: 'Pipeline: All',
+  contacted: 'Pipeline: Contacted',
+  meeting_booked: 'Pipeline: Meeting Booked',
+  listed: 'Pipeline: Listed',
+  lost: 'Pipeline: Lost',
+  none: 'Pipeline: No Status',
+}
+
 const PIPELINE_STATUS_CONFIG = {
   contacted: { label: 'Contacted', className: 'bg-blue-50 text-blue-700 border-blue-200' },
   meeting_booked: { label: 'Meeting Booked', className: 'bg-purple-50 text-purple-700 border-purple-200' },
@@ -176,7 +199,7 @@ const LeadFeedComponent = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v as StatusFilter)}>
               <SelectTrigger className="h-9 w-[140px] text-xs">
-                <SelectValue placeholder="Status" />
+                <span className="truncate">{STATUS_LABELS[statusFilter]}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Status: All</SelectItem>
@@ -186,7 +209,7 @@ const LeadFeedComponent = () => {
             </Select>
             <Select value={sourceFilter} onValueChange={(v) => v && setSourceFilter(v as SourceFilter)}>
               <SelectTrigger className="h-9 w-[150px] text-xs">
-                <SelectValue placeholder="Source" />
+                <span className="truncate">{SOURCE_LABELS[sourceFilter]}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Source: All</SelectItem>
@@ -197,8 +220,8 @@ const LeadFeedComponent = () => {
               </SelectContent>
             </Select>
             <Select value={pipelineFilter} onValueChange={(v) => v && setPipelineFilter(v as PipelineFilter)}>
-              <SelectTrigger className="h-9 w-[170px] text-xs">
-                <SelectValue placeholder="Pipeline" />
+              <SelectTrigger className="h-9 w-[185px] text-xs">
+                <span className="truncate">{PIPELINE_LABELS[pipelineFilter]}</span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Pipeline: All</SelectItem>
