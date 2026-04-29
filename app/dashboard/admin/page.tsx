@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 
 export const metadata = { title: 'Admin | InstantAppraisal' }
 
-const TIER_MRR: Record<string, number> = { pro: 97, elite: 247, launch: 47 }
+const TIER_MRR: Record<string, number> = { pro: 99, elite: 199 }
 
 export default async function AdminPage() {
   const supabase = createServiceClient(

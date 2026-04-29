@@ -71,12 +71,14 @@ export function useSubscription() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) return EMPTY_DATA
 
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
+      const res = await fetch('/api/stripe/subscription', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
-
-      if (error) throw error
-      return data as SubscriptionData
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Failed to check subscription' }))
+        throw new Error(err.error ?? 'Failed to check subscription')
+      }
+      return res.json() as Promise<SubscriptionData>
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000,
