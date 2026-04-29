@@ -49,9 +49,13 @@ export async function proxy(request: NextRequest) {
   const devDomain = url.searchParams.get('domain')
 
   const isDashboard =
-    hostname.startsWith('dashboard.') || devDomain === 'dashboard'
+    hostname.startsWith('dashboard.') ||
+    hostname.startsWith('staging-dashboard.') ||
+    devDomain === 'dashboard'
   const isAgent =
-    hostname.startsWith('my.') || devDomain === 'agent'
+    hostname.startsWith('my.') ||
+    hostname.startsWith('staging-my.') ||
+    devDomain === 'agent'
 
   if (isDashboard) {
     // API routes manage their own auth (Authorization header / RLS) and must
@@ -71,9 +75,12 @@ export async function proxy(request: NextRequest) {
 
     // Protect all dashboard page routes — auth lives on the marketing domain
     if (!user && url.pathname !== '/subscription-expired') {
+      // Build the login URL using env vars so staging redirects to the right place
+      const marketingBase = process.env.NEXT_PUBLIC_MARKETING_URL ?? 'https://instantappraisal.co'
+      const dashboardBase = process.env.NEXT_PUBLIC_DASHBOARD_URL ?? 'https://dashboard.instantappraisal.co'
       const loginUrl = devDomain
         ? new URL(`/auth/login?redirect=${encodeURIComponent(url.pathname)}`, url.origin)
-        : new URL(`https://instantappraisal.co/auth/login?redirect=${encodeURIComponent('https://dashboard.instantappraisal.co' + url.pathname)}`)
+        : new URL(`${marketingBase}/auth/login?redirect=${encodeURIComponent(dashboardBase + url.pathname)}`)
       return NextResponse.redirect(loginUrl)
     }
 
