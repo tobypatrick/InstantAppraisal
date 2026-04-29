@@ -7,7 +7,6 @@ import { MinimalistTemplate } from '@/components/landing/templates/MinimalistTem
 import { LimitReachedModal } from '@/components/landing/LimitReachedModal'
 import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR, DEFAULT_ACCENT_COLOR } from '@/lib/color-utils'
 import { extractUTMParams } from '@/lib/utm-utils'
-import { createClient } from '@/lib/supabase/client'
 import type { PublicProfile } from '@/hooks/useAgentProfile'
 
 type CaptureStep = 'address' | 'contact' | 'loading' | 'success'
@@ -35,10 +34,16 @@ export function AgentLandingClient({ profile }: Props) {
   const sendPartialNotification = useCallback(() => {
     if (leadCompletedRef.current || partialNotifiedRef.current || !leadCapture.currentLeadId) return
     partialNotifiedRef.current = true
-    const supabase = createClient()
-    supabase.functions.invoke('send-lead-notification', {
-      body: { type: 'partial', lead_id: leadCapture.currentLeadId, agent_id: profile.id },
-    }).catch(console.warn)
+    fetch('/api/email/lead-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'partial',
+        lead_id: leadCapture.currentLeadId,
+        agent_id: profile.id,
+      }),
+      keepalive: true, // beforeunload may have fired
+    }).catch((err) => console.warn('[partial notification]', err))
   }, [leadCapture.currentLeadId, profile.id])
 
   useEffect(() => {
@@ -73,9 +78,14 @@ export function AgentLandingClient({ profile }: Props) {
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
       await leadCapture.completeLead.mutateAsync(data)
       // Send vendor confirmation email (fire and forget)
-      createClient().functions.invoke('send-vendor-confirmation', {
-        body: { lead_id: leadCapture.currentLeadId, agent_id: profile.id },
-      }).catch(console.warn)
+      fetch('/api/email/vendor-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: leadCapture.currentLeadId,
+          agent_id: profile.id,
+        }),
+      }).catch((err) => console.warn('[vendor confirmation]', err))
       if (typeof window !== 'undefined' && (window as any).fbq) {
         (window as any).fbq('track', 'Lead')
       }

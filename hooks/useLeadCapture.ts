@@ -140,15 +140,29 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
           }
         }
 
-        const supabase = createClient()
+        // Persist estimate + report_url on the lead, then fire the agent
+        // notification. Run these in parallel — if save-estimate fails the
+        // notification still goes out so the agent never misses a lead.
         if (report.estimatedValue || report.reportUrl) {
-          supabase.functions.invoke('save-estimate', {
-            body: { lead_id: currentLeadId, estimated_value: report.estimatedValue || null, report_url: report.reportUrl || null },
-          }).then(() => {
-            supabase.functions.invoke('send-lead-notification', {
-              body: { type: 'complete', lead_id: currentLeadId, agent_id: agentId },
-            }).catch(console.warn)
-          }).catch(console.warn)
+          fetch('/api/leads/save-estimate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lead_id: currentLeadId,
+              estimated_value: report.estimatedValue || null,
+              report_url: report.reportUrl || null,
+            }),
+          }).catch((err) => console.warn('[save-estimate]', err))
+
+          fetch('/api/email/lead-notification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'complete',
+              lead_id: currentLeadId,
+              agent_id: agentId,
+            }),
+          }).catch((err) => console.warn('[lead-notification]', err))
         }
 
         return { reportUrl: report.reportUrl || null, reportId: report.reportId, estimatedValue: report.estimatedValue }
@@ -156,8 +170,11 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
         if (error?.message === 'limit_reached') {
           if (!limitEmailSentRef.current) {
             limitEmailSentRef.current = true
-            const supabase = createClient()
-            supabase.functions.invoke('send-limit-reached', { body: { agent_id: agentId } }).catch(console.warn)
+            fetch('/api/email/limit-reached', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ agent_id: agentId }),
+            }).catch((err) => console.warn('[limit-reached]', err))
           }
           return { reportUrl: null, gracefulFailure: true, message: 'A Report Could Not Be Generated.' }
         }
