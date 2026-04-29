@@ -77,7 +77,16 @@ export function AgentLandingClient({ profile }: Props) {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
       await leadCapture.completeLead.mutateAsync(data)
-      // Send vendor confirmation email (fire and forget)
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Lead')
+      }
+      setStep('loading')
+
+      const result = await leadCapture.generateReport.mutateAsync()
+
+      // Fire vendor confirmation. keepalive=true lets the request survive
+      // the upcoming page redirect so the homeowner reliably gets the email
+      // even when we navigate them straight to the PropTrack report.
       fetch('/api/email/vendor-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,13 +94,8 @@ export function AgentLandingClient({ profile }: Props) {
           lead_id: leadCapture.currentLeadId,
           agent_id: profile.id,
         }),
+        keepalive: true,
       }).catch((err) => console.warn('[vendor confirmation]', err))
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Lead')
-      }
-      setStep('loading')
-
-      const result = await leadCapture.generateReport.mutateAsync()
 
       if (result.reportUrl) {
         window.location.href = result.reportUrl

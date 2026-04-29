@@ -28,8 +28,12 @@ export async function POST(request: NextRequest) {
       .eq('id', lead_id)
       .single()
 
-    if (!lead || lead.status !== 'complete' || !lead.contact_email) {
-      return NextResponse.json({ skipped: true })
+    // Only requirement is a contact email — the homeowner has already given
+    // it to us by submitting the form. The previous status === 'complete'
+    // check caused races with save-estimate (which sets that status) and
+    // resulted in confirmations being silently skipped.
+    if (!lead || !lead.contact_email) {
+      return NextResponse.json({ skipped: true, reason: 'no contact email' })
     }
 
     const { data: profile } = await supabase
