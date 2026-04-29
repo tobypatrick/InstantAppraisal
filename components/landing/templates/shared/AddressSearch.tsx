@@ -13,15 +13,17 @@ interface AddressSearchProps {
   rateLimitError?: RateLimitError | null;
   onClearRateLimitError?: () => void;
   pageBgColor: string;
+  accentColor?: string;
   variant?: "default" | "glass";
 }
 
-export function AddressSearch({ 
-  onSubmit, 
-  isLoading, 
+export function AddressSearch({
+  onSubmit,
+  isLoading,
   rateLimitError,
   onClearRateLimitError,
   pageBgColor,
+  accentColor = "#10b981",
   variant = "default",
 }: AddressSearchProps) {
   const [address, setAddress] = useState("");
@@ -195,7 +197,11 @@ export function AddressSearch({
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" strokeWidth={1.5} />
             {isSearching && (
-              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent animate-spin z-10" strokeWidth={1.5} />
+              <Loader2
+                className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin z-10"
+                strokeWidth={1.5}
+                style={{ color: accentColor }}
+              />
             )}
             <Input
               ref={inputRef}
@@ -225,12 +231,17 @@ export function AddressSearch({
                       type="button"
                       onClick={() => handleSelectSuggestion(suggestion)}
                       className={`w-full px-4 py-3 text-left flex items-start gap-3 transition-colors ${
-                        index === selectedIndex
-                          ? "bg-accent/10"
-                          : "hover:bg-muted/50"
-                      } ${index !== suggestions.length - 1 ? "border-b border-border/50" : ""}`}
+                        index !== suggestions.length - 1 ? "border-b border-border/50" : ""
+                      } ${index === selectedIndex ? "" : "hover:bg-muted/50"}`}
+                      style={index === selectedIndex
+                        ? { backgroundColor: `${accentColor}1a` /* ~10% alpha */ }
+                        : undefined}
                     >
-                      <MapPin className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                      <MapPin
+                        className="h-4 w-4 mt-0.5 flex-shrink-0"
+                        strokeWidth={1.5}
+                        style={{ color: accentColor }}
+                      />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-foreground truncate">
                           {suggestion.address}
@@ -270,7 +281,8 @@ export function AddressSearch({
         
         <Button
           type="submit"
-          className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
+          className="w-full h-12 text-white font-medium hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: accentColor }}
           disabled={!address.trim() || isLoading || isRateLimited}
         >
           {isLoading ? (

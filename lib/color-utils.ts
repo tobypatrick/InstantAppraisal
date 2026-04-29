@@ -59,3 +59,14 @@ export function isValidHexColor(color: string): boolean {
  */
 export const DEFAULT_HEADER_COLOR = "#0f172a"; // slate-900
 export const DEFAULT_PAGE_COLOR = "#020617"; // slate-950
+export const DEFAULT_ACCENT_COLOR = "#10b981"; // emerald-500
+
+/**
+ * Convert a hex colour to an `rgba(r,g,b,a)` string. Useful for tinted
+ * backgrounds derived from the user's accent colour.
+ */
+export function hexToRgba(hex: string, alpha: number): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return `rgba(16,185,129,${alpha})`;
+  return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
+}

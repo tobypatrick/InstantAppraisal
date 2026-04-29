@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useLeadCapture, type LeadFormData } from '@/hooks/useLeadCapture'
 import { MinimalistTemplate } from '@/components/landing/templates/MinimalistTemplate'
 import { LimitReachedModal } from '@/components/landing/LimitReachedModal'
-import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR } from '@/lib/color-utils'
+import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR, DEFAULT_ACCENT_COLOR } from '@/lib/color-utils'
 import { extractUTMParams } from '@/lib/utm-utils'
 import { createClient } from '@/lib/supabase/client'
 import type { PublicProfile } from '@/hooks/useAgentProfile'
@@ -100,6 +100,7 @@ export function AgentLandingClient({ profile }: Props) {
 
   const headerBgColor = profile.header_bg_color || DEFAULT_HEADER_COLOR
   const pageBgColor = profile.page_bg_color || DEFAULT_PAGE_COLOR
+  const accentColor = profile.accent_color || DEFAULT_ACCENT_COLOR
 
   return (
     <>
@@ -107,6 +108,7 @@ export function AgentLandingClient({ profile }: Props) {
         profile={profile}
         headerBgColor={headerBgColor}
         pageBgColor={pageBgColor}
+        accentColor={accentColor}
         step={step}
         submittedAddress={submittedAddress}
         reportUrl={reportUrl}

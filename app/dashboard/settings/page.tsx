@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR } from '@/lib/color-utils'
+import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR, DEFAULT_ACCENT_COLOR } from '@/lib/color-utils'
 import { ProfileImagesSection } from '@/components/settings/ProfileImagesSection'
 import { VSLInput } from '@/components/settings/VSLInput'
 import { BrandingSection } from '@/components/settings/BrandingSection'
@@ -24,6 +24,7 @@ interface FormData {
   profile_picture_url: string
   header_bg_color: string
   page_bg_color: string
+  accent_color: string
   facebook_pixel_id: string
   leadconnector_webhook_url: string
   google_tag_manager_id: string
@@ -40,6 +41,7 @@ const DEFAULT_FORM: FormData = {
   profile_picture_url: '',
   header_bg_color: DEFAULT_HEADER_COLOR,
   page_bg_color: DEFAULT_PAGE_COLOR,
+  accent_color: DEFAULT_ACCENT_COLOR,
   facebook_pixel_id: '',
   leadconnector_webhook_url: '',
   google_tag_manager_id: '',
@@ -59,7 +61,7 @@ export default function SettingsPage() {
       setProfileId(user.id)
       supabase
         .from('profiles')
-        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email')
+        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email')
         .eq('id', user.id)
         .maybeSingle()
         .then(({ data }) => {
@@ -74,6 +76,7 @@ export default function SettingsPage() {
               profile_picture_url: data.profile_picture_url || '',
               header_bg_color: data.header_bg_color || DEFAULT_HEADER_COLOR,
               page_bg_color: data.page_bg_color || DEFAULT_PAGE_COLOR,
+              accent_color: (data as any).accent_color || DEFAULT_ACCENT_COLOR,
               facebook_pixel_id: data.facebook_pixel_id || '',
               leadconnector_webhook_url: data.leadconnector_webhook_url || '',
               google_tag_manager_id: data.google_tag_manager_id || '',
@@ -125,6 +128,7 @@ export default function SettingsPage() {
           profile_picture_url: formData.profile_picture_url || null,
           header_bg_color: formData.header_bg_color,
           page_bg_color: formData.page_bg_color,
+          accent_color: formData.accent_color,
           facebook_pixel_id: formData.facebook_pixel_id || null,
           leadconnector_webhook_url: formData.leadconnector_webhook_url || null,
           google_tag_manager_id: formData.google_tag_manager_id || null,
@@ -181,7 +185,13 @@ export default function SettingsPage() {
         </LightCard>
 
         <BrandingSection
-          formData={{ header_bg_color: formData.header_bg_color, page_bg_color: formData.page_bg_color, agency_logo_url: formData.agency_logo_url, agency_name: formData.agency_name }}
+          formData={{
+            header_bg_color: formData.header_bg_color,
+            page_bg_color: formData.page_bg_color,
+            accent_color: formData.accent_color,
+            agency_logo_url: formData.agency_logo_url,
+            agency_name: formData.agency_name,
+          }}
           onChange={(field, value) => handleChange(field, value)}
         />
 

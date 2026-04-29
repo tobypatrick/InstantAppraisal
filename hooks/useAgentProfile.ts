@@ -14,6 +14,7 @@ export interface PublicProfile {
   slug: string | null
   header_bg_color?: string | null
   page_bg_color?: string | null
+  accent_color?: string | null
   facebook_pixel_id?: string | null
   google_tag_manager_id?: string | null
 }

@@ -8,6 +8,7 @@ export interface TemplateProps {
   profile: PublicProfile;
   headerBgColor: string;
   pageBgColor: string;
+  accentColor: string;
   step: CaptureStep;
   submittedAddress: string;
   reportUrl: string | null;

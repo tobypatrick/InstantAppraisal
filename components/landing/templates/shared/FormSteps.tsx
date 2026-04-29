@@ -15,6 +15,7 @@ interface FormStepsProps {
   rateLimitError?: TemplateProps["rateLimitError"];
   onClearRateLimitError?: () => void;
   pageBgColor: string;
+  accentColor: string;
   agentName?: string | null;
   isGracefulFailure?: boolean;
   gracefulFailureMessage?: string;
@@ -33,6 +34,7 @@ export function FormSteps({
   rateLimitError,
   onClearRateLimitError,
   pageBgColor,
+  accentColor,
   agentName,
   isGracefulFailure,
   gracefulFailureMessage,
@@ -53,6 +55,7 @@ export function FormSteps({
             rateLimitError={rateLimitError}
             onClearRateLimitError={onClearRateLimitError}
             pageBgColor={pageBgColor}
+            accentColor={accentColor}
             variant={variant}
           />
         </div>

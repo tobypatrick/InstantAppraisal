@@ -1,4 +1,5 @@
 import { TrendingUp, Home, Clock, BarChart3, DollarSign, LayoutGrid, Users, GraduationCap } from 'lucide-react'
+import { hexToRgba } from '@/lib/color-utils'
 
 const REPORT_SECTIONS = [
   { icon: TrendingUp, label: 'Estimated Value', desc: 'Instant valuation with confidence rating' },
@@ -14,9 +15,10 @@ const REPORT_SECTIONS = [
 interface Props {
   textColorClass: string
   mutedTextClass: string
+  accentColor?: string
 }
 
-export function ReportPreview({ textColorClass, mutedTextClass }: Props) {
+export function ReportPreview({ textColorClass, mutedTextClass, accentColor = '#10b981' }: Props) {
   return (
     <div
       className="mt-16 w-full max-w-3xl landing-fade-in-down"
@@ -29,7 +31,10 @@ export function ReportPreview({ textColorClass, mutedTextClass }: Props) {
       />
 
       <div className="text-center mb-8">
-        <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 mb-2`}>
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.18em] mb-2"
+          style={{ color: accentColor }}
+        >
           What's in your free report
         </p>
         <p className={`text-sm ${mutedTextClass}`}>
@@ -50,11 +55,11 @@ export function ReportPreview({ textColorClass, mutedTextClass }: Props) {
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
               style={{
-                backgroundColor: 'rgba(16,185,129,0.10)',
-                border: '1px solid rgba(16,185,129,0.18)',
+                backgroundColor: hexToRgba(accentColor, 0.1),
+                border: `1px solid ${hexToRgba(accentColor, 0.18)}`,
               }}
             >
-              <Icon className="h-4 w-4 text-emerald-400" strokeWidth={1.75} />
+              <Icon className="h-4 w-4" strokeWidth={1.75} style={{ color: accentColor }} />
             </div>
             <p className={`text-[13px] font-semibold ${textColorClass} mb-1 leading-tight`}>{label}</p>
             <p className={`text-[11px] leading-snug ${mutedTextClass}`}>{desc}</p>
