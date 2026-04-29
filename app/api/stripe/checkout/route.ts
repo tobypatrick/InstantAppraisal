@@ -56,11 +56,12 @@ export async function POST(request: NextRequest) {
 
     const { data: billing } = await adminSupabase
       .from('billing')
-      .select('stripe_customer_id')
+      .select('stripe_customer_id, trial_used')
       .eq('user_id', user.id)
       .maybeSingle()
 
     let customerId = billing?.stripe_customer_id ?? null
+    const trialAlreadyUsed = billing?.trial_used === true
 
     // If no customer yet, create one in Stripe
     if (!customerId) {
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
-        trial_period_days: 30,
+        // Only offer the free trial if this user has never had one before
+        ...(trialAlreadyUsed ? {} : { trial_period_days: 30 }),
         metadata: { supabase_user_id: user.id, tier, interval },
       },
       success_url: successUrl,
