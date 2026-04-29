@@ -18,28 +18,46 @@ interface Props {
 
 export function ReportPreview({ textColorClass, mutedTextClass }: Props) {
   return (
-    <div className="mt-12 w-full landing-fade-in-down" style={{ animationDelay: '0.2s' }}>
-      <div className="text-center mb-6">
-        <p className={`text-xs font-semibold uppercase tracking-widest ${mutedTextClass} mb-1`}>
+    <div
+      className="mt-16 w-full max-w-3xl landing-fade-in-down"
+      style={{ animationDelay: '0.2s' }}
+    >
+      {/* Divider line */}
+      <div
+        className="w-12 h-px mx-auto mb-8"
+        style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+      />
+
+      <div className="text-center mb-8">
+        <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 mb-2`}>
           What's in your free report
         </p>
-        <p className={`text-[11px] ${mutedTextClass} opacity-60`}>
+        <p className={`text-sm ${mutedTextClass}`}>
           Powered by PropTrack — Australia's leading property data provider
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {REPORT_SECTIONS.map(({ icon: Icon, label, desc }) => (
           <div
             key={label}
-            className="rounded-lg p-3 border"
+            className="rounded-xl p-4 border transition-colors hover:bg-white/[0.06]"
             style={{
-              backgroundColor: 'rgba(255,255,255,0.04)',
+              backgroundColor: 'rgba(255,255,255,0.03)',
               borderColor: 'rgba(255,255,255,0.08)',
             }}
           >
-            <Icon className="h-4 w-4 mb-2 text-emerald-400" strokeWidth={1.5} />
-            <p className={`text-xs font-medium ${textColorClass} mb-0.5`}>{label}</p>
-            <p className={`text-[10px] leading-relaxed ${mutedTextClass} opacity-70`}>{desc}</p>
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
+              style={{
+                backgroundColor: 'rgba(16,185,129,0.10)',
+                border: '1px solid rgba(16,185,129,0.18)',
+              }}
+            >
+              <Icon className="h-4 w-4 text-emerald-400" strokeWidth={1.75} />
+            </div>
+            <p className={`text-[13px] font-semibold ${textColorClass} mb-1 leading-tight`}>{label}</p>
+            <p className={`text-[11px] leading-snug ${mutedTextClass}`}>{desc}</p>
           </div>
         ))}
       </div>

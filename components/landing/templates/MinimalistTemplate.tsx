@@ -63,31 +63,40 @@ export function MinimalistTemplate({
       </div>
 
       {/* Main Content - Centered Stack */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-20 pt-24">
-        {/* Content Container - Max 560px */}
-        <div className="w-full max-w-[560px]">
-          
+      <div className="relative z-10 flex flex-col items-center px-4 pt-16 md:pt-24 pb-20">
+        {/* Content Container - Max 580px */}
+        <div className="w-full max-w-[580px]">
+
           {/* Hero Section */}
-          <div className="landing-fade-in-down text-center mb-10">
-            <h1 className={`text-2xl md:text-4xl font-bold ${textColorClass} mb-3 tracking-tight`}>
+          <div className="landing-fade-in-down text-center mb-8 md:mb-10">
+            {/* Trust badge above heading */}
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-5 ${mutedTextClass}`}
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Powered by PropTrack data
+            </div>
+
+            <h1 className={`text-3xl md:text-5xl font-bold ${textColorClass} mb-4 tracking-tight leading-[1.1]`}>
               Discover Your Property's<br />New Market Value
             </h1>
-            <p className={`${mutedTextClass} text-sm md:text-base max-w-md mx-auto`}>
+            <p className={`${mutedTextClass} text-sm md:text-base max-w-md mx-auto leading-relaxed`}>
               Get a <strong>free, no-obligation</strong> property report in 30 seconds.
             </p>
-            
-            {/* Agent attribution */}
-            {profile.full_name && (
-              <p className={`${mutedTextClass} text-xs mt-4`} style={{ animationDelay: '0.1s' }}>
-                Prepared by {profile.full_name}
-                {profile.agency_name && ` • ${profile.agency_name}`}
-              </p>
-            )}
 
-            {/* Social proof */}
-            <p className={`${mutedTextClass} text-xs mt-2 font-medium`} style={{ animationDelay: '0.15s' }}>
-              Software used by 800+ homeowners this week.
-            </p>
+            {/* Agent attribution + social proof, condensed */}
+            <div className="mt-5 space-y-1">
+              {profile.full_name && (
+                <p className={`${mutedTextClass} text-xs`}>
+                  Prepared by <span className="font-medium">{profile.full_name}</span>
+                  {profile.agency_name && <> · {profile.agency_name}</>}
+                </p>
+              )}
+              <p className={`${mutedTextClass} text-xs opacity-75`}>
+                Used by 800+ homeowners this week
+              </p>
+            </div>
           </div>
 
           {/* Form Steps */}

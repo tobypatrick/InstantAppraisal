@@ -3,7 +3,7 @@
  * Calls Next.js API routes which proxy to PropTrack with server-side credentials
  */
 
-const API_TIMEOUT_MS = 5000
+const API_TIMEOUT_MS = 12000  // Generous to absorb Vercel cold starts
 
 export interface AddressSuggestion {
   address: string
@@ -27,17 +27,33 @@ export interface PropertyReport {
   suppressed?: boolean
 }
 
-export async function suggestAddresses(query: string): Promise<AddressSuggestion[]> {
-  if (!query || query.length < 3) return []
-
+async function fetchSuggestOnce(query: string, timeoutMs: number) {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
-
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
   try {
     const response = await fetch(`/api/proptrack/suggest?q=${encodeURIComponent(query)}`, {
       signal: controller.signal,
     })
     clearTimeout(timeoutId)
+    return response
+  } catch (err) {
+    clearTimeout(timeoutId)
+    throw err
+  }
+}
+
+export async function suggestAddresses(query: string): Promise<AddressSuggestion[]> {
+  if (!query || query.length < 3) return []
+
+  // One quick attempt, then a slower retry — handles cold-start timeouts
+  let response: Response
+  try {
+    response = await fetchSuggestOnce(query, 6000)
+  } catch {
+    response = await fetchSuggestOnce(query, API_TIMEOUT_MS)
+  }
+
+  try {
     if (!response.ok) throw new Error(`Status ${response.status}`)
     const data = await response.json()
     const raw = Array.isArray(data) ? data : data.suggestions || []
@@ -54,7 +70,6 @@ export async function suggestAddresses(query: string): Promise<AddressSuggestion
       }
     }).filter((s: AddressSuggestion) => s.address.length > 0)
   } catch (error) {
-    clearTimeout(timeoutId)
     console.warn('Address suggestion failed:', error)
     throw error
   }

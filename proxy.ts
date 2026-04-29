@@ -33,6 +33,18 @@ export async function proxy(request: NextRequest) {
   const hostname = request.headers.get('host') ?? ''
   const url = request.nextUrl.clone()
 
+  // Supabase email confirmation links land at "/" with a ?code=… query param
+  // (because the Supabase project's Site URL is the marketing root). Forward
+  // them to /auth/callback so the code → session exchange happens correctly.
+  if (url.pathname === '/' && url.searchParams.has('code')) {
+    const callbackUrl = url.clone()
+    callbackUrl.pathname = '/auth/callback'
+    if (!callbackUrl.searchParams.has('next')) {
+      callbackUrl.searchParams.set('next', 'checkout')
+    }
+    return NextResponse.redirect(callbackUrl)
+  }
+
   // Local dev: use ?domain=dashboard|agent query param to simulate subdomains
   const devDomain = url.searchParams.get('domain')
 
