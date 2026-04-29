@@ -211,9 +211,10 @@ export function AddressSearch({
               onChange={(e) => handleChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
-              className={`h-12 pl-11 pr-10 text-sm bg-white border border-border focus-visible:ring-1 focus-visible:ring-accent ${
+              className={`h-12 pl-11 pr-10 text-sm bg-white border border-border focus-visible:ring-1 focus-visible:ring-offset-0 ${
                 displayError ? "ring-1 ring-destructive border-destructive" : ""
               }`}
+              style={!displayError ? ({ ['--tw-ring-color' as any]: accentColor }) : undefined}
               disabled={isLoading || isRateLimited}
               maxLength={500}
               autoComplete="off"

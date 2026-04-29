@@ -26,6 +26,22 @@ export function AgentLandingClient({ profile }: Props) {
   const utmParams = useMemo(() => extractUTMParams(searchParams), [searchParams])
   const leadCapture = useLeadCapture(profile.id, utmParams)
 
+  // Track page view exactly once per mount
+  const viewTrackedRef = useRef(false)
+  useEffect(() => {
+    if (viewTrackedRef.current) return
+    viewTrackedRef.current = true
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent_id: profile.id,
+        event_type: 'view',
+        source: utmParams.utm_source ?? null,
+      }),
+    }).catch((err) => console.warn('[analytics]', err))
+  }, [profile.id, utmParams.utm_source])
+
   // Abandon detection
   const leadCompletedRef = useRef(false)
   const partialNotifiedRef = useRef(false)

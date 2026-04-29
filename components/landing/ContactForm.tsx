@@ -12,9 +12,10 @@ interface ContactFormProps {
   onSubmit: (data: LeadFormData) => void;
   isLoading: boolean;
   pageBgColor: string;
+  accentColor?: string;
 }
 
-export function ContactForm({ address, onSubmit, isLoading, pageBgColor }: ContactFormProps) {
+export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentColor = "#10b981" }: ContactFormProps) {
   const [formData, setFormData] = useState<LeadFormData>({
     contact_name: "",
     contact_email: "",
@@ -187,32 +188,32 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor }: Conta
             What's your situation?
           </Label>
           <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleChange("interest_level", "Looking to Sell")}
-              className={`p-3 rounded border transition-all ${
-                formData.interest_level === "Looking to Sell"
-                  ? "border-accent bg-accent/10 text-accent"
-                  : "border-border bg-white text-muted-foreground hover:border-accent/50"
-              }`}
-              disabled={isLoading}
-            >
-              <Home className="h-4 w-4 mx-auto mb-1.5" strokeWidth={1.5} />
-              <span className="text-xs font-medium">Looking to Sell</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleChange("interest_level", "Just Interested")}
-              className={`p-3 rounded border transition-all ${
-                formData.interest_level === "Just Interested"
-                  ? "border-accent bg-accent/10 text-accent"
-                  : "border-border bg-white text-muted-foreground hover:border-accent/50"
-              }`}
-              disabled={isLoading}
-            >
-              <Eye className="h-4 w-4 mx-auto mb-1.5" strokeWidth={1.5} />
-              <span className="text-xs font-medium">Just Interested</span>
-            </button>
+            {[
+              { value: "Looking to Sell", icon: Home },
+              { value: "Just Interested", icon: Eye },
+            ].map(({ value, icon: Icon }) => {
+              const selected = formData.interest_level === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => handleChange("interest_level", value)}
+                  className="p-3 rounded border transition-all bg-white"
+                  style={selected ? {
+                    borderColor: accentColor,
+                    backgroundColor: `${accentColor}1a`,
+                    color: accentColor,
+                  } : {
+                    borderColor: 'hsl(var(--border))',
+                    color: 'hsl(var(--muted-foreground))',
+                  }}
+                  disabled={isLoading}
+                >
+                  <Icon className="h-4 w-4 mx-auto mb-1.5" strokeWidth={1.5} />
+                  <span className="text-xs font-medium">{value}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -227,7 +228,8 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor }: Conta
                 if (e.target.checked) setTermsError("");
               }}
               disabled={isLoading}
-              className="mt-0.5 h-4 w-4 rounded border-border accent-accent shrink-0"
+              className="mt-0.5 h-4 w-4 rounded border-border shrink-0"
+              style={{ accentColor }}
             />
             <span className={`${mutedTextClass} text-xs leading-relaxed`}>
               I agree to the{" "}
@@ -243,7 +245,8 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor }: Conta
 
         <Button
           type="submit"
-          className="w-full h-12 mt-4 bg-accent hover:bg-accent/90 text-accent-foreground font-medium"
+          className="w-full h-12 mt-4 text-white font-medium hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: accentColor }}
           disabled={!isFormValid || isLoading}
         >
           {isLoading ? (

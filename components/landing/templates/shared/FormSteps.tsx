@@ -68,6 +68,7 @@ export function FormSteps({
             onSubmit={onContactSubmit}
             isLoading={isContactLoading}
             pageBgColor={pageBgColor}
+            accentColor={accentColor}
           />
         </div>
       )}

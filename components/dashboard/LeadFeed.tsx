@@ -175,38 +175,38 @@ const LeadFeedComponent = () => {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v as StatusFilter)}>
-              <SelectTrigger className="h-9 w-[110px] text-xs">
+              <SelectTrigger className="h-9 w-[140px] text-xs">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="complete">Complete</SelectItem>
-                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="all">Status: All</SelectItem>
+                <SelectItem value="complete">Status: Complete</SelectItem>
+                <SelectItem value="partial">Status: Partial</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={(v) => v && setSourceFilter(v as SourceFilter)}>
-              <SelectTrigger className="h-9 w-[110px] text-xs">
+              <SelectTrigger className="h-9 w-[150px] text-xs">
                 <SelectValue placeholder="Source" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="facebook">Facebook</SelectItem>
-                <SelectItem value="google">Google</SelectItem>
-                <SelectItem value="qr">QR Code</SelectItem>
-                <SelectItem value="direct">Direct</SelectItem>
+                <SelectItem value="all">Source: All</SelectItem>
+                <SelectItem value="facebook">Source: Facebook</SelectItem>
+                <SelectItem value="google">Source: Google</SelectItem>
+                <SelectItem value="qr">Source: QR Code</SelectItem>
+                <SelectItem value="direct">Source: Direct</SelectItem>
               </SelectContent>
             </Select>
             <Select value={pipelineFilter} onValueChange={(v) => v && setPipelineFilter(v as PipelineFilter)}>
-              <SelectTrigger className="h-9 w-[130px] text-xs">
+              <SelectTrigger className="h-9 w-[170px] text-xs">
                 <SelectValue placeholder="Pipeline" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Pipeline</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="meeting_booked">Meeting Booked</SelectItem>
-                <SelectItem value="listed">Listed</SelectItem>
-                <SelectItem value="lost">Lost</SelectItem>
-                <SelectItem value="none">No Status</SelectItem>
+                <SelectItem value="all">Pipeline: All</SelectItem>
+                <SelectItem value="contacted">Pipeline: Contacted</SelectItem>
+                <SelectItem value="meeting_booked">Pipeline: Meeting Booked</SelectItem>
+                <SelectItem value="listed">Pipeline: Listed</SelectItem>
+                <SelectItem value="lost">Pipeline: Lost</SelectItem>
+                <SelectItem value="none">Pipeline: No Status</SelectItem>
               </SelectContent>
             </Select>
             <DropdownMenu>
