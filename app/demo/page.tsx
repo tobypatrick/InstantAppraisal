@@ -7,41 +7,6 @@ export const metadata = {
   description: 'See what your branded property appraisal page looks like to homeowners.',
 }
 
-const ANNOTATIONS = [
-  {
-    number: '1',
-    title: 'Your logo and brand colours',
-    desc: 'Upload your logo, set your header and page colour. Looks 100% like yours.',
-    position: 'top-[52px] left-[-20px] md:left-[-200px]',
-    dot: 'top-[68px] left-[60px]',
-    side: 'left',
-  },
-  {
-    number: '2',
-    title: 'Instant PropTrack address search',
-    desc: "Homeowners search their address using Australia's most trusted property data.",
-    position: 'top-[280px] right-[-20px] md:right-[-200px]',
-    dot: 'top-[298px] right-[60px]',
-    side: 'right',
-  },
-  {
-    number: '3',
-    title: 'Lead capture built in',
-    desc: 'Name, email, and phone are collected before the report is shown. Every enquiry goes straight to your dashboard.',
-    position: 'top-[390px] left-[-20px] md:left-[-200px]',
-    dot: 'top-[408px] left-[60px]',
-    side: 'left',
-  },
-  {
-    number: '4',
-    title: 'Your unique URL',
-    desc: 'Share my.instantappraisal.co/your-name in ads, emails, and letterbox drops.',
-    position: 'top-[-16px] right-[-20px] md:right-[-200px]',
-    dot: 'top-[4px] right-[110px]',
-    side: 'right',
-  },
-]
-
 export default function DemoPage() {
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -58,14 +23,48 @@ export default function DemoPage() {
         </p>
       </div>
 
-      {/* Full-width annotated agent page */}
-      <div className="relative max-w-2xl mx-auto px-4 pb-16 md:px-16">
+      {/* Annotated mockup */}
+      {/*
+        Layout: the outer div is the positioning context for all annotations.
+        Annotations are NOT inside the overflow-hidden browser chrome — they're
+        siblings of it, positioned absolutely relative to this outer wrapper.
+        This prevents overflow-hidden from clipping them.
+      */}
+      <div className="relative max-w-xl mx-auto px-4 pb-16">
 
-        {/* Browser chrome */}
+        {/* ── Desktop annotation cards (hidden on mobile) ── */}
+
+        {/* Annotation 4 — URL bar (right) */}
+        <div className="hidden md:block absolute top-[6px] right-[-228px] w-[200px] z-20">
+          <AnnotationCard number="4" title="Your unique URL" desc="Share my.instantappraisal.co/your-name in ads, emails, and letterbox drops." side="right" />
+        </div>
+
+        {/* Annotation 1 — Agent header (left) */}
+        <div className="hidden md:block absolute top-[54px] left-[-228px] w-[200px] z-20">
+          <AnnotationCard number="1" title="Your logo and brand colours" desc="Upload your logo and set your brand colours. Looks 100% like yours." side="left" />
+        </div>
+
+        {/* Annotation 2 — Address search (right) */}
+        <div className="hidden md:block absolute top-[330px] right-[-228px] w-[200px] z-20">
+          <AnnotationCard number="2" title="Instant PropTrack address search" desc="Homeowners search their address using Australia's most trusted property data." side="right" />
+        </div>
+
+        {/* Annotation 3 — Lead form (left) */}
+        <div className="hidden md:block absolute top-[490px] left-[-228px] w-[200px] z-20">
+          <AnnotationCard number="3" title="Lead capture built in" desc="Name, email, and phone collected before the report is shown. Goes straight to your dashboard." side="left" />
+        </div>
+
+        {/* ── Dot indicators on the browser chrome ── */}
+        <div className="hidden md:block absolute top-[20px] right-[88px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 z-20" />
+        <div className="hidden md:block absolute top-[72px] left-[14px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 z-20" />
+        <div className="hidden md:block absolute top-[354px] right-[14px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 z-20" />
+        <div className="hidden md:block absolute top-[516px] left-[14px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 z-20" />
+
+        {/* ── Browser chrome ── */}
         <div className="rounded-2xl overflow-hidden border border-zinc-700 shadow-[0_0_80px_rgba(0,0,0,0.6)]">
 
           {/* URL bar */}
-          <div className="relative bg-zinc-800 px-4 py-3 flex items-center gap-3">
+          <div className="bg-zinc-800 px-4 py-3 flex items-center gap-3">
             <div className="flex gap-1.5 shrink-0">
               <div className="w-3 h-3 rounded-full bg-red-400/80" />
               <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
@@ -75,19 +74,13 @@ export default function DemoPage() {
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0" />
               <span className="text-xs text-zinc-300 font-mono">my.instantappraisal.co/sarah-smith</span>
             </div>
-
-            {/* Annotation 4 — URL bar */}
-            <div className="hidden md:block absolute right-[-220px] top-[-4px] w-[200px]">
-              <AnnotationCard number="4" title="Your unique URL" desc="Share in ads, emails, and letterbox drops." side="right" />
-            </div>
-            <div className="hidden md:block absolute right-[120px] top-[18px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30" />
           </div>
 
-          {/* Agent landing page — full mock */}
+          {/* Agent page content */}
           <div style={{ background: '#020617' }}>
 
-            {/* Header — centered logo only, matching the real template */}
-            <div className="relative" style={{ background: '#0f172a' }}>
+            {/* Centered header — logo only, matches real TemplateHeader */}
+            <div style={{ background: '#0f172a' }}>
               <div className="px-5 py-3.5 flex items-center justify-center border-b border-white/5">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
@@ -96,12 +89,6 @@ export default function DemoPage() {
                   <span className="text-white text-sm font-bold">Smith Real Estate</span>
                 </div>
               </div>
-
-              {/* Annotation 1 — header */}
-              <div className="hidden md:block absolute left-[-220px] top-[4px] w-[200px]">
-                <AnnotationCard number="1" title="Your logo and brand colours" desc="Upload your logo, set header and page colour. 100% yours." side="left" />
-              </div>
-              <div className="hidden md:block absolute left-[10px] top-[44px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30" />
             </div>
 
             {/* Hero */}
@@ -118,28 +105,18 @@ export default function DemoPage() {
               </p>
 
               {/* Address search */}
-              <div className="relative">
-                <div className="bg-white rounded-xl px-4 py-3.5 flex items-center gap-3 mb-3 shadow-lg">
-                  <MapPin className="h-4 w-4 text-slate-400 shrink-0" strokeWidth={1.5} />
-                  <span className="text-slate-400 text-sm">Enter your property address...</span>
-                </div>
-
-                {/* Annotation 2 — address search */}
-                <div className="hidden md:block absolute right-[-220px] top-[-8px] w-[200px]">
-                  <AnnotationCard number="2" title="PropTrack address search" desc="Australia's most trusted property data, live in the search." side="right" />
-                </div>
-                <div className="hidden md:block absolute right-[-10px] top-[16px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30" />
-
-                <button className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3.5 rounded-xl text-sm transition-colors">
-                  Get My Free Property Report
-                </button>
+              <div className="bg-white rounded-xl px-4 py-3.5 flex items-center gap-3 mb-3 shadow-lg">
+                <MapPin className="h-4 w-4 text-slate-400 shrink-0" strokeWidth={1.5} />
+                <span className="text-slate-400 text-sm">Enter your property address...</span>
               </div>
-
+              <button className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3.5 rounded-xl text-sm transition-colors">
+                Get My Free Property Report
+              </button>
               <p className="text-white/20 text-xs mt-5">Prepared by Sarah Smith · Smith Real Estate</p>
             </div>
 
-            {/* Lead capture form (shown after address) */}
-            <div className="mx-6 mb-6 bg-white/5 border border-white/10 rounded-xl p-5 relative">
+            {/* Lead capture form */}
+            <div className="mx-6 mb-6 bg-white/5 border border-white/10 rounded-xl p-5">
               <p className="text-white text-sm font-semibold mb-1">Almost there. Where should we send it?</p>
               <p className="text-white/40 text-xs mb-4">Your report will be emailed to you instantly.</p>
               <div className="space-y-2.5">
@@ -155,12 +132,6 @@ export default function DemoPage() {
               <button className="w-full bg-emerald-500 text-white font-semibold py-3 rounded-lg text-sm mt-3">
                 Send My Report
               </button>
-
-              {/* Annotation 3 — lead form */}
-              <div className="hidden md:block absolute left-[-220px] top-[20px] w-[200px]">
-                <AnnotationCard number="3" title="Lead capture built in" desc="Collected before the report is shown. Lands straight in your dashboard." side="left" />
-              </div>
-              <div className="hidden md:block absolute left-[-10px] top-[48px] w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30" />
             </div>
 
             {/* PropTrack badge */}
@@ -173,7 +144,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        {/* Mobile annotations below */}
+        {/* Mobile annotation cards */}
         <div className="md:hidden mt-8 grid grid-cols-2 gap-3">
           {[
             { number: '1', title: 'Your logo and brand colours', desc: 'Upload your logo, set header and page colour.' },
@@ -219,9 +190,13 @@ export default function DemoPage() {
 
 function AnnotationCard({ number, title, desc, side }: { number: string; title: string; desc: string; side: 'left' | 'right' }) {
   return (
-    <div className={`relative bg-zinc-900 border border-zinc-700 rounded-xl p-3 shadow-xl ${side === 'right' ? 'text-left' : 'text-left'}`}>
-      {/* Connector line */}
-      <div className={`absolute top-[14px] ${side === 'right' ? 'left-[-28px] border-r-0 border-l border-b rounded-bl-lg' : 'right-[-28px] border-l-0 border-r border-b rounded-br-lg'} w-7 h-4 border-zinc-600`} />
+    <div className="relative bg-zinc-900 border border-zinc-700 rounded-xl p-3 shadow-xl">
+      {/* Connector line pointing toward the browser */}
+      <div className={`absolute top-[14px] ${
+        side === 'right'
+          ? 'left-[-28px] border-l border-b rounded-bl-lg'
+          : 'right-[-28px] border-r border-b rounded-br-lg'
+      } w-7 h-4 border-zinc-600`} />
       <div className="flex items-start gap-2">
         <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
           <span className="text-zinc-950 text-[9px] font-black">{number}</span>
