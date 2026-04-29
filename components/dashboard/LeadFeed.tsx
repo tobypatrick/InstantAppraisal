@@ -346,8 +346,8 @@ const LeadFeedComponent = () => {
       </div>
 
       <Sheet open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader className="pb-4 border-b border-slate-100">
+        <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
+          <SheetHeader className="px-6 py-4 border-b border-slate-100 shrink-0">
             <SheetTitle className="text-lg font-semibold">Lead Details</SheetTitle>
             <SheetDescription className="text-sm text-slate-500">
               Full information for this property enquiry.
@@ -355,7 +355,7 @@ const LeadFeedComponent = () => {
           </SheetHeader>
 
           {selectedLead && (
-            <div className="py-6 space-y-6">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
               <div>
                 <label className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Property Address</label>
                 <div className="mt-2 flex items-start gap-2">
@@ -441,33 +441,35 @@ const LeadFeedComponent = () => {
                 </div>
               )}
 
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  {selectedLead.contact_phone && (
-                    <a href={`tel:${selectedLead.contact_phone}`} className="h-12 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded active:scale-95 transition-transform">
-                      <Phone className="h-4 w-4" strokeWidth={1.5} />
-                      Call Now
-                    </a>
-                  )}
-                  {selectedLead.contact_email && (
-                    <a href={`mailto:${selectedLead.contact_email}`} className="h-12 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded active:scale-95 transition-transform">
-                      <Mail className="h-4 w-4" strokeWidth={1.5} />
-                      Email
-                    </a>
-                  )}
-                </div>
-                {selectedLead.report_url && (
-                  <Button className="w-full h-12 bg-white border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-sm font-medium" onClick={() => window.open(selectedLead.report_url!, '_blank')}>
-                    <ExternalLink className="h-4 w-4 mr-2" strokeWidth={1.25} />
-                    View PropTrack Report
-                  </Button>
-                )}
-              </div>
-
               {selectedLead.status === 'partial' && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700">
                   This lead only provided their address. Consider reaching out via alternative channels to gather their contact information.
                 </div>
+              )}
+            </div>
+          )}
+
+          {selectedLead && (
+            <div className="px-6 py-4 border-t border-slate-100 space-y-3 shrink-0">
+              <div className="grid grid-cols-2 gap-3">
+                {selectedLead.contact_phone && (
+                  <a href={`tel:${selectedLead.contact_phone}`} className="h-12 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded active:scale-95 transition-transform">
+                    <Phone className="h-4 w-4" strokeWidth={1.5} />
+                    Call Now
+                  </a>
+                )}
+                {selectedLead.contact_email && (
+                  <a href={`mailto:${selectedLead.contact_email}`} className="h-12 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded active:scale-95 transition-transform">
+                    <Mail className="h-4 w-4" strokeWidth={1.5} />
+                    Email
+                  </a>
+                )}
+              </div>
+              {selectedLead.report_url && (
+                <Button className="w-full h-12 bg-white border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-sm font-medium" onClick={() => window.open(selectedLead.report_url!, '_blank')}>
+                  <ExternalLink className="h-4 w-4 mr-2" strokeWidth={1.25} />
+                  View PropTrack Report
+                </Button>
               )}
             </div>
           )}
