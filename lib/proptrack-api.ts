@@ -75,7 +75,11 @@ export async function suggestAddresses(query: string): Promise<AddressSuggestion
   }
 }
 
-export async function generatePropertyReport(propertyId: string, agentId?: string): Promise<PropertyReport> {
+export async function generatePropertyReport(
+  propertyId: string,
+  agentId?: string,
+  leadId?: string | null
+): Promise<PropertyReport> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 15000)
 
@@ -83,7 +87,7 @@ export async function generatePropertyReport(propertyId: string, agentId?: strin
     const response = await fetch('/api/proptrack/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId, agent_id: agentId }),
+      body: JSON.stringify({ propertyId, agent_id: agentId, lead_id: leadId ?? null }),
       signal: controller.signal,
     })
     clearTimeout(timeoutId)

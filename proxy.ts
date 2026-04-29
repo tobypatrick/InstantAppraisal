@@ -54,6 +54,13 @@ export async function proxy(request: NextRequest) {
     hostname.startsWith('my.') || devDomain === 'agent'
 
   if (isDashboard) {
+    // API routes manage their own auth (Authorization header / RLS) and must
+    // never be redirected to the login page — the redirect returns HTML, which
+    // breaks the client's `await res.json()` with an "Unexpected token '<'" error.
+    if (url.pathname.startsWith('/api/')) {
+      return supabaseResponse
+    }
+
     // Redirect /dashboard/* → /* for clean URLs (e.g. /dashboard/settings → /settings)
     if (url.pathname.startsWith('/dashboard/') || url.pathname === '/dashboard') {
       const cleanPath = url.pathname.replace(/^\/dashboard/, '') || '/'
@@ -62,7 +69,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Protect all dashboard routes — auth lives on the marketing domain
+    // Protect all dashboard page routes — auth lives on the marketing domain
     if (!user && url.pathname !== '/subscription-expired') {
       const loginUrl = devDomain
         ? new URL(`/auth/login?redirect=${encodeURIComponent(url.pathname)}`, url.origin)

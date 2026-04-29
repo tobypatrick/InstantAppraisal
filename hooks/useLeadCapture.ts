@@ -123,7 +123,7 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
       if (!currentPropertyId) throw new Error('No property ID available')
 
       try {
-        const report = await generatePropertyReport(currentPropertyId, agentId)
+        const report = await generatePropertyReport(currentPropertyId, agentId, currentLeadId)
         const isSuppressed =
           report.suppressed === true ||
           (!report.reportUrl && !report.estimatedValue) ||
