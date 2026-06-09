@@ -47,3 +47,8 @@ next-env.d.ts
 supabase/.temp/
 scripts/
 .env*.local
+
+# Stray landing-page files from other projects (do not deploy here)
+/public/ipswich*.html
+/public/pool-installs.html
+/public/style.css
