@@ -7,6 +7,11 @@ import {
 } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { MarketingHeader } from '@/components/marketing/marketing-header'
+import { getAgentPageUrl } from '@/lib/subdomain'
+
+// Live demo lives on the agent subdomain (env-aware: my.* in prod,
+// staging-my.* in staging). The old marketing /demo page redirects here.
+const demoUrl = getAgentPageUrl('demo')
 
 export const metadata = {
   title: 'Property Appraisals for Real Estate Agents',
@@ -259,7 +264,7 @@ export default function HomePage() {
                   <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
                 </Link>
                 <Link
-                  href="/demo"
+                  href={demoUrl}
                   className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-6 h-14 text-base rounded transition-colors"
                 >
                   <MousePointerClick className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />
@@ -326,7 +331,7 @@ export default function HomePage() {
 
           <div className="text-center mt-14">
             <Link
-              href="/demo"
+              href={demoUrl}
               className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium px-6 h-11 rounded transition-colors"
             >
               <MousePointerClick className="h-4 w-4" strokeWidth={1.5} />
@@ -430,7 +435,7 @@ export default function HomePage() {
 
               <div className="mt-10">
                 <Link
-                  href="/demo"
+                  href={demoUrl}
                   className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold px-6 h-11 rounded text-sm transition-colors"
                 >
                   <MousePointerClick className="h-4 w-4" strokeWidth={2} />
@@ -689,7 +694,7 @@ export default function HomePage() {
               <p className="text-emerald-900 text-sm">Walk through the full flow: branded page, address search, report preview, and lead capture.</p>
             </div>
             <Link
-              href="/demo"
+              href={demoUrl}
               className="shrink-0 inline-flex items-center gap-2 bg-zinc-950 text-white font-semibold px-8 h-12 rounded hover:bg-zinc-800 transition-colors text-sm"
             >
               <MousePointerClick className="h-4 w-4" strokeWidth={2} />
@@ -815,7 +820,7 @@ export default function HomePage() {
                   <ArrowRight className="h-5 w-5 ml-2" strokeWidth={2} />
                 </Link>
                 <Link
-                  href="/demo"
+                  href={demoUrl}
                   className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium px-6 h-14 text-base rounded transition-colors"
                 >
                   <MousePointerClick className="h-4 w-4 text-emerald-400" strokeWidth={1.5} />

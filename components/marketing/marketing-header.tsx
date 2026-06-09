@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
+import { getAgentPageUrl } from '@/lib/subdomain'
 
 const NAV_LINKS = [
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Demo', href: '/demo' },
+  // Live demo lives on the agent subdomain (env-aware: my.* / staging-my.*)
+  { label: 'Demo', href: getAgentPageUrl('demo') },
 ]
 
 export function MarketingHeader() {
