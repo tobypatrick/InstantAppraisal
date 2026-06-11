@@ -127,6 +127,8 @@ export async function POST(request: NextRequest) {
     let body: string
     let ctaText: string
     let ctaUrl: string
+    let secondaryCtaText: string | undefined
+    let secondaryCtaUrl: string | undefined
 
     if (notificationType === 'partial') {
       subject = `New Address Search — ${leadData.address}`
@@ -146,9 +148,15 @@ export async function POST(request: NextRequest) {
       )
       ctaText = 'View Lead'
       ctaUrl = `https://dashboard.instantappraisal.co/leads?highlight=${leadId}`
+      // Secondary "View Report" button next to "View Lead", only when a
+      // PropTrack report was generated for this lead.
+      if (reportUrl) {
+        secondaryCtaText = 'View Report'
+        secondaryCtaUrl = reportUrl
+      }
     }
 
-    const html = buildEmail({ body, ctaText, ctaUrl })
+    const html = buildEmail({ body, ctaText, ctaUrl, secondaryCtaText, secondaryCtaUrl })
 
     const fromDomain = process.env.EMAIL_FROM_DOMAIN || 'team.instantappraisal.co'
     const resend = new Resend(apiKey)
