@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getPropTrackToken } from '@/lib/proptrack-token'
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit-server'
 
 const TIER_LIMITS: Record<string, number> = {
   pro: 20,
   elite: 100,
 }
+
+// Report generation is the costly PropTrack call. The per-agent monthly cap
+// bounds spend per agent, but agent_id comes from the (forgeable) request
+// body, so cap by IP too — stops a script from burning reports / exhausting
+// agents' quotas at scale.
+const REPORT_RATE_MAX = 15
+const REPORT_RATE_WINDOW_MS = 60 * 60 * 1000
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,15 +28,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'propertyId must be numeric' }, { status: 400 })
     }
 
-    // Service-role client used both for the limit check and for logging the
-    // report after generation. Created up front so it is also in scope below.
-    const adminSupabase = agent_id
-      ? createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          { auth: { persistSession: false } }
-        )
-      : null
+    // Service-role client used for the rate-limit check and the agent's
+    // subscription/limit check below.
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    )
+
+    const ip = getClientIP(request)
+    const rate = await checkRateLimit(adminSupabase, ip, 'proptrack-report', REPORT_RATE_MAX, REPORT_RATE_WINDOW_MS)
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.', retryAfter: rate.retryAfterSeconds },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      )
+    }
 
     if (agent_id && adminSupabase) {
       const supabase = adminSupabase

@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
 import { generatePropertyReport } from '@/lib/proptrack-api'
 import { checkRateLimit, recordAttempt, getRemainingAttempts } from '@/lib/rate-limit'
 import type { UTMParams } from '@/lib/utm-utils'
@@ -53,20 +52,21 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
       const rateLimitCheck = checkRateLimit()
       if (!rateLimitCheck.allowed) throw new Error(rateLimitCheck.reason || 'Rate limit exceeded')
 
-      const supabase = createClient()
-      const { data, error } = await supabase.functions.invoke('create-lead', {
-        body: {
+      const res = await fetch('/api/leads/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           agent_id: agentId,
           address,
           property_id: propertyId || null,
           utm_source: utmParams?.utm_source,
           utm_medium: utmParams?.utm_medium,
           utm_campaign: utmParams?.utm_campaign,
-        },
+        }),
       })
-
-      if (error) throw error
-      if (!data?.success) throw new Error(data?.error || 'Failed to create lead')
+      const data = await res.json().catch(() => null)
+      if (res.status === 429) throw new Error(data?.error || 'Too many requests. Please try again later.')
+      if (!res.ok || !data?.success) throw new Error(data?.error || 'Failed to create lead')
       recordAttempt()
       return { id: data.lead_id, address, propertyId: propertyId || null }
     },
@@ -85,17 +85,18 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
   const completeLead = useMutation({
     mutationFn: async (formData: LeadFormData) => {
       if (!currentLeadId) throw new Error('No lead to complete')
-      const supabase = createClient()
-      const { data, error } = await supabase.functions.invoke('complete-lead', {
-        body: {
+      const res = await fetch('/api/leads/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           lead_id: currentLeadId,
           contact_name: formData.contact_name,
           contact_email: formData.contact_email,
           contact_phone: formData.contact_phone,
           interest_level: formData.interest_level,
-        },
+        }),
       })
-      if (error) throw error
+      const data = await res.json().catch(() => null)
       if (data?.error === 'subscription_inactive') {
         setSubscriptionError({ type: 'subscription_inactive', message: data.message })
         throw new Error('subscription_inactive')
@@ -122,6 +123,16 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
       if (!currentLeadId) throw new Error('No lead to generate report for')
       if (!currentPropertyId) throw new Error('No property ID available')
 
+      // Notify the agent that a lead completed. Fired here (not in the
+      // complete route) so it runs exactly once per lead and — for a
+      // successful report — after the URL is saved, so the email links it.
+      const notifyComplete = () =>
+        fetch('/api/email/lead-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'complete', lead_id: currentLeadId, agent_id: agentId }),
+        }).catch((err) => console.warn('[lead-notification]', err))
+
       try {
         const report = await generatePropertyReport(currentPropertyId, agentId, currentLeadId)
         const isSuppressed =
@@ -133,6 +144,8 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
             report.estimatedValue.high === 0)
 
         if (isSuppressed) {
+          // Lead is still captured — notify the agent even with no estimate.
+          notifyComplete()
           return {
             reportUrl: null,
             gracefulFailure: true,
@@ -140,11 +153,10 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
           }
         }
 
-        // Persist estimate + report_url on the lead, then fire the agent
-        // notification. Run these in parallel — if save-estimate fails the
-        // notification still goes out so the agent never misses a lead.
+        // Persist estimate + report_url first so the notification email can
+        // include the report link, then notify the agent once.
         if (report.estimatedValue || report.reportUrl) {
-          fetch('/api/leads/save-estimate', {
+          await fetch('/api/leads/save-estimate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -153,17 +165,8 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
               report_url: report.reportUrl || null,
             }),
           }).catch((err) => console.warn('[save-estimate]', err))
-
-          fetch('/api/email/lead-notification', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'complete',
-              lead_id: currentLeadId,
-              agent_id: agentId,
-            }),
-          }).catch((err) => console.warn('[lead-notification]', err))
         }
+        notifyComplete()
 
         return { reportUrl: report.reportUrl || null, reportId: report.reportId, estimatedValue: report.estimatedValue }
       } catch (error: any) {
