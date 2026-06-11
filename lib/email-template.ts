@@ -37,7 +37,7 @@ export function buildEmail({
   const secondaryButton =
     secondaryCtaText && secondaryCtaUrl
       ? `<a href="${escapeHtml(secondaryCtaUrl)}" target="_blank"
-             style="display:inline-block;background-color:#111827;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:44px;border-radius:6px;margin-left:8px;">${secondaryCtaText}</a>`
+             style="display:inline-block;background-color:transparent;color:#111827;font-size:14px;font-weight:700;text-decoration:underline;padding:0 24px;line-height:44px;margin-left:8px;">${secondaryCtaText}</a>`
       : ''
 
   const ctaBlock =
@@ -47,7 +47,7 @@ export function buildEmail({
       <tr>
         <td align="left">
           <a href="${ctaUrl}" target="_blank"
-             style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:44px;border-radius:6px;">${ctaText}</a>${secondaryButton}
+             style="display:inline-block;background-color:#111827;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:44px;border-radius:6px;">${ctaText}</a>${secondaryButton}
         </td>
       </tr>
     </table>`
