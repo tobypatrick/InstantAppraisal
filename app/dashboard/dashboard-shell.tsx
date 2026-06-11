@@ -3,6 +3,7 @@
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+import { ReportLimitBanner } from '@/components/dashboard/ReportLimitBanner'
 import { createClient } from '@/lib/supabase/client'
 import { getMarketingUrl } from '@/lib/subdomain'
 
@@ -35,6 +36,7 @@ export function DashboardShell({ profile, isAdmin, children }: DashboardShellPro
         <div className="flex flex-1 overflow-hidden">
           <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
           <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+            <ReportLimitBanner />
             {children}
           </main>
         </div>
