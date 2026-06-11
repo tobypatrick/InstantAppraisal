@@ -156,10 +156,16 @@ export default function SettingsPage() {
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+      if (!session?.access_token) throw new Error('Not authenticated')
+      // Use the Next.js route (same path the billing page uses), not the
+      // legacy `customer-portal` Supabase edge function, which was never
+      // ported to the new project.
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
-      if (error) throw error
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error ?? 'Failed to open billing portal')
       if (data?.url) window.open(data.url, '_blank')
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Please try again.')
