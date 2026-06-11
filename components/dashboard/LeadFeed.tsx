@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from './StatusBadge'
 import { EmptyState } from './EmptyState'
 import { TimeoutError } from './TimeoutError'
-import { useFlatLeads, type Lead } from '@/hooks/useLeads'
+import { useFlatLeads, useLeadCounts, type Lead } from '@/hooks/useLeads'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet'
@@ -91,6 +91,7 @@ const getOriginIcon = (lead: Lead) => {
 
 const LeadFeedComponent = () => {
   const { leads, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useFlatLeads()
+  const { data: leadCounts } = useLeadCounts()
   const searchParams = useSearchParams()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -187,9 +188,30 @@ const LeadFeedComponent = () => {
     )
   }
 
+  const completeCount = leadCounts?.complete ?? leads.filter((l) => l.status === 'complete').length
+  const incompleteCount = leadCounts?.partial ?? leads.filter((l) => l.status === 'partial').length
+
   return (
     <>
       <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setStatusFilter(statusFilter === 'complete' ? 'all' : 'complete')}
+            className={`bg-white border rounded-lg p-4 text-left transition-colors ${statusFilter === 'complete' ? 'border-emerald-500 ring-1 ring-emerald-500' : 'border-slate-200 hover:border-slate-300'}`}
+          >
+            <p className="text-xs text-slate-500">Complete Leads</p>
+            <p className="text-2xl font-semibold text-emerald-600 mt-1">{completeCount}</p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter(statusFilter === 'partial' ? 'all' : 'partial')}
+            className={`bg-white border rounded-lg p-4 text-left transition-colors ${statusFilter === 'partial' ? 'border-amber-500 ring-1 ring-amber-500' : 'border-slate-200 hover:border-slate-300'}`}
+          >
+            <p className="text-xs text-slate-500">Incomplete Leads</p>
+            <p className="text-2xl font-semibold text-amber-600 mt-1">{incompleteCount}</p>
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-slate-400" strokeWidth={1.25} />

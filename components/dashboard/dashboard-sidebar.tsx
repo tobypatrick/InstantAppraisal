@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, QrCode, BarChart3, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Users, QrCode, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck } from 'lucide-react'
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuItem, SidebarHeader,
@@ -30,7 +30,6 @@ const navItems = [
   { title: 'Overview', url: '/overview', icon: LayoutDashboard },
   { title: 'Leads', url: '/leads', icon: Users },
   { title: 'Marketing', url: '/marketing', icon: QrCode },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Billing', url: '/billing', icon: CreditCard },
   { title: 'Settings', url: '/settings', icon: Settings },
 ]

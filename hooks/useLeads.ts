@@ -1,6 +1,6 @@
 'use client'
 
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 
 export interface Lead {
@@ -77,4 +77,25 @@ export function useFlatLeads() {
   const query = useLeads()
   const leads = query.data?.pages.flatMap((p) => p.leads) ?? []
   return { ...query, leads }
+}
+
+// True totals via head-count queries — the lead list itself is paginated,
+// so counting the loaded pages would under-report.
+export function useLeadCounts() {
+  return useQuery({
+    queryKey: ['lead-counts'],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return { complete: 0, partial: 0 }
+
+      const [completeRes, partialRes] = await Promise.all([
+        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('agent_id', user.id).eq('status', 'complete'),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('agent_id', user.id).eq('status', 'partial'),
+      ])
+
+      return { complete: completeRes.count ?? 0, partial: partialRes.count ?? 0 }
+    },
+    staleTime: 60_000,
+  })
 }
