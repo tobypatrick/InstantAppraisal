@@ -109,10 +109,13 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
         <SidebarSeparator className="bg-white/10 mb-3" />
         <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+            <a
+              href="mailto:team@instantappraisal.co?subject=Instant%20Appraisal%20Support"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            >
               <HelpCircle className="h-4 w-4 shrink-0" strokeWidth={1.25} />
               {!collapsed && <span className="text-[13px] font-medium">Help</span>}
-            </button>
+            </a>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <button onClick={onSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors">
