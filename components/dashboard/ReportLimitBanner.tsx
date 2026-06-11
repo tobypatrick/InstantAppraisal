@@ -25,7 +25,7 @@ export function ReportLimitBanner() {
       <span className="flex-1">
         {maxedOut ? (
           <>
-            You&apos;ve used all {reportLimit} reports this month. New leads are still captured,
+            You&apos;ve used all {reportLimit}{' '}reports this month. New leads are still captured,
             but homeowners won&apos;t receive their report until you upgrade or your limit resets next month.
           </>
         ) : (
