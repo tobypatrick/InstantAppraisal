@@ -17,10 +17,6 @@ interface EmailTemplateOptions {
   body: string
   ctaText?: string
   ctaUrl?: string
-  // Optional secondary button shown next to the primary CTA — rendered as a
-  // transparent, underlined link in the primary button's colour.
-  secondaryCtaText?: string
-  secondaryCtaUrl?: string
   showLogo?: boolean
   footerText?: string
 }
@@ -29,17 +25,9 @@ export function buildEmail({
   body,
   ctaText,
   ctaUrl,
-  secondaryCtaText,
-  secondaryCtaUrl,
   showLogo = true,
   footerText,
 }: EmailTemplateOptions): string {
-  const secondaryButton =
-    secondaryCtaText && secondaryCtaUrl
-      ? `<a href="${escapeHtml(secondaryCtaUrl)}" target="_blank"
-             style="display:inline-block;background-color:transparent;color:#111827;font-size:14px;font-weight:700;text-decoration:underline;padding:0 24px;line-height:44px;margin-left:8px;">${secondaryCtaText}</a>`
-      : ''
-
   const ctaBlock =
     ctaText && ctaUrl
       ? `
@@ -47,7 +35,7 @@ export function buildEmail({
       <tr>
         <td align="left">
           <a href="${ctaUrl}" target="_blank"
-             style="display:inline-block;background-color:#111827;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:44px;border-radius:6px;">${ctaText}</a>${secondaryButton}
+             style="display:inline-block;background-color:#111827;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:44px;border-radius:6px;">${ctaText}</a>
         </td>
       </tr>
     </table>`

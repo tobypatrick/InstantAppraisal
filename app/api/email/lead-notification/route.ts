@@ -26,16 +26,12 @@ function buildCompleteEmail(
   utmSource: string,
   limitReached = false
 ): string {
-  let actionButtons = ''
-  if (leadPhone) {
-    actionButtons += `<a href="tel:${escapeHtml(leadPhone)}" style="display:inline-block;background-color:#10B981;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:40px;border-radius:6px;margin-right:8px;">Call Now</a>`
-  }
-  if (leadEmail) {
-    actionButtons += `<a href="mailto:${escapeHtml(leadEmail)}" style="display:inline-block;background-color:#10B981;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:0 24px;line-height:40px;border-radius:6px;">Send Email</a>`
-  }
-
-  const actionRow = actionButtons
-    ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:24px 0 0 0;"><tr><td>${actionButtons}</td></tr></table>`
+  const linkStyle = 'color:#10B981;text-decoration:underline;'
+  const emailCell = leadEmail
+    ? `<a href="mailto:${escapeHtml(leadEmail)}" style="${linkStyle}">${escapeHtml(leadEmail)}</a>`
+    : ''
+  const phoneCell = leadPhone
+    ? `<a href="tel:${escapeHtml(leadPhone)}" style="${linkStyle}">${escapeHtml(leadPhone)}</a>`
     : ''
 
   const reportRow = reportUrl
@@ -49,14 +45,13 @@ function buildCompleteEmail(
     <p style="margin:0 0 24px 0;">A homeowner has completed an instant appraisal on your page. This is a warm seller lead — follow up promptly.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 8px 0;">
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
-      ${leadEmail ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${escapeHtml(leadEmail)}</td></tr>` : ''}
-      ${leadPhone ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:16px;color:#333333;">${escapeHtml(leadPhone)}</td></tr>` : ''}
+      ${emailCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${emailCell}</td></tr>` : ''}
+      ${phoneCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:16px;color:#333333;">${phoneCell}</td></tr>` : ''}
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Property</td><td style="padding:8px 0;font-size:16px;color:#333333;">${address}</td></tr>
       ${reportRow}
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Source</td><td style="padding:8px 0;font-size:16px;color:#333333;">${utmSource}</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Date</td><td style="padding:8px 0;font-size:16px;color:#333333;">${date}</td></tr>
-    </table>
-    ${actionRow}`
+    </table>`
 }
 
 export async function POST(request: NextRequest) {
@@ -127,8 +122,6 @@ export async function POST(request: NextRequest) {
     let body: string
     let ctaText: string
     let ctaUrl: string
-    let secondaryCtaText: string | undefined
-    let secondaryCtaUrl: string | undefined
 
     if (notificationType === 'partial') {
       subject = `New Address Search — ${leadData.address}`
@@ -148,15 +141,9 @@ export async function POST(request: NextRequest) {
       )
       ctaText = 'View Lead'
       ctaUrl = `https://dashboard.instantappraisal.co/leads?highlight=${leadId}`
-      // Secondary "View Report" button next to "View Lead", only when a
-      // PropTrack report was generated for this lead.
-      if (reportUrl) {
-        secondaryCtaText = 'View Report'
-        secondaryCtaUrl = reportUrl
-      }
     }
 
-    const html = buildEmail({ body, ctaText, ctaUrl, secondaryCtaText, secondaryCtaUrl })
+    const html = buildEmail({ body, ctaText, ctaUrl })
 
     const fromDomain = process.env.EMAIL_FROM_DOMAIN || 'team.instantappraisal.co'
     const resend = new Resend(apiKey)
