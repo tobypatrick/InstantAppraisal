@@ -346,8 +346,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-14 items-start">
 
-            {/* Browser mockup */}
-            <div className="sticky top-24">
+            {/* Browser mockup — sticky only on desktop; on mobile the single
+                column would otherwise stick and cover the content below it. */}
+            <div className="md:sticky md:top-24">
               <div className="rounded-xl overflow-hidden border border-zinc-700 shadow-2xl shadow-black/60">
                 {/* Browser bar */}
                 <div className="bg-zinc-800 px-4 py-3 flex items-center gap-3">

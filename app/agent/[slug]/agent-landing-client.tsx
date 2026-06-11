@@ -114,6 +114,14 @@ export function AgentLandingClient({ profile }: Props) {
           body: JSON.stringify({ type: 'limit_blocked', lead_id: leadCapture.currentLeadId, agent_id: profile.id }),
         }).catch((err) => console.warn('[limit-blocked notification]', err))
 
+        // Still confirm to the homeowner (the lead has no report_url, so the
+        // route sends the "agent will be in touch" version, not a report one).
+        fetch('/api/email/vendor-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: leadCapture.currentLeadId, agent_id: profile.id }),
+        }).catch((err) => console.warn('[vendor confirmation]', err))
+
         setIsGracefulFailure(true)
         setGracefulFailureMessage('Sorry, A Report Could Not Be Generated On Your Property.')
         setReportUrl(null)

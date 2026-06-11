@@ -38,9 +38,15 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, agency_name, phone_number, notification_email')
+      .select('full_name, agency_name, phone_number, notification_email, send_vendor_email')
       .eq('id', agent_id)
       .single()
+
+    // Agent can turn off the homeowner confirmation email in settings.
+    if (profile?.send_vendor_email === false) {
+      return NextResponse.json({ skipped: true, reason: 'disabled by agent' })
+    }
+
     const { data: userData } = await supabase.auth.admin.getUserById(agent_id)
 
     const agentName = escapeHtml(profile?.full_name) || 'Your agent'
@@ -52,17 +58,20 @@ export async function POST(request: NextRequest) {
 
     let contactLines = ''
     if (contactPhone) {
-      contactLines += `<p style="margin:0 0 8px 0;"><a href="tel:${escapeHtml(contactPhone)}" style="color:#10B981;text-decoration:none;">📞 ${escapeHtml(contactPhone)}</a></p>`
+      contactLines += `<p style="margin:0 0 8px 0;color:#333333;">Phone: <a href="tel:${escapeHtml(contactPhone)}" style="color:#10B981;text-decoration:underline;">${escapeHtml(contactPhone)}</a></p>`
     }
     if (contactEmail) {
-      contactLines += `<p style="margin:0;"><a href="mailto:${escapeHtml(contactEmail)}" style="color:#10B981;text-decoration:none;">✉️ ${escapeHtml(contactEmail)}</a></p>`
+      contactLines += `<p style="margin:0;color:#333333;">Email: <a href="mailto:${escapeHtml(contactEmail)}" style="color:#10B981;text-decoration:underline;">${escapeHtml(contactEmail)}</a></p>`
     }
 
+    const hasReport = !!lead.report_url
     const body = `
       <p style="margin:0 0 16px 0;">Hi ${vendorFirstName},</p>
-      <p style="margin:0 0 16px 0;">Thanks for using Instant Appraisal to get your property report for <strong>${address}</strong>.</p>
+      <p style="margin:0 0 16px 0;">Thanks for requesting a property appraisal for <strong>${address}</strong>.</p>
       <p style="margin:0 0 16px 0;">${agentName}${agencyPart} will be in touch with you shortly to discuss your property's value and answer any questions you may have.</p>
-      <p style="margin:0 0 16px 0;">Your PropTrack property report includes your estimated value range, recent comparable sales in your area, and local market insights — everything you need to understand your property's current market position.</p>
+      ${hasReport
+        ? `<p style="margin:0 0 16px 0;">Your PropTrack property report includes your estimated value range, recent comparable sales in your area, and local market insights — everything you need to understand your property's current market position.</p>`
+        : ''}
       ${contactLines ? `<p style="margin:0 0 8px 0;color:#6b7280;font-size:14px;">In the meantime, you can reach ${agentName} directly:</p>${contactLines}` : ''}
     `
 
