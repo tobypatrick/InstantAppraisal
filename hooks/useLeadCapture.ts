@@ -135,16 +135,11 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
 
       try {
         const report = await generatePropertyReport(currentPropertyId, agentId, currentLeadId)
-        const isSuppressed =
-          report.suppressed === true ||
-          (!report.reportUrl && !report.estimatedValue) ||
-          (report.estimatedValue &&
-            report.estimatedValue.low === 0 &&
-            report.estimatedValue.mid === 0 &&
-            report.estimatedValue.high === 0)
+        // Suppressed = PropTrack returned no viewable report for this property.
+        const isSuppressed = report.suppressed === true || !report.reportUrl
 
         if (isSuppressed) {
-          // Lead is still captured — notify the agent even with no estimate.
+          // Lead is still captured — notify the agent even with no report.
           notifyComplete()
           return {
             reportUrl: null,
@@ -153,22 +148,16 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
           }
         }
 
-        // Persist estimate + report_url first so the notification email can
-        // include the report link, then notify the agent once.
-        if (report.estimatedValue || report.reportUrl) {
-          await fetch('/api/leads/save-estimate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              lead_id: currentLeadId,
-              estimated_value: report.estimatedValue || null,
-              report_url: report.reportUrl || null,
-            }),
-          }).catch((err) => console.warn('[save-estimate]', err))
-        }
+        // Persist the report URL first so the notification email can include
+        // the link, then notify the agent once.
+        await fetch('/api/leads/save-estimate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: currentLeadId, report_url: report.reportUrl }),
+        }).catch((err) => console.warn('[save-estimate]', err))
         notifyComplete()
 
-        return { reportUrl: report.reportUrl || null, reportId: report.reportId, estimatedValue: report.estimatedValue }
+        return { reportUrl: report.reportUrl, reportId: report.reportId }
       } catch (error: any) {
         if (error?.message === 'limit_reached') {
           if (!limitEmailSentRef.current) {

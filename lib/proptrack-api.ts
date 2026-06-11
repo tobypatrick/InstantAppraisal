@@ -19,11 +19,6 @@ export interface PropertyReport {
   reportUrl?: string
   propertyId: string
   generatedAt?: string
-  estimatedValue?: {
-    low: number
-    mid: number
-    high: number
-  }
   suppressed?: boolean
 }
 

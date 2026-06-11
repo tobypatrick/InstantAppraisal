@@ -1,13 +1,6 @@
-import { useState, useCallback } from "react";
-import { CheckCircle, FileText, Download, Clock, MessageCircle, Eye } from "lucide-react";
+import { CheckCircle, FileText, Download, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getContrastTextColor } from "@/lib/color-utils";
-
-interface EstimatedValue {
-  low: number;
-  mid: number;
-  high: number;
-}
 
 interface ReportSuccessProps {
   reportUrl: string | null;
@@ -18,15 +11,7 @@ interface ReportSuccessProps {
   leadId?: string | null;
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-AU", {
-    style: "currency",
-    currency: "AUD",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-export function ReportSuccess({ 
+export function ReportSuccess({
   reportUrl, 
   agentName, 
   pageBgColor = "#020617",
@@ -35,35 +20,9 @@ export function ReportSuccess({
   leadId,
 }: ReportSuccessProps) {
   const textColorClass = getContrastTextColor(pageBgColor);
-  const mutedTextClass = textColorClass === "text-white" 
-    ? "text-white/60" 
+  const mutedTextClass = textColorClass === "text-white"
+    ? "text-white/60"
     : "text-slate-600";
-
-  const [estimatedValue, setEstimatedValue] = useState<EstimatedValue | null>(null);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleReveal = useCallback(async () => {
-    if (!leadId) return;
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/leads/get-estimate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lead_id: leadId }),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.estimated_value) {
-        setEstimatedValue(data.estimated_value);
-      }
-      // Reveal regardless — the UI handles the unavailable case
-      setIsRevealed(true);
-    } catch {
-      setIsRevealed(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [leadId]);
 
   // Graceful failure state
   if (gracefulFailure || !reportUrl) {
@@ -145,77 +104,6 @@ export function ReportSuccess({
       >
         Your comprehensive property appraisal report has been generated.
       </p>
-
-      {/* Estimated Value Card */}
-      {leadId && (
-        <div
-          className="landing-fade-in-up mb-5 relative overflow-hidden rounded border border-white/10 bg-white/5 p-6"
-          style={{ animationDelay: '0.22s' }}
-        >
-          <p className={`text-xs uppercase tracking-widest ${mutedTextClass} mb-2`}>
-            Estimated Property Value
-          </p>
-
-          <div className="relative">
-            {/* Blurred placeholder / Revealed value */}
-            <div
-              className={`transition-all duration-700 ease-out ${
-                isRevealed ? "blur-0 opacity-100" : "blur-lg opacity-50 select-none"
-              }`}
-              aria-hidden={!isRevealed}
-            >
-              {isRevealed && estimatedValue ? (
-                <div>
-                  <p className={`text-3xl font-bold ${textColorClass} tracking-tight`}>
-                    {formatCurrency(estimatedValue.mid)}
-                  </p>
-                  <p className={`text-xs ${mutedTextClass} mt-1`}>
-                    Range: {formatCurrency(estimatedValue.low)} – {formatCurrency(estimatedValue.high)}
-                  </p>
-                </div>
-              ) : isRevealed ? (
-                <p className={`text-lg font-semibold ${textColorClass}`}>
-                  Estimate unavailable
-                </p>
-              ) : (
-                /* Dummy placeholder text — not the real value */
-                <div>
-                  <p className={`text-3xl font-bold ${textColorClass} tracking-tight`}>
-                    $1 – $10,000,000
-                  </p>
-                  <p className={`text-xs ${mutedTextClass} mt-1`}>
-                    Range: $1 – $10,000,000
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Reveal button overlay */}
-            {!isRevealed && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button
-                  onClick={handleReveal}
-                  disabled={isLoading}
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium shadow-lg"
-                  size="sm"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
-                      Loading…
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Eye className="h-4 w-4" strokeWidth={1.5} />
-                      Reveal estimate
-                    </span>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Report Card */}
       <div

@@ -5,13 +5,13 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 export async function POST(request: NextRequest) {
   try {
-    const { lead_id, estimated_value, report_url } = await request.json()
+    const { lead_id, report_url } = await request.json()
 
     if (!lead_id || !UUID_RE.test(lead_id)) {
       return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
     }
 
-    if (!estimated_value && !report_url) {
+    if (!report_url || typeof report_url !== 'string') {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
 
@@ -21,21 +21,9 @@ export async function POST(request: NextRequest) {
       { auth: { persistSession: false } }
     )
 
-    // Write only the columns that exist on `leads`. estimated_value is a
-    // jsonb column holding { low, mid, high }; report_url is text. The
-    // previous port also wrote estimated_value_low/mid/high, which don't
-    // exist — that made every write fail and silently drop the report URL.
-    const update: Record<string, unknown> = {}
-    if (estimated_value && typeof estimated_value === 'object') {
-      update.estimated_value = estimated_value
-    }
-    if (report_url && typeof report_url === 'string') {
-      update.report_url = report_url
-    }
-
     const { error } = await supabase
       .from('leads')
-      .update(update)
+      .update({ report_url })
       .eq('id', lead_id)
       .eq('status', 'complete')
 
