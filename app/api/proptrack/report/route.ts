@@ -3,11 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 import { getPropTrackToken } from '@/lib/proptrack-token'
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit-server'
 
-const TIER_LIMITS: Record<string, number> = {
-  pro: 20,
-  elite: 100,
-}
-
 // Report generation is the costly PropTrack call. The per-agent monthly cap
 // bounds spend per agent, but agent_id comes from the (forgeable) request
 // body, so cap by IP too — stops a script from burning reports / exhausting
@@ -46,11 +41,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (agent_id && adminSupabase) {
-      const supabase = adminSupabase
-
-      const { data: billing } = await supabase
+      // Defence for direct calls: refuse inactive agents. The monthly report
+      // limit is enforced upstream in /api/leads/complete (the single gate),
+      // so we deliberately do NOT re-check it here — doing so would block the
+      // agent's last allowed report (usage is recorded at complete, so the
+      // count would already equal the limit by the time we reach this route).
+      const { data: billing } = await adminSupabase
         .from('billing')
-        .select('subscription_status, subscription_tier')
+        .select('subscription_status')
         .eq('user_id', agent_id)
         .single()
 
@@ -58,26 +56,6 @@ export async function POST(request: NextRequest) {
       if (!isActive) {
         return NextResponse.json(
           { error: 'subscription_inactive', message: 'Agent subscription is not active' },
-          { status: 403 }
-        )
-      }
-
-      const tier = billing?.subscription_tier ?? ''
-      const reportLimit = TIER_LIMITS[tier] ?? 0
-
-      const { data: usageCount } = await supabase.rpc('get_monthly_report_count', {
-        p_agent_id: agent_id,
-      })
-
-      const currentUsage = usageCount ?? 0
-      if (currentUsage >= reportLimit) {
-        return NextResponse.json(
-          {
-            error: 'limit_reached',
-            message: 'Monthly report limit reached',
-            current_usage: currentUsage,
-            limit: reportLimit,
-          },
           { status: 403 }
         )
       }

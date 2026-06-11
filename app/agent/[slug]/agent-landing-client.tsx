@@ -99,10 +99,28 @@ export function AgentLandingClient({ profile }: Props) {
     try {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
-      await leadCapture.completeLead.mutateAsync(data)
+      const completeResult = await leadCapture.completeLead.mutateAsync(data)
       if (typeof window !== 'undefined' && (window as any).fbq) {
         (window as any).fbq('track', 'Lead')
       }
+
+      // Agent is over their monthly report cap. The lead is captured, but no
+      // report is generated — show the homeowner a sorry message and send the
+      // agent a "lead captured, upgrade to send their report" email.
+      if (completeResult.limitBlocked) {
+        fetch('/api/email/lead-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'limit_blocked', lead_id: leadCapture.currentLeadId, agent_id: profile.id }),
+        }).catch((err) => console.warn('[limit-blocked notification]', err))
+
+        setIsGracefulFailure(true)
+        setGracefulFailureMessage('Sorry, A Report Could Not Be Generated On Your Property.')
+        setReportUrl(null)
+        setStep('success')
+        return
+      }
+
       setStep('loading')
 
       const result = await leadCapture.generateReport.mutateAsync()

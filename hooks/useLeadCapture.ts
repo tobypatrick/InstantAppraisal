@@ -101,10 +101,6 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
         setSubscriptionError({ type: 'subscription_inactive', message: data.message })
         throw new Error('subscription_inactive')
       }
-      if (data?.error === 'limit_reached') {
-        setSubscriptionError({ type: 'limit_reached', message: data.message, currentUsage: data.current_usage, limit: data.limit })
-        throw new Error('limit_reached')
-      }
       if (!data?.success) throw new Error(data?.error || 'Failed to complete lead')
 
       // Fire LeadConnector webhook fire-and-forget
@@ -114,7 +110,10 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
         body: JSON.stringify({ agent_id: agentId, lead_id: currentLeadId }),
       }).catch(console.warn)
 
-      return { id: currentLeadId, formData }
+      // limit_blocked = lead captured but agent is over their report cap, so
+      // no report will be generated. The caller shows the homeowner a sorry
+      // message and sends the agent the upgrade/follow-up email.
+      return { id: currentLeadId, formData, limitBlocked: data?.limit_blocked === true }
     },
   })
 

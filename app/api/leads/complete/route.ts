@@ -77,13 +77,10 @@ export async function POST(request: NextRequest) {
     const reportLimit = TIER_LIMITS[billing?.subscription_tier ?? ''] ?? 0
     const { data: usageCount } = await supabase.rpc('get_monthly_report_count', { p_agent_id: lead.agent_id })
     const currentUsage = usageCount ?? 0
-    if (currentUsage >= reportLimit) {
-      return NextResponse.json(
-        { error: 'limit_reached', message: 'Monthly report limit reached', current_usage: currentUsage, limit: reportLimit },
-        { status: 403 }
-      )
-    }
+    const limitBlocked = currentUsage >= reportLimit
 
+    // Always complete the lead (capture contact details) — even when the agent
+    // is over their limit — so they still receive the lead and can follow up.
     const { error: updateError } = await supabase
       .from('leads')
       .update({
@@ -98,10 +95,12 @@ export async function POST(request: NextRequest) {
 
     if (updateError) throw updateError
 
-    // Single source of truth for quota usage.
-    await supabase.rpc('record_report_usage', { p_agent_id: lead.agent_id })
+    // Only count usage when a report will actually be generated (under limit).
+    if (!limitBlocked) {
+      await supabase.rpc('record_report_usage', { p_agent_id: lead.agent_id })
+    }
 
-    return NextResponse.json({ success: true, agent_id: lead.agent_id })
+    return NextResponse.json({ success: true, agent_id: lead.agent_id, limit_blocked: limitBlocked })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[leads/complete]', message)

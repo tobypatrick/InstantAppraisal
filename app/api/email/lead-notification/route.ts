@@ -54,6 +54,36 @@ function buildCompleteEmail(
     </table>`
 }
 
+// Sent when a homeowner completes an appraisal but the agent is over their
+// monthly report limit — so the homeowner did NOT receive their report. The
+// lead is still captured; nudge the agent to follow up directly and upgrade.
+function buildLimitBlockedEmail(
+  firstName: string,
+  leadName: string,
+  leadEmail: string,
+  leadPhone: string,
+  address: string,
+  date: string,
+  utmSource: string
+): string {
+  const linkStyle = 'color:#10B981;text-decoration:underline;'
+  const emailCell = leadEmail ? `<a href="mailto:${escapeHtml(leadEmail)}" style="${linkStyle}">${escapeHtml(leadEmail)}</a>` : ''
+  const phoneCell = leadPhone ? `<a href="tel:${escapeHtml(leadPhone)}" style="${linkStyle}">${escapeHtml(leadPhone)}</a>` : ''
+
+  return `
+    <p style="margin:0 0 16px 0;">Hey ${firstName},</p>
+    <p style="margin:0 0 16px 0;">A homeowner just completed an appraisal on your page — but you've hit your monthly report limit, so <strong>they did not receive their report</strong>.</p>
+    <p style="margin:0 0 24px 0;">Reach out to them directly so they don't go cold, and upgrade your plan to start sending reports again.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 8px 0;">
+      <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
+      ${emailCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${emailCell}</td></tr>` : ''}
+      ${phoneCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:16px;color:#333333;">${phoneCell}</td></tr>` : ''}
+      <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Property</td><td style="padding:8px 0;font-size:16px;color:#333333;">${address}</td></tr>
+      <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Source</td><td style="padding:8px 0;font-size:16px;color:#333333;">${utmSource}</td></tr>
+      <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Date</td><td style="padding:8px 0;font-size:16px;color:#333333;">${date}</td></tr>
+    </table>`
+}
+
 export async function POST(request: NextRequest) {
   try {
     const apiKey = process.env.RESEND_API_KEY
@@ -128,6 +158,15 @@ export async function POST(request: NextRequest) {
       body = buildPartialEmail(firstName, leadAddress, formattedDate, utmSource)
       ctaText = 'View All Leads'
       ctaUrl = 'https://dashboard.instantappraisal.co/leads'
+    } else if (notificationType === 'limit_blocked') {
+      const leadName = escapeHtml(leadData.contact_name) || 'Anonymous'
+      const leadEmail = leadData.contact_email || ''
+      const leadPhone = leadData.contact_phone || ''
+
+      subject = `Action needed — lead captured, report limit reached — ${leadData.address}`
+      body = buildLimitBlockedEmail(firstName, leadName, leadEmail, leadPhone, leadAddress, formattedDate, utmSource)
+      ctaText = 'Upgrade Here'
+      ctaUrl = 'https://dashboard.instantappraisal.co/billing'
     } else {
       const leadName = escapeHtml(leadData.contact_name) || 'Anonymous'
       const leadEmail = leadData.contact_email || ''
