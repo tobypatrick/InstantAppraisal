@@ -194,7 +194,7 @@ export function AddressSearch({
     <div className={containerClass}>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="space-y-2">
-          <div className="relative">
+          <div className="relative z-50">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" strokeWidth={1.5} />
             {isSearching && (
               <Loader2

@@ -14,7 +14,7 @@ import { getAgentPageUrl } from '@/lib/subdomain'
 const demoUrl = getAgentPageUrl('demo')
 
 export const metadata = {
-  title: 'Property Appraisals for Real Estate Agents',
+  title: 'Property Appraisals for Real Estate Agents | InstantAppraisal',
   description: 'Generate professional property appraisals instantly using PropTrack data. Capture high-intent leads with a branded landing page. Start your free trial today.',
   openGraph: {
     title: 'InstantAppraisal — Property Appraisals for Real Estate Agents',
@@ -121,7 +121,7 @@ const DASHBOARD_FEATURES = [
   { icon: Eye, label: 'Full lead history', desc: 'Every enquiry with name, email, phone, address, and report status' },
   { icon: Filter, label: 'Filter & search', desc: 'Filter by source, date range, report status, or pipeline stage' },
   { icon: Tag, label: 'Pipeline status', desc: 'Mark leads as Contacted, Meeting Booked, Listed, or Lost' },
-  { icon: BarChart3, label: 'Source analytics', desc: 'See which campaigns and channels are driving the most leads' },
+  { icon: BarChart3, label: 'Lead source tracking', desc: 'See where each lead came from — Facebook, Google, QR, or direct' },
   { icon: Bell, label: 'Real-time updates', desc: 'New leads appear the moment they submit, no refresh needed' },
   { icon: Download, label: 'Export leads', desc: 'Download your lead list as a CSV at any time' },
 ]

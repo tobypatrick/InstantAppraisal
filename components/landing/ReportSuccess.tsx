@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { CheckCircle, FileText, Download, Clock, MessageCircle, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getContrastTextColor } from "@/lib/color-utils";
-import { createClient } from "@/lib/supabase/client";
 
 interface EstimatedValue {
   low: number;
@@ -48,17 +47,17 @@ export function ReportSuccess({
     if (!leadId) return;
     setIsLoading(true);
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase.functions.invoke("get-estimate", {
-        body: { lead_id: leadId },
+      const res = await fetch("/api/leads/get-estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lead_id: leadId }),
       });
-      if (!error && data?.estimated_value) {
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.estimated_value) {
         setEstimatedValue(data.estimated_value);
-        setIsRevealed(true);
-      } else {
-        // Fallback: still reveal but show unavailable
-        setIsRevealed(true);
       }
+      // Reveal regardless — the UI handles the unavailable case
+      setIsRevealed(true);
     } catch {
       setIsRevealed(true);
     } finally {

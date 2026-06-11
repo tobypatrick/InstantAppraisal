@@ -102,6 +102,16 @@ export async function POST(request: NextRequest) {
 
     const data = await res.json()
 
+    // TEMP diagnostics (remove once the report-URL shape is confirmed):
+    // logs only the response KEYS and which value-bearing fields are present,
+    // never PII, so we can see why reportUrl is missing for some properties.
+    console.log('[proptrack/report] response keys:', Object.keys(data ?? {}), {
+      hasReportUrl: !!data?.reportUrl,
+      hasEstimatedValue: !!data?.estimatedValue,
+      reportId: data?.reportId ?? data?.id ?? null,
+      suppressed: data?.suppressed ?? null,
+    })
+
     // Log the successful report so it counts against the agent's monthly quota
     // and shows up in their billing usage card.
     if (agent_id && adminSupabase) {

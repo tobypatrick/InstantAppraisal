@@ -26,6 +26,11 @@ export function AgentLandingClient({ profile }: Props) {
   const utmParams = useMemo(() => extractUTMParams(searchParams), [searchParams])
   const leadCapture = useLeadCapture(profile.id, utmParams)
 
+  // Guards against a double form submit (e.g. double-click) firing the
+  // complete-lead + report flow twice, which double-charges the agent's
+  // monthly report quota and sends duplicate notification emails.
+  const contactSubmitInFlightRef = useRef(false)
+
   // Track page view exactly once per mount
   const viewTrackedRef = useRef(false)
   useEffect(() => {
@@ -89,6 +94,8 @@ export function AgentLandingClient({ profile }: Props) {
   }
 
   const handleContactSubmit = async (data: LeadFormData) => {
+    if (contactSubmitInFlightRef.current) return
+    contactSubmitInFlightRef.current = true
     try {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
@@ -123,6 +130,8 @@ export function AgentLandingClient({ profile }: Props) {
       setReportUrl(null)
       setStep('success')
     } catch (err) {
+      // Allow a retry after a genuine failure
+      contactSubmitInFlightRef.current = false
       if (err instanceof Error && (err.message === 'limit_reached' || err.message === 'subscription_inactive')) return
       throw err
     }

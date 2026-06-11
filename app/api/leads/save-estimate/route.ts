@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function POST(request: NextRequest) {
   try {
     const { lead_id, estimated_value, report_url } = await request.json()
 
-    if (!lead_id) {
-      return NextResponse.json({ error: 'Missing lead_id' }, { status: 400 })
+    if (!lead_id || !UUID_RE.test(lead_id)) {
+      return NextResponse.json({ error: 'Invalid lead ID' }, { status: 400 })
+    }
+
+    if (!estimated_value && !report_url) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
 
     const supabase = createClient(
@@ -15,35 +21,27 @@ export async function POST(request: NextRequest) {
       { auth: { persistSession: false } }
     )
 
-    const update: Record<string, unknown> = {
-      status: 'complete',
-      updated_at: new Date().toISOString(),
-    }
-    if (report_url) update.report_url = report_url
+    // Write only the columns that exist on `leads`. estimated_value is a
+    // jsonb column holding { low, mid, high }; report_url is text. The
+    // previous port also wrote estimated_value_low/mid/high, which don't
+    // exist — that made every write fail and silently drop the report URL.
+    const update: Record<string, unknown> = {}
     if (estimated_value && typeof estimated_value === 'object') {
-      // Try common column names — keep both write attempts so we cover the
-      // schema regardless of how the original Lovable migration named it.
-      update.estimated_value_low = estimated_value.low ?? null
-      update.estimated_value_mid = estimated_value.mid ?? null
-      update.estimated_value_high = estimated_value.high ?? null
       update.estimated_value = estimated_value
     }
+    if (report_url && typeof report_url === 'string') {
+      update.report_url = report_url
+    }
 
-    const { error } = await supabase.from('leads').update(update).eq('id', lead_id)
+    const { error } = await supabase
+      .from('leads')
+      .update(update)
+      .eq('id', lead_id)
+      .eq('status', 'complete')
 
     if (error) {
-      // Retry without the columns most likely to be missing
-      console.warn('[save-estimate] full update failed, retrying minimal:', error.message)
-      const minimal: Record<string, unknown> = {
-        status: 'complete',
-        updated_at: new Date().toISOString(),
-      }
-      if (report_url) minimal.report_url = report_url
-      const { error: minimalError } = await supabase.from('leads').update(minimal).eq('id', lead_id)
-      if (minimalError) {
-        console.error('[save-estimate] minimal update also failed:', minimalError.message)
-        return NextResponse.json({ error: minimalError.message }, { status: 500 })
-      }
+      console.error('[save-estimate] update failed:', error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
