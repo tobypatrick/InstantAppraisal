@@ -4,6 +4,7 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { ReportLimitBanner } from '@/components/dashboard/ReportLimitBanner'
+import { TourProvider } from '@/components/dashboard/tour-context'
 import { createClient } from '@/lib/supabase/client'
 import { getMarketingUrl } from '@/lib/subdomain'
 
@@ -19,10 +20,11 @@ interface Profile {
 interface DashboardShellProps {
   profile: Profile | null
   isAdmin: boolean
+  firstLogin: boolean
   children: React.ReactNode
 }
 
-export function DashboardShell({ profile, isAdmin, children }: DashboardShellProps) {
+export function DashboardShell({ profile, isAdmin, firstLogin, children }: DashboardShellProps) {
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -30,17 +32,19 @@ export function DashboardShell({ profile, isAdmin, children }: DashboardShellPro
   }
 
   return (
-    <SidebarProvider>
-      <div className="h-dvh flex flex-col w-full bg-background overflow-hidden">
-        <DashboardHeader profile={profile} onSignOut={handleSignOut} />
-        <div className="flex flex-1 overflow-hidden">
-          <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
-          <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-            <ReportLimitBanner />
-            {children}
-          </main>
+    <TourProvider firstLogin={firstLogin} userId={profile?.id ?? null}>
+      <SidebarProvider>
+        <div className="h-dvh flex flex-col w-full bg-background overflow-hidden">
+          <DashboardHeader profile={profile} onSignOut={handleSignOut} />
+          <div className="flex flex-1 overflow-hidden">
+            <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
+            <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+              <ReportLimitBanner />
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </TourProvider>
   )
 }

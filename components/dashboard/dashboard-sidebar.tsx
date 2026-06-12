@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, QrCode, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Users, QrCode, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck, Compass } from 'lucide-react'
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuItem, SidebarHeader,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sidebar'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { getMarketingUrl } from '@/lib/subdomain'
+import { useTour } from '@/components/dashboard/tour-context'
 import { toast } from 'sonner'
 
 const SUPPORT_EMAIL = 'team@instantappraisal.co'
@@ -50,6 +51,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
   const collapsed = state === 'collapsed'
   const pathname = usePathname()
   const accentColor = profile?.header_bg_color || '#10b981'
+  const { startTour } = useTour()
 
   return (
     <Sidebar
@@ -79,6 +81,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
                   <SidebarMenuItem key={item.title}>
                     <Link
                       href={item.url}
+                      data-tour={item.title === 'Settings' ? 'settings-link' : undefined}
                       className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
                         isActive ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
                       }`}
@@ -119,6 +122,16 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
       <SidebarFooter className="p-3">
         <SidebarSeparator className="bg-white/10 mb-3" />
         <SidebarMenu className="space-y-1">
+          <SidebarMenuItem>
+            <button
+              type="button"
+              onClick={startTour}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <Compass className="h-4 w-4 shrink-0" strokeWidth={1.25} />
+              {!collapsed && <span className="text-[13px] font-medium">Tour</span>}
+            </button>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <button
               type="button"

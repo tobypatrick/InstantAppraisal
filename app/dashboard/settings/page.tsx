@@ -184,26 +184,30 @@ export default function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <ProfileImagesSection
-          formData={{ profile_picture_url: formData.profile_picture_url, agency_logo_url: formData.agency_logo_url }}
-          onChange={(field, value) => handleChange(field, value)}
-        />
+        <div data-tour="profile-images">
+          <ProfileImagesSection
+            formData={{ profile_picture_url: formData.profile_picture_url, agency_logo_url: formData.agency_logo_url }}
+            onChange={(field, value) => handleChange(field, value)}
+          />
+        </div>
 
         <LightCard>
           <LightCardHeader icon={<Layout className="h-4 w-4" strokeWidth={1.25} />} title="Landing Page Video" description="Add a YouTube video to your landing page." />
           <VSLInput value={formData.vsl_youtube_url} onChange={(url) => handleChange('vsl_youtube_url', url)} />
         </LightCard>
 
-        <BrandingSection
-          formData={{
-            header_bg_color: formData.header_bg_color,
-            page_bg_color: formData.page_bg_color,
-            accent_color: formData.accent_color,
-            agency_logo_url: formData.agency_logo_url,
-            agency_name: formData.agency_name,
-          }}
-          onChange={(field, value) => handleChange(field, value)}
-        />
+        <div data-tour="branding-colours">
+          <BrandingSection
+            formData={{
+              header_bg_color: formData.header_bg_color,
+              page_bg_color: formData.page_bg_color,
+              accent_color: formData.accent_color,
+              agency_logo_url: formData.agency_logo_url,
+              agency_name: formData.agency_name,
+            }}
+            onChange={(field, value) => handleChange(field, value)}
+          />
+        </div>
 
         <BusinessInfoSection
           formData={{
