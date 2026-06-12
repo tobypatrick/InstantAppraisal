@@ -71,10 +71,10 @@ export function ImageUpload({ currentUrl, onUpload, folder, label, aspectRatio =
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-slate-900">{label}</label>
-      <div className={`relative border-2 border-dashed border-slate-200 rounded-lg overflow-hidden transition-colors hover:border-slate-300 ${aspectRatio === 'wide' ? 'w-48 aspect-[3/1]' : 'w-32 aspect-square'} ${aspectRatio === 'wide' ? 'bg-slate-50' : ''}`}>
+      <div className={`relative border-2 border-dashed border-slate-200 rounded-lg overflow-hidden transition-colors hover:border-slate-300 w-40 aspect-square ${aspectRatio === 'wide' ? 'bg-slate-50' : ''}`}>
         {signedUrl && (
           <>
-            <img src={signedUrl} alt={label} className={`w-full h-full ${aspectRatio === 'wide' ? 'object-contain p-2' : 'object-cover'}`} onError={(e) => { e.currentTarget.style.display = 'none' }} />
+            <img src={signedUrl} alt={label} className={`w-full h-full ${aspectRatio === 'wide' ? 'object-contain p-3' : 'object-cover'}`} onError={(e) => { e.currentTarget.style.display = 'none' }} />
             <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <Button type="button" variant="secondary" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>Change</Button>
               <Button type="button" variant="destructive" size="sm" onClick={handleRemove} disabled={uploading}><X className="h-4 w-4" /></Button>
