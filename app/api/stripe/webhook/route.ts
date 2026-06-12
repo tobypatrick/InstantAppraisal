@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { sendCapiEvent } from '@/lib/fb-capi'
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : ''
@@ -250,6 +251,17 @@ export async function POST(request: NextRequest) {
         if (obj.subscription && typeof obj.subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(obj.subscription)
           await handleSubscriptionChange(supabase, stripe, sub, sub.status)
+        }
+        // Conversions API: a non-zero paid invoice is a real paying conversion
+        // (trial → paid, or a renewal) — the browser pixel can't see this, so
+        // report it server-side. No-ops until the CAPI token is configured.
+        if (typeof obj.amount_paid === 'number' && obj.amount_paid > 0) {
+          await sendCapiEvent({
+            eventName: 'Subscribe',
+            email: obj.customer_email ?? null,
+            value: obj.amount_paid / 100,
+            currency: (obj.currency ?? 'aud').toUpperCase(),
+          })
         }
         break
       }
