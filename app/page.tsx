@@ -89,9 +89,9 @@ const FEATURES = [
   },
   {
     icon: BarChart3,
-    title: 'Multi-Channel Attribution',
-    description: 'Track every lead back to its source: Facebook, Google, letterbox drop, or email. Know your cost per lead by channel and double down on what works.',
-    highlight: 'Full attribution',
+    title: 'Google & Facebook Tracking',
+    description: 'Add your own Google Tag Manager and Facebook Pixel to your landing page. Track conversions, optimise your ad spend, and build retargeting audiences automatically.',
+    highlight: 'Your pixels',
     accent: 'violet',
   },
   {

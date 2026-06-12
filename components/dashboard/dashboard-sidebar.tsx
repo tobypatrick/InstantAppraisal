@@ -10,6 +10,17 @@ import {
 } from '@/components/ui/sidebar'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { getMarketingUrl } from '@/lib/subdomain'
+import { toast } from 'sonner'
+
+const SUPPORT_EMAIL = 'team@instantappraisal.co'
+
+function handleHelp() {
+  // mailto: silently does nothing when no mail client is configured, so also
+  // copy the address and confirm via a toast — the button always does something.
+  navigator.clipboard?.writeText(SUPPORT_EMAIL).catch(() => {})
+  toast.success(`Support: ${SUPPORT_EMAIL} — copied to clipboard`)
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=Instant%20Appraisal%20Support`
+}
 
 interface Profile {
   id: string
@@ -109,13 +120,14 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
         <SidebarSeparator className="bg-white/10 mb-3" />
         <SidebarMenu className="space-y-1">
           <SidebarMenuItem>
-            <a
-              href="mailto:team@instantappraisal.co?subject=Instant%20Appraisal%20Support"
+            <button
+              type="button"
+              onClick={handleHelp}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors"
             >
               <HelpCircle className="h-4 w-4 shrink-0" strokeWidth={1.25} />
               {!collapsed && <span className="text-[13px] font-medium">Help</span>}
-            </a>
+            </button>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <button onClick={onSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors">

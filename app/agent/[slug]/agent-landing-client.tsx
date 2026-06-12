@@ -82,11 +82,23 @@ export function AgentLandingClient({ profile }: Props) {
     return () => window.removeEventListener('beforeunload', handleUnload)
   }, [sendPartialNotification])
 
+  // Fire a GTM dataLayer event and (optionally) a Facebook Pixel event.
+  // Lets agents build GTM triggers / FB conversions on each funnel step.
+  const fireTracking = (gtmEvent: string, fbEvent?: string) => {
+    if (typeof window === 'undefined') return
+    const w = window as any
+    w.dataLayer = w.dataLayer || []
+    w.dataLayer.push({ event: gtmEvent })
+    if (fbEvent && typeof w.fbq === 'function') w.fbq('track', fbEvent)
+  }
+
   const handleAddressSubmit = async (address: string, propertyId?: string) => {
     if (!leadCapture.checkCanSubmit()) return
     setSubmittedAddress(address)
     try {
       await leadCapture.createPartialLead.mutateAsync({ address, propertyId })
+      // Track the address search on both GTM and the Pixel.
+      fireTracking('address_submit', 'Search')
       setStep('contact')
     } catch {
       // error handled by mutation
@@ -100,9 +112,8 @@ export function AgentLandingClient({ profile }: Props) {
       leadCompletedRef.current = true
       if (abandonTimeoutRef.current) clearTimeout(abandonTimeoutRef.current)
       const completeResult = await leadCapture.completeLead.mutateAsync(data)
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Lead')
-      }
+      // Track the completed lead on both GTM and the Pixel.
+      fireTracking('lead_submit', 'Lead')
 
       // Agent is over their monthly report cap. The lead is captured, but no
       // report is generated — show the homeowner a sorry message and send the
