@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { getDashboardUrl } from '@/lib/subdomain'
+import { trackMarketingEvent } from '@/lib/marketing-tracking'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { CheckCircle, Loader2 } from 'lucide-react'
 
 const MAX_WAIT_MS = 20_000   // 20 seconds before giving up
 const POLL_INTERVAL_MS = 1_500
+// Monthly plan value, used for value-based ad optimisation on StartTrial.
+const TIER_VALUE: Record<string, number> = { pro: 99, elite: 199 }
 
 export default function CheckoutSuccessPage() {
   const router = useRouter()
@@ -29,13 +32,22 @@ export default function CheckoutSuccessPage() {
 
       const { data: billing } = await supabase
         .from('billing')
-        .select('subscription_status')
+        .select('subscription_status, subscription_tier, billing_interval')
         .eq('user_id', user.id)
         .maybeSingle()
 
       const isActive = ['active', 'trialing'].includes(billing?.subscription_status ?? '')
 
       if (isActive) {
+        // Marketing conversion: trial / subscription started, with plan value
+        // so the pixel can do value-based optimisation.
+        const tier = billing?.subscription_tier ?? ''
+        trackMarketingEvent('subscription_started', 'StartTrial', {
+          value: TIER_VALUE[tier] ?? 0,
+          currency: 'AUD',
+          plan: tier,
+          interval: billing?.billing_interval ?? null,
+        })
         setStatus('success')
         setTimeout(() => {
           window.location.href = getDashboardUrl()

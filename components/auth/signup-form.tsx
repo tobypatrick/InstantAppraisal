@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { getDashboardUrl } from '@/lib/subdomain'
+import { trackMarketingEvent } from '@/lib/marketing-tracking'
 
 interface SignupFormProps {
   onSwitchToLogin: () => void
@@ -62,6 +63,9 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
         options: { emailRedirectTo: emailRedirectUrl, data: { full_name: fullName } },
       })
       if (error) throw error
+
+      // Marketing conversion: account created.
+      trackMarketingEvent('sign_up', 'CompleteRegistration')
 
       if (data.session) {
         try {
