@@ -47,11 +47,14 @@ const navItems = [
 ]
 
 export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSidebarProps) {
-  const { state } = useSidebar()
+  const { state, isMobile, setOpenMobile } = useSidebar()
   const collapsed = state === 'collapsed'
   const pathname = usePathname()
   const accentColor = profile?.header_bg_color || '#10b981'
   const { startTour } = useTour()
+  // On mobile the sidebar is an overlay drawer — close it after a tap so the
+  // user doesn't have to dismiss it every time they switch pages.
+  const closeMobile = () => { if (isMobile) setOpenMobile(false) }
 
   return (
     <Sidebar
@@ -81,6 +84,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
                   <SidebarMenuItem key={item.title}>
                     <Link
                       href={item.url}
+                      onClick={closeMobile}
                       data-tour={item.title === 'Settings' ? 'settings-link' : undefined}
                       className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${
                         isActive ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
@@ -102,13 +106,13 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <Link href="/dashboard/admin" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/dashboard/admin' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                  <Link href="/dashboard/admin" onClick={closeMobile} className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/dashboard/admin' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
                     <ShieldCheck className="h-4 w-4 shrink-0" strokeWidth={1.25} />
                     {!collapsed && <span className="text-[13px] font-medium">Admin</span>}
                   </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <Link href="/admin/audit-log" className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                  <Link href="/admin/audit-log" onClick={closeMobile} className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
                     <Shield className="h-4 w-4 shrink-0" strokeWidth={1.25} />
                     {!collapsed && <span className="text-[13px] font-medium">Audit Log</span>}
                   </Link>
@@ -125,7 +129,7 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
           <SidebarMenuItem>
             <button
               type="button"
-              onClick={startTour}
+              onClick={() => { closeMobile(); startTour() }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded text-white/60 hover:text-white hover:bg-white/5 transition-colors"
             >
               <Compass className="h-4 w-4 shrink-0" strokeWidth={1.25} />

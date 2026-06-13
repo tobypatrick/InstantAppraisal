@@ -148,10 +148,15 @@ export function GuidedTour({ run, onComplete }: GuidedTourProps) {
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768
   const cardW = Math.min(CARD_W, vw - 24) // fit narrow mobile screens
+  const isMobile = vw < 768
   const clampLeft = (l: number) => Math.max(12, Math.min(l, vw - cardW - 12))
 
   let cardStyle: React.CSSProperties
-  if (!rect || step.placement === 'center') {
+  if (isMobile) {
+    // Bottom sheet on mobile — fixed, thumb-reachable, never collides with the
+    // spotlight or the off-canvas menu. The spotlight (if any) still shows above.
+    cardStyle = { bottom: 16, left: '50%', transform: 'translateX(-50%)' }
+  } else if (!rect || step.placement === 'center') {
     cardStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
   } else if (step.placement === 'right') {
     cardStyle = { top: clampTop(rect.top + rect.height / 2 - 70, vh), left: clampLeft(rect.left + rect.width + 16) }
