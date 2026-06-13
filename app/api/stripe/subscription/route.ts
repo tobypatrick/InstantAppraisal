@@ -48,19 +48,19 @@ export async function GET(request: NextRequest) {
     const tier = billing?.subscription_tier ?? null
     const isSubscribed = ['active', 'trialing'].includes(status)
 
-    // Count reports used in the current billing period
+    // Reports used this calendar month — via the SAME source as the limit check
+    // in /api/leads/complete (get_monthly_report_count), so the displayed count
+    // and the enforced limit always agree. Previously this read was gated on
+    // current_period_start (null for some trials → always 0) and counted from the
+    // billing period instead of the calendar month, so it disagreed with the cap.
     let reportsUsed = 0
-    if (isSubscribed && billing?.current_period_start) {
-      const { count, error: usageError } = await adminSupabase
-        .from('report_usage')
-        .select('*', { count: 'exact', head: true })
-        .eq('agent_id', user.id)
-        .gte('created_at', billing.current_period_start)
-
+    if (isSubscribed) {
+      const { data: monthCount, error: usageError } = await adminSupabase
+        .rpc('get_monthly_report_count', { p_agent_id: user.id })
       if (usageError) {
         console.error('[check-subscription] usage count error:', usageError.message)
       } else {
-        reportsUsed = count ?? 0
+        reportsUsed = (monthCount as number) ?? 0
       }
     }
 

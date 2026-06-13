@@ -96,8 +96,15 @@ export async function POST(request: NextRequest) {
     if (updateError) throw updateError
 
     // Only count usage when a report will actually be generated (under limit).
+    // Log + fall back to a direct insert if the RPC fails — usage tracking must
+    // never silently no-op, and it must not depend on the later email step.
     if (!limitBlocked) {
-      await supabase.rpc('record_report_usage', { p_agent_id: lead.agent_id })
+      const { error: usageError } = await supabase.rpc('record_report_usage', { p_agent_id: lead.agent_id })
+      if (usageError) {
+        console.error('[leads/complete] record_report_usage RPC failed, using direct insert:', usageError.message)
+        const { error: insertError } = await supabase.from('report_usage').insert({ agent_id: lead.agent_id })
+        if (insertError) console.error('[leads/complete] report_usage fallback insert failed:', insertError.message)
+      }
     }
 
     return NextResponse.json({ success: true, agent_id: lead.agent_id, limit_blocked: limitBlocked })
