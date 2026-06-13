@@ -14,6 +14,11 @@ export function createClient() {
     {
       cookies: {
         getAll() {
+          // No document during SSR — a browser client has no cookies to read on
+          // the server (server components use the server client). Guarding here
+          // prevents "ReferenceError: document is not defined" when Supabase auth
+          // initialises during a server render.
+          if (typeof document === 'undefined') return []
           return document.cookie
             .split('; ')
             .filter(Boolean)
@@ -23,6 +28,7 @@ export function createClient() {
             })
         },
         setAll(cookiesToSet) {
+          if (typeof document === 'undefined') return
           cookiesToSet.forEach(({ name, value, options }) => {
             const parts = [`${name}=${value}`, 'path=/']
             if (domain) parts.push(`domain=${domain}`)
