@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 
-// react-joyride touches window/document, so never render it on the server.
+// The tour reads window geometry to position itself, so render it client-only.
 const GuidedTour = dynamic(
   () => import('./GuidedTour').then((m) => m.GuidedTour),
   { ssr: false }
