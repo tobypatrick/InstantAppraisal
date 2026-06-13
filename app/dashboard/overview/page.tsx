@@ -30,6 +30,7 @@ function isProfileIncomplete(profile: Profile | null): boolean {
 
 export default function DashboardOverviewPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
   const [copied, setCopied] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
@@ -47,13 +48,13 @@ export default function DashboardOverviewPage() {
 
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
+      if (!user) { setProfileLoaded(true); return }
       supabase
         .from('profiles')
         .select('full_name, phone_number, agency_name, slug')
         .eq('id', user.id)
         .maybeSingle()
-        .then(({ data }) => setProfile(data))
+        .then(({ data }) => { setProfile(data); setProfileLoaded(true) })
     })
   }, [])
 
@@ -82,7 +83,7 @@ export default function DashboardOverviewPage() {
     }
   }
 
-  const showBanner = isProfileIncomplete(profile) && !bannerDismissed
+  const showBanner = profileLoaded && isProfileIncomplete(profile) && !bannerDismissed
   const showIncompleteSignup = !subLoading && !subscribed
 
   if (error) {
