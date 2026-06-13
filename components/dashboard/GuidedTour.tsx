@@ -96,7 +96,10 @@ export function GuidedTour({ run, onComplete }: GuidedTourProps) {
   useEffect(() => {
     if (!run) return
 
-    if (step.target === 'center') {
+    // On mobile the sidebar is off-canvas, so its anchored step (placement
+    // 'right') can't be spotlighted — render it as a centred card instead.
+    const isMobile = window.innerWidth < 768
+    if (step.target === 'center' || (isMobile && step.placement === 'right')) {
       setRect(null)
       return
     }
@@ -144,7 +147,8 @@ export function GuidedTour({ run, onComplete }: GuidedTourProps) {
   // Compute the tooltip card position.
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
   const vh = typeof window !== 'undefined' ? window.innerHeight : 768
-  const clampLeft = (l: number) => Math.max(12, Math.min(l, vw - CARD_W - 12))
+  const cardW = Math.min(CARD_W, vw - 24) // fit narrow mobile screens
+  const clampLeft = (l: number) => Math.max(12, Math.min(l, vw - cardW - 12))
 
   let cardStyle: React.CSSProperties
   if (!rect || step.placement === 'center') {
@@ -152,10 +156,10 @@ export function GuidedTour({ run, onComplete }: GuidedTourProps) {
   } else if (step.placement === 'right') {
     cardStyle = { top: clampTop(rect.top + rect.height / 2 - 70, vh), left: clampLeft(rect.left + rect.width + 16) }
   } else if (step.placement === 'top') {
-    cardStyle = { top: Math.max(12, rect.top - 180), left: clampLeft(rect.left + rect.width / 2 - CARD_W / 2) }
+    cardStyle = { top: Math.max(12, rect.top - 180), left: clampLeft(rect.left + rect.width / 2 - cardW / 2) }
   } else {
     // bottom
-    cardStyle = { top: Math.min(rect.top + rect.height + 16, vh - 200), left: clampLeft(rect.left + rect.width / 2 - CARD_W / 2) }
+    cardStyle = { top: Math.min(rect.top + rect.height + 16, vh - 200), left: clampLeft(rect.left + rect.width / 2 - cardW / 2) }
   }
 
   return (
@@ -185,7 +189,7 @@ export function GuidedTour({ run, onComplete }: GuidedTourProps) {
         aria-label={step.title}
         style={{
           position: 'fixed',
-          width: CARD_W,
+          width: cardW,
           background: '#ffffff',
           borderRadius: 10,
           padding: 20,

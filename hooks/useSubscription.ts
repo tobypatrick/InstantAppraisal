@@ -121,7 +121,10 @@ export function useSubscription() {
 
     const data = await res.json()
     if (!res.ok) throw new Error(data.error ?? 'Failed to open billing portal')
-    if (data?.url) window.open(data.url, '_blank')
+    // Same-tab redirect (not window.open) — popups opened after an await are
+    // blocked on mobile, so the button appeared to do nothing. The portal's
+    // return_url brings them back to the dashboard.
+    if (data?.url) window.location.href = data.url
   }, [supabase])
 
   const trialDaysRemaining = sub.trial_end_date
