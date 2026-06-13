@@ -116,7 +116,17 @@ export function BusinessInfoSection({ formData, onChange }: BusinessInfoSectionP
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="leadconnector_webhook_url" className="text-sm text-slate-600">LeadConnector Webhook URL</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="leadconnector_webhook_url" className="text-sm text-slate-600">LeadConnector Webhook URL</Label>
+            <a
+              href="https://help.gohighlevel.com/support/solutions/articles/155000003147-workflow-trigger-inbound-webhook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline whitespace-nowrap"
+            >
+              How to set this up ↗
+            </a>
+          </div>
           <div className="relative">
             <Webhook className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" strokeWidth={1.25} />
             <Input
