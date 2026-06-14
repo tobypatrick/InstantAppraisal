@@ -26,28 +26,43 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error && data.session && next === 'checkout') {
-      // New signup — create Stripe Checkout session via Next.js API route
-      try {
-        const baseUrl = request.nextUrl.origin
-        const res = await fetch(`${baseUrl}/api/stripe/checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${data.session.access_token}`,
-          },
-          body: JSON.stringify({ tier: 'pro', interval: 'month' }),
-        })
-        const checkoutData = await res.json()
-        if (res.ok && checkoutData?.url) {
-          return NextResponse.redirect(checkoutData.url)
-        }
-      } catch {
-        // fall through to dashboard
+    if (!error && data.session) {
+      // Send brand-new users straight into checkout to start their trial. The
+      // explicit ?next=checkout flag is the happy path, but Supabase can strip
+      // that query param when it re-validates the email redirect — so also treat
+      // anyone with NO billing record as new and route them to checkout. Only
+      // users who already have a billing row (existing/lapsed) fall through to
+      // the dashboard, where the gate shows the "welcome back" page if inactive.
+      let goToCheckout = next === 'checkout'
+      if (!goToCheckout) {
+        const { data: billing } = await supabase
+          .from('billing')
+          .select('user_id')
+          .eq('user_id', data.session.user.id)
+          .maybeSingle()
+        goToCheckout = !billing
       }
-    }
 
-    if (!error) {
+      if (goToCheckout) {
+        try {
+          const baseUrl = request.nextUrl.origin
+          const res = await fetch(`${baseUrl}/api/stripe/checkout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.session.access_token}`,
+            },
+            body: JSON.stringify({ tier: 'pro', interval: 'month' }),
+          })
+          const checkoutData = await res.json()
+          if (res.ok && checkoutData?.url) {
+            return NextResponse.redirect(checkoutData.url)
+          }
+        } catch {
+          // fall through to dashboard
+        }
+      }
+
       return NextResponse.redirect(new URL(getDashboardUrl()))
     }
   }
