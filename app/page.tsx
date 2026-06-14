@@ -271,7 +271,7 @@ export default function HomePage() {
                   See a live demo
                 </Link>
               </div>
-              <p className="text-zinc-500 text-sm">30-day free trial · No credit card required · Cancel anytime</p>
+              <p className="text-zinc-500 text-sm">30-day free trial · Cancel anytime</p>
               <Link href="/auth/login" className="text-zinc-500 hover:text-white text-sm transition-colors">
                 Already have an account?{' '}
                 <span className="font-medium text-zinc-400">Go to Dashboard</span>
@@ -714,7 +714,7 @@ export default function HomePage() {
               Simple, transparent pricing
             </h2>
             <p className="text-zinc-500 text-base max-w-md mx-auto">
-              Start with a 30-day free trial. No credit card required.
+              Start with a 30-day free trial.
             </p>
           </div>
 
@@ -830,7 +830,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 text-zinc-500 text-sm">
-                {['30-day free trial', 'No credit card required', 'Cancel anytime'].map((item, i) => (
+                {['30-day free trial', 'Cancel anytime'].map((item, i) => (
                   <span key={item} className="flex items-center gap-2">
                     {i > 0 && <span className="hidden sm:block text-zinc-700">·</span>}
                     <CheckCircle className="h-4 w-4 text-emerald-500" strokeWidth={1.5} />
