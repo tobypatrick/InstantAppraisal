@@ -23,9 +23,9 @@ The app serves **three sites from one codebase**, routed by hostname in `proxy.t
 A raw Vercel preview URL (`...git-feat-x.vercel.app`) matches none of those prefixes, so **it only renders the marketing site.** Therefore:
 
 - **Marketing changes** → test on the branch's preview URL. ✅
-- **Dashboard or agent changes** → preview URLs won't show them. Test by **pushing to `staging`** (hits `staging-dashboard.` / `staging-my.`), or **locally** with the `?domain=dashboard` / `?domain=agent` query param.
+- **Dashboard or agent changes** → append **`?domain=dashboard`** or **`?domain=agent`** to the preview URL to simulate the subdomain — e.g. `…vercel.app/?domain=dashboard` renders the dashboard, `…vercel.app/overview?domain=dashboard` the overview page. Works on local dev and preview deploys; **ignored on production** (the real hostname is authoritative there). You can still also test on the `staging` subdomains by pushing to `staging`.
 
-> Optional future enhancement: allow the `?domain=` override on **preview** deploys (gate on `VERCEL_ENV !== 'production'`) so any preview URL can simulate all three sites. Small change to `proxy.ts`. Until then, `staging` is the real multi-site test environment.
+> Implemented in `proxy.ts`: the `?domain=` override is gated on `VERCEL_ENV !== 'production'`, so it's available on dev + previews but never honoured on the live site.
 
 ## Workflows
 

@@ -45,8 +45,15 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(callbackUrl)
   }
 
-  // Local dev: use ?domain=dashboard|agent query param to simulate subdomains
-  const devDomain = url.searchParams.get('domain')
+  // Simulate the dashboard/agent subdomains via a ?domain=dashboard|agent query
+  // param — on local dev AND preview deploys — so a single preview URL can
+  // exercise all three sites (dashboard/agent otherwise need their own
+  // subdomains). NEVER honour it on production, where the real hostname is the
+  // only source of truth (otherwise anyone could force dashboard/agent routing
+  // on the public marketing site via a query param).
+  const devDomain = process.env.VERCEL_ENV !== 'production'
+    ? url.searchParams.get('domain')
+    : null
 
   const isDashboard =
     hostname.startsWith('dashboard.') ||
