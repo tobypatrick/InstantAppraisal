@@ -177,7 +177,10 @@ Deno.serve(async (req) => {
   const text = await renderAsync(React.createElement(EmailTemplate, templateProps), { plainText: true })
 
   const subject = EMAIL_SUBJECTS[emailType] || 'InstantAppraisal notification'
-  const fromAddress = `InstantAppraisal <noreply@${FROM_DOMAIN}>`
+  // Friendly, reply-able sender (not no-reply) — replies route to a monitored
+  // inbox. Improves trust/engagement signals with spam filters.
+  const fromAddress = `InstantAppraisal <hello@${FROM_DOMAIN}>`
+  const replyToAddress = 'team@instantappraisal.co'
 
   const resendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -187,6 +190,7 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       from: fromAddress,
+      reply_to: replyToAddress,
       to: [recipientEmail],
       subject,
       html,

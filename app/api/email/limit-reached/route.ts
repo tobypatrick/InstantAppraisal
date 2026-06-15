@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
     const fromDomain = process.env.EMAIL_FROM_DOMAIN || 'team.instantappraisal.co'
     const resend = new Resend(apiKey)
     await resend.emails.send({
-      from: `InstantAppraisal <noreply@${fromDomain}>`,
+      from: `InstantAppraisal <hello@${fromDomain}>`,
+      replyTo: 'team@instantappraisal.co',
       to: [agentEmail],
       subject: "You've reached your monthly report limit",
       html,

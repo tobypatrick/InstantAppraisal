@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     const fromDomain = process.env.EMAIL_FROM_DOMAIN || 'team.instantappraisal.co'
     const resend = new Resend(apiKey)
     const { error: sendError } = await resend.emails.send({
-      from: `${agentName} via InstantAppraisal <noreply@${fromDomain}>`,
+      from: `${agentName} via InstantAppraisal <hello@${fromDomain}>`,
       to: [lead.contact_email],
       replyTo: contactEmail || undefined,
       subject: `Your Instant Property Appraisal — ${lead.address}`,
