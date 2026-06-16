@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { QrCode, Link as LinkIcon, Copy, Check, Download, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -47,8 +47,32 @@ export function MarketingKit({ agentSlug }: MarketingKitProps) {
   const [medium, setMedium] = useState('social')
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
+  const [loaded, setLoaded] = useState(false)
 
   const baseUrl = getAgentPageUrl(agentSlug)
+  const storageKey = `marketing-campaigns-${agentSlug}`
+
+  // Persist campaigns per-agent in localStorage so they survive refresh/navigation.
+  // Load once on mount; only start saving after load so the initial empty state
+  // doesn't overwrite what's stored.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey)
+      if (raw) setCampaigns(JSON.parse(raw))
+    } catch {
+      // ignore malformed/unavailable storage
+    }
+    setLoaded(true)
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!loaded) return
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(campaigns))
+    } catch {
+      // ignore quota/unavailable storage
+    }
+  }, [campaigns, loaded, storageKey])
 
   const generateUtmUrl = (name: string, src: string, med: string) => {
     const params = new URLSearchParams({

@@ -29,18 +29,21 @@ export async function GET(request: NextRequest) {
     if (!error && data.session) {
       // Send brand-new users straight into checkout to start their trial. The
       // explicit ?next=checkout flag is the happy path, but Supabase can strip
-      // that query param when it re-validates the email redirect — so also treat
-      // anyone with NO billing record as new and route them to checkout. Only
-      // users who already have a billing row (existing/lapsed) fall through to
-      // the dashboard, where the gate shows the "welcome back" page if inactive.
+      // that query param when it re-validates the email redirect — so also detect
+      // new users by billing state. NOTE: the handle_new_user trigger creates a
+      // billing row for EVERY signup, so "no billing row" can't tell new from
+      // returning. Instead, a user who has never subscribed has no
+      // stripe_customer_id — route those to checkout. Returning/lapsed users
+      // (who DO have a stripe_customer_id) fall through to the dashboard, where
+      // the gate shows the "resubscribe" page if their plan is inactive.
       let goToCheckout = next === 'checkout'
       if (!goToCheckout) {
         const { data: billing } = await supabase
           .from('billing')
-          .select('user_id')
+          .select('stripe_customer_id')
           .eq('user_id', data.session.user.id)
           .maybeSingle()
-        goToCheckout = !billing
+        goToCheckout = !billing?.stripe_customer_id
       }
 
       if (goToCheckout) {
