@@ -75,10 +75,11 @@ export async function POST(request: NextRequest) {
 
     const marketingUrl = getMarketingUrl()
 
-    // /checkout/success polls Supabase until the webhook confirms the billing record,
-    // then redirects to the dashboard — avoids the race condition where the user
-    // lands on the dashboard before the webhook has fired.
-    const successUrl = `${marketingUrl}/checkout/success`
+    // /checkout/success uses the session_id to provision billing synchronously
+    // (via /api/stripe/verify-session) so the dashboard activates immediately,
+    // without waiting on — or depending on — the async webhook. Stripe substitutes
+    // {CHECKOUT_SESSION_ID} into the URL.
+    const successUrl = `${marketingUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

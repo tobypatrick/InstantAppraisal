@@ -63,7 +63,33 @@ export default function CheckoutSuccessPage() {
       setTimeout(poll, POLL_INTERVAL_MS)
     }
 
-    poll()
+    const run = async () => {
+      // Provision billing synchronously from the Stripe checkout session so the
+      // dashboard activates immediately — don't depend on the async webhook
+      // (which can be delayed, or blocked on protected staging). Polling stays
+      // as a fallback in case this call fails.
+      const sessionId = new URLSearchParams(window.location.search).get('session_id')
+      if (sessionId) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            await fetch('/api/stripe/verify-session', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({ session_id: sessionId }),
+            })
+          }
+        } catch {
+          // ignore — polling below is the fallback
+        }
+      }
+      poll()
+    }
+
+    run()
   }, [router])
 
   // Animated dots
