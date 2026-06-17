@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight, Eye, EyeOff, CheckCircle2, RotateCw } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,32 +21,7 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [verificationPending, setVerificationPending] = useState(false)
-  const [pendingEmail, setPendingEmail] = useState('')
-  const [resendCooldown, setResendCooldown] = useState(0)
   const supabase = createClient()
-
-  const emailRedirectUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback?next=checkout`
-    : '/auth/callback?next=checkout'
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return
-    const interval = setInterval(() => setResendCooldown((p) => Math.max(0, p - 1)), 1000)
-    return () => clearInterval(interval)
-  }, [resendCooldown])
-
-  const handleResend = useCallback(async () => {
-    if (resendCooldown > 0 || !pendingEmail) return
-    try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email: pendingEmail, options: { emailRedirectTo: emailRedirectUrl } })
-      if (error) throw error
-      setResendCooldown(60)
-      toast.success('Verification email sent', { description: `Resent to ${pendingEmail}.` })
-    } catch (err: any) {
-      toast.error('Could not resend', { description: err.message })
-    }
-  }, [pendingEmail, resendCooldown, supabase, emailRedirectUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,10 +32,12 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
     setIsLoading(true)
 
     try {
+      // Email confirmation is disabled, so signUp returns a session immediately —
+      // no "check your email" step. Send the new agent straight to checkout.
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: emailRedirectUrl, data: { full_name: fullName } },
+        options: { data: { full_name: fullName } },
       })
       if (error) throw error
 
@@ -78,49 +55,26 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
             body: JSON.stringify({ tier: 'pro', interval: 'month' }),
           })
           const checkoutData = await res.json()
-          if (res.ok && checkoutData?.url) { window.location.href = checkoutData.url; return }
+          if (res.ok && checkoutData?.url) {
+            window.location.href = checkoutData.url
+            return
+          }
         } catch {
-          window.location.href = getDashboardUrl()
-          return
+          // checkout failed to start — fall through to the dashboard
         }
+        window.location.href = getDashboardUrl()
+        return
       }
 
-      setPendingEmail(email)
-      setVerificationPending(true)
-    } catch (error: any) {
-      toast.error('Sign up failed', { description: error.message || 'Something went wrong. Please try again.' })
+      // No session and no error → Supabase obfuscates that the email is already
+      // registered (to prevent enumeration). Nudge them to sign in.
+      toast.error('Account already exists', { description: 'This email is already registered — please sign in instead.' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+      toast.error('Sign up failed', { description: message })
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (verificationPending) {
-    return (
-      <div className="text-center space-y-6 py-4">
-        <div className="mx-auto w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
-          <CheckCircle2 className="h-7 w-7 text-accent" strokeWidth={1.5} />
-        </div>
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground">Check your email</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            We've sent a verification link to <span className="font-medium text-foreground">{pendingEmail}</span>.
-          </p>
-        </div>
-        <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">Didn't receive it? Check your spam folder or resend below.</p>
-          <Button variant="outline" className="w-full h-10" disabled={resendCooldown > 0} onClick={handleResend}>
-            <RotateCw className="h-4 w-4 mr-2" strokeWidth={1.5} />
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend verification email'}
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Wrong email?{' '}
-          <button type="button" onClick={() => { setVerificationPending(false); setPendingEmail('') }} className="text-accent hover:underline font-medium">
-            Try again
-          </button>
-        </p>
-      </div>
-    )
   }
 
   return (

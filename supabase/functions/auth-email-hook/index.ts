@@ -1,6 +1,5 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
 import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
 import { RecoveryEmail } from '../_shared/email-templates/recovery.tsx'
@@ -17,8 +16,9 @@ const SITE_NAME = 'InstantAppraisal'
 const SITE_URL = Deno.env.get('SITE_URL') || 'https://instantappraisal.co'
 const FROM_DOMAIN = Deno.env.get('EMAIL_FROM_DOMAIN') || 'team.instantappraisal.co'
 
+// Note: 'signup' (email confirmation) is intentionally omitted — email
+// confirmation is disabled, so signup confirmation emails are never sent.
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email — InstantAppraisal',
   invite: "You've been invited to InstantAppraisal",
   magiclink: 'Your login link — InstantAppraisal',
   recovery: 'Reset your password — InstantAppraisal',
@@ -27,7 +27,6 @@ const EMAIL_SUBJECTS: Record<string, string> = {
 }
 
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
-  signup: SignupEmail,
   invite: InviteEmail,
   magiclink: MagicLinkEmail,
   recovery: RecoveryEmail,
