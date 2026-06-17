@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { MarketingTabs } from '@/components/dashboard/MarketingTabs'
+import { MarketingKit } from '@/components/dashboard/MarketingKit'
+import { MarketingAnalytics } from '@/components/dashboard/MarketingAnalytics'
 
 export default async function MarketingPage() {
   const supabase = await createClient()
@@ -14,13 +15,24 @@ export default async function MarketingPage() {
     .maybeSingle()
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-xl font-semibold mb-1 tracking-tight text-slate-900">Marketing</h1>
-        <p className="text-sm text-slate-500">Campaign links, QR codes, and lead analytics.</p>
+        <p className="text-sm text-slate-500">Track your lead performance and build trackable campaign links.</p>
       </div>
+
       {profile?.slug ? (
-        <MarketingTabs agentSlug={profile.slug} />
+        <>
+          <section className="space-y-4">
+            <h2 className="text-sm font-semibold text-slate-900">Lead Analytics</h2>
+            <MarketingAnalytics />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-sm font-semibold text-slate-900">Campaign Links</h2>
+            <MarketingKit agentSlug={profile.slug} />
+          </section>
+        </>
       ) : (
         <div className="text-center py-12 text-slate-500">
           <p>Complete your profile to access marketing tools.</p>
