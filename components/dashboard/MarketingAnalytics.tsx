@@ -38,7 +38,6 @@ export function MarketingAnalytics() {
     let query = supabase
       .from('leads')
       .select('status, utm_source, utm_medium, utm_campaign, created_at')
-      .order('created_at', { ascending: true })
     if (range.days) {
       const start = new Date(Date.now() - range.days * 24 * 60 * 60 * 1000).toISOString()
       query = query.gte('created_at', start)
