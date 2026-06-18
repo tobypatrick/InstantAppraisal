@@ -70,8 +70,12 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
       // registered (to prevent enumeration). Nudge them to sign in.
       toast.error('Account already exists', { description: 'This email is already registered — please sign in instead.' })
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Something went wrong. Please try again.'
-      toast.error('Sign up failed', { description: message })
+      const message = error instanceof Error ? error.message : ''
+      if (/already registered|already exists/i.test(message)) {
+        toast.error('Account already exists', { description: 'This email is already registered — please sign in instead.' })
+      } else {
+        toast.error('Sign up failed', { description: message || 'Something went wrong. Please try again.' })
+      }
     } finally {
       setIsLoading(false)
     }
