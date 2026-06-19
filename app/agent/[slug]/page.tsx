@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/server'
+import { getAgentPageUrl } from '@/lib/subdomain'
 import { AgentLandingClient } from './agent-landing-client'
 
 interface PageProps {
@@ -53,10 +54,41 @@ export async function generateMetadata({ params }: PageProps) {
   const { data } = await supabase.rpc('get_public_profile', { profile_slug: slug })
   const profile = data?.[0]
 
+  // Brand the link preview with the agent's identity (agency first, then name)
+  // so when an agent SMSes their URL it shows as theirs — not the generic site.
+  const brand = profile?.agency_name || profile?.full_name || null
+  const title = brand ? `${brand} — Free Property Appraisal` : 'Free Instant Property Appraisal'
+  const description = `Get a free, instant property appraisal${brand ? ` from ${brand}` : ''} — no obligation, powered by PropTrack data.`
+
+  // Resolve a branded preview image: agency logo → agent headshot → site default.
+  const resolveAsset = (path: string | null | undefined): string | null => {
+    if (!path) return null
+    if (path.startsWith('http')) return path
+    const { data: { publicUrl } } = supabase.storage.from('agent-assets').getPublicUrl(path)
+    return publicUrl
+  }
+  const ogImage =
+    resolveAsset(profile?.agency_logo_url) || resolveAsset(profile?.profile_picture_url) || '/og-image.png'
+
+  const url = getAgentPageUrl(slug)
+
   return {
-    title: profile?.agency_name
-      ? `Free Property Appraisal | ${profile.agency_name}`
-      : 'Free Instant Property Appraisal',
-    description: 'Get a free, no-obligation property report in 30 seconds.',
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'website',
+      url,
+      siteName: brand || 'InstantAppraisal',
+      title,
+      description,
+      images: [{ url: ogImage, alt: brand || 'Free Property Appraisal' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
   }
 }
