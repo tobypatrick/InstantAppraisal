@@ -282,13 +282,13 @@ export function AddressSearch({
         
         <Button
           type="submit"
-          className="w-full h-12 text-white font-medium hover:opacity-90 transition-opacity"
+          className={`w-full h-12 ${getContrastTextColor(accentColor)} font-medium hover:opacity-90 transition-opacity`}
           style={{ backgroundColor: accentColor }}
           disabled={!address.trim() || isLoading || isRateLimited}
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full landing-spinner" />
+              <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full landing-spinner" />
               Connecting...
             </span>
           ) : (
