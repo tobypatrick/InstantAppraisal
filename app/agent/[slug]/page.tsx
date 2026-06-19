@@ -54,11 +54,16 @@ export async function generateMetadata({ params }: PageProps) {
   const { data } = await supabase.rpc('get_public_profile', { profile_slug: slug })
   const profile = data?.[0]
 
-  // Brand the link preview with the agent's identity (agency first, then name)
-  // so when an agent SMSes their URL it shows as theirs — not the generic site.
-  const brand = profile?.agency_name || profile?.full_name || null
-  const title = brand ? `${brand} — Free Property Appraisal` : 'Free Instant Property Appraisal'
-  const description = `Get a free, instant property appraisal${brand ? ` from ${brand}` : ''} — no obligation, powered by PropTrack data.`
+  // Brand the link preview with the agent's identity (agent · agency) so when
+  // an agent SMSes their URL it shows as theirs — not the generic site.
+  const agentName = profile?.full_name || null
+  const agencyName = profile?.agency_name || null
+  const brand = [agentName, agencyName].filter(Boolean).join(' · ')
+  const title = brand
+    ? `Instant, Free Property Report | ${brand}`
+    : 'Instant, Free Property Report'
+  const fromName = agentName || agencyName
+  const description = `Get a free, instant property value update${fromName ? ` from ${fromName}` : ''} — no obligation, powered by PropTrack data.`
 
   // Resolve a branded preview image: agency logo → agent headshot → site default.
   const resolveAsset = (path: string | null | undefined): string | null => {
@@ -79,10 +84,10 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       type: 'website',
       url,
-      siteName: brand || 'InstantAppraisal',
+      siteName: agencyName || agentName || 'InstantAppraisal',
       title,
       description,
-      images: [{ url: ogImage, alt: brand || 'Free Property Appraisal' }],
+      images: [{ url: ogImage, alt: brand || 'Instant, Free Property Report' }],
     },
     twitter: {
       card: 'summary_large_image',
