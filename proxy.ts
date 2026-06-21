@@ -63,6 +63,10 @@ export async function proxy(request: NextRequest) {
     hostname.startsWith('my.') ||
     hostname.startsWith('staging-my.') ||
     devDomain === 'agent'
+  const isAdmin =
+    hostname.startsWith('admin.') ||
+    hostname.startsWith('staging-admin.') ||
+    devDomain === 'admin'
 
   if (isDashboard) {
     // API routes manage their own auth (Authorization header / RLS) and must
@@ -104,6 +108,35 @@ export async function proxy(request: NextRequest) {
     // Don't rewrite API routes or Next.js internals
     if (!url.pathname.startsWith('/agent') && !url.pathname.startsWith('/api/')) {
       url.pathname = `/agent${url.pathname}`
+      supabaseResponse = NextResponse.rewrite(url)
+    }
+  } else if (isAdmin) {
+    // API routes manage their own auth — never redirect them to the login page.
+    if (url.pathname.startsWith('/api/')) {
+      return supabaseResponse
+    }
+
+    // Clean URLs: /admin/* → /* (e.g. /admin/overview → /overview)
+    if (url.pathname.startsWith('/admin/') || url.pathname === '/admin') {
+      const cleanPath = url.pathname.replace(/^\/admin/, '') || '/'
+      const redirectUrl = url.clone()
+      redirectUrl.pathname = cleanPath
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // The login page is the only public admin route — everything else needs a
+    // session. The admin role itself is enforced in the protected layout.
+    const isLoginPage = url.pathname === '/login'
+    if (!user && !isLoginPage) {
+      const loginUrl = url.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.search = devDomain ? '?domain=admin' : ''
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Rewrite clean path → internal /admin/* route
+    if (!url.pathname.startsWith('/admin')) {
+      url.pathname = url.pathname === '/' ? '/admin/overview' : `/admin${url.pathname}`
       supabaseResponse = NextResponse.rewrite(url)
     }
   }
