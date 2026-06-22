@@ -3,6 +3,9 @@ import { AgentsTable, type AdminAgent } from '@/components/admin/agents-table'
 
 export const metadata = { title: 'Overview | Admin' }
 
+// Always fetch live data on each request — never a build-time static snapshot.
+export const dynamic = 'force-dynamic'
+
 // Monthly recurring revenue per active tier. Mirrors the values used elsewhere.
 const TIER_MRR: Record<string, number> = { pro: 99, elite: 199 }
 
