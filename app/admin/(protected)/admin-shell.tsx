@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 
 export function AdminShell({ email, children }: { email: string; children: React.ReactNode }) {
   const signOut = async () => {
@@ -14,7 +15,7 @@ export function AdminShell({ email, children }: { email: string; children: React
       <header className="border-b border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-900">InstantAppraisal</span>
+            <LeadAgentLogo height={26} />
             <span className="text-xs uppercase tracking-wide text-emerald-700 bg-emerald-50 rounded px-1.5 py-0.5">Admin</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-500">

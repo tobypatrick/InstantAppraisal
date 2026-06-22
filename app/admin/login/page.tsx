@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 
 // Standalone admin login — deliberately separate from the agent dashboard login.
 // Lives at admin.instantappraisal.co/login.
@@ -46,9 +47,9 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <span className="font-semibold text-slate-900 text-lg">InstantAppraisal</span>
-          <span className="ml-2 text-xs uppercase tracking-wide text-emerald-700 bg-emerald-50 rounded px-1.5 py-0.5">Admin</span>
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <LeadAgentLogo height={30} />
+          <span className="text-xs uppercase tracking-wide text-emerald-700 bg-emerald-50 rounded px-1.5 py-0.5">Admin</span>
         </div>
         <form onSubmit={onSubmit} className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
           <div className="space-y-1">
