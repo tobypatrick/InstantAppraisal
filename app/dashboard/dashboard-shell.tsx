@@ -19,12 +19,11 @@ interface Profile {
 
 interface DashboardShellProps {
   profile: Profile | null
-  isAdmin: boolean
   firstLogin: boolean
   children: React.ReactNode
 }
 
-export function DashboardShell({ profile, isAdmin, firstLogin, children }: DashboardShellProps) {
+export function DashboardShell({ profile, firstLogin, children }: DashboardShellProps) {
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -37,7 +36,7 @@ export function DashboardShell({ profile, isAdmin, firstLogin, children }: Dashb
         <div className="h-dvh flex flex-col w-full bg-background overflow-hidden">
           <DashboardHeader profile={profile} onSignOut={handleSignOut} />
           <div className="flex flex-1 overflow-hidden">
-            <DashboardSidebar profile={profile} onSignOut={handleSignOut} isAdmin={isAdmin} />
+            <DashboardSidebar profile={profile} onSignOut={handleSignOut} />
             <main className="flex-1 p-4 md:p-6 overflow-y-auto">
               <ReportLimitBanner />
               {children}

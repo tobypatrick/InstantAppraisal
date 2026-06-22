@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, QrCode, Settings, HelpCircle, LogOut, Shield, CreditCard, ShieldCheck, Compass } from 'lucide-react'
+import { LayoutDashboard, Users, QrCode, Settings, HelpCircle, LogOut, CreditCard, Compass } from 'lucide-react'
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarMenu, SidebarMenuItem, SidebarHeader,
@@ -35,7 +35,6 @@ interface Profile {
 interface DashboardSidebarProps {
   profile: Profile | null
   onSignOut: () => void
-  isAdmin?: boolean
 }
 
 const navItems = [
@@ -46,7 +45,7 @@ const navItems = [
   { title: 'Settings', url: '/settings', icon: Settings },
 ]
 
-export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSidebarProps) {
+export function DashboardSidebar({ profile, onSignOut }: DashboardSidebarProps) {
   const { state, isMobile, setOpenMobile } = useSidebar()
   const collapsed = state === 'collapsed'
   const pathname = usePathname()
@@ -101,26 +100,6 @@ export function DashboardSidebar({ profile, onSignOut, isAdmin }: DashboardSideb
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
-          <SidebarGroup className="mt-4">
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <Link href="/dashboard/admin" onClick={closeMobile} className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/dashboard/admin' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    <ShieldCheck className="h-4 w-4 shrink-0" strokeWidth={1.25} />
-                    {!collapsed && <span className="text-[13px] font-medium">Admin</span>}
-                  </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <Link href="/admin/audit-log" onClick={closeMobile} className={`relative flex items-center gap-3 px-3 py-2.5 rounded transition-colors ${pathname === '/admin/audit-log' ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                    <Shield className="h-4 w-4 shrink-0" strokeWidth={1.25} />
-                    {!collapsed && <span className="text-[13px] font-medium">Audit Log</span>}
-                  </Link>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3">

@@ -54,7 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   } : null
 
   return (
-    <DashboardShell profile={profile} isAdmin={isAdmin} firstLogin={!!rawProfile?.first_login}>
+    <DashboardShell profile={profile} firstLogin={!!rawProfile?.first_login}>
       {children}
     </DashboardShell>
   )
