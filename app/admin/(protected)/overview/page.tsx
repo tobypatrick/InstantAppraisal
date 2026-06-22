@@ -6,31 +6,33 @@ export const metadata = { title: 'Overview | Admin' }
 // Always fetch live data on each request — never a build-time static snapshot.
 export const dynamic = 'force-dynamic'
 
-// Monthly recurring revenue per active tier. Mirrors the values used elsewhere.
+// Monthly recurring revenue per active tier.
 const TIER_MRR: Record<string, number> = { pro: 99, elite: 199 }
 
 export default async function AdminOverviewPage() {
-  // Service-role client: admin needs to read every agent's data, bypassing RLS.
+  // Service-role client: admin needs to read every account's data, bypassing RLS.
   const supabase = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   )
 
-  const [profilesRes, billingRes, leadsRes, usersRes] = await Promise.all([
-    supabase.from('profiles').select('id, full_name, agency_name, slug, created_at').order('created_at', { ascending: false }),
+  const [usersRes, profilesRes, billingRes, leadsRes, rolesRes] = await Promise.all([
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
+    supabase.from('profiles').select('id, full_name, agency_name, slug'),
     supabase.from('billing').select('user_id, subscription_status, subscription_tier'),
     supabase.from('leads').select('agent_id, status'),
-    supabase.auth.admin.listUsers({ perPage: 1000 }),
+    supabase.from('user_roles').select('user_id').eq('role', 'admin'),
   ])
 
+  const users = usersRes.data?.users || []
   const profiles = profilesRes.data || []
   const billing = billingRes.data || []
   const leads = leadsRes.data || []
-  const users = usersRes.data?.users || []
+  const adminIds = new Set((rolesRes.data || []).map((r) => r.user_id))
 
+  const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]))
   const billingMap = Object.fromEntries(billing.map((b) => [b.user_id, b]))
-  const emailMap = Object.fromEntries(users.map((u) => [u.id, u.email ?? '']))
 
   // Per-agent + platform-wide lead split (complete = finished the contact form,
   // incomplete = searched an address but did not finish).
@@ -47,14 +49,21 @@ export default async function AdminOverviewPage() {
     else bucket.incomplete++
   }
 
-  const activeSubscriptions = billing.filter((b) => b.subscription_status === 'active').length
-  const trials = billing.filter((b) => b.subscription_status === 'trialing').length
-  const mrr = billing
-    .filter((b) => b.subscription_status === 'active')
-    .reduce((sum, b) => sum + (TIER_MRR[b.subscription_tier || ''] || 0), 0)
+  // Agents = every signed-up account that is NOT an admin. This includes
+  // accounts that have not finished onboarding (no profile row yet), newest first.
+  const agentUsers = users
+    .filter((u) => !adminIds.has(u.id))
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  const activeSubscriptions = agentUsers.filter((u) => billingMap[u.id]?.subscription_status === 'active').length
+  const trials = agentUsers.filter((u) => billingMap[u.id]?.subscription_status === 'trialing').length
+  const mrr = agentUsers.reduce((sum, u) => {
+    const b = billingMap[u.id]
+    return b?.subscription_status === 'active' ? sum + (TIER_MRR[b.subscription_tier || ''] || 0) : sum
+  }, 0)
 
   const metrics = [
-    { label: 'Agents', value: profiles.length.toLocaleString() },
+    { label: 'Agents', value: agentUsers.length.toLocaleString() },
     { label: 'Active Subscriptions', value: activeSubscriptions.toLocaleString() },
     { label: 'Trials', value: trials.toLocaleString() },
     { label: 'MRR', value: `$${mrr.toLocaleString()}` },
@@ -62,15 +71,16 @@ export default async function AdminOverviewPage() {
     { label: 'Leads (Incomplete)', value: leadsIncomplete.toLocaleString() },
   ]
 
-  const agents: AdminAgent[] = profiles.map((p) => {
-    const b = billingMap[p.id]
-    const l = leadsPerAgent[p.id] || { complete: 0, incomplete: 0 }
+  const agents: AdminAgent[] = agentUsers.map((u) => {
+    const p = profileMap[u.id]
+    const b = billingMap[u.id]
+    const l = leadsPerAgent[u.id] || { complete: 0, incomplete: 0 }
     return {
-      id: p.id,
-      name: p.full_name || '',
-      agency: p.agency_name || '',
-      email: emailMap[p.id] || '',
-      slug: p.slug || '',
+      id: u.id,
+      name: p?.full_name || '',
+      agency: p?.agency_name || '',
+      email: u.email || '',
+      slug: p?.slug || '',
       status: b?.subscription_status || 'none',
       tier: b?.subscription_tier || '',
       leadsComplete: l.complete,
