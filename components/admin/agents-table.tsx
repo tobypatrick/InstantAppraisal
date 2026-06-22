@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ChevronUp, ChevronDown } from 'lucide-react'
 
 export interface AdminAgent {
   id: string
@@ -22,17 +23,50 @@ const STATUS_STYLES: Record<string, string> = {
   none: 'bg-slate-100 text-slate-400',
 }
 
+type SortKey = 'name' | 'email' | 'tier' | 'status' | 'leads'
+
+const COLUMNS: { key: SortKey; label: string; align?: 'right'; value: (a: AdminAgent) => string | number }[] = [
+  { key: 'name', label: 'Agent', value: (a) => a.name || a.agency || a.slug },
+  { key: 'email', label: 'Email', value: (a) => a.email },
+  { key: 'tier', label: 'Plan', value: (a) => a.tier },
+  { key: 'status', label: 'Status', value: (a) => a.status },
+  { key: 'leads', label: 'Leads (C / I)', align: 'right', value: (a) => a.leadsComplete + a.leadsIncomplete },
+]
+
 export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
   const [q, setQ] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('leads')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
   const query = q.trim().toLowerCase()
   const filtered = query
     ? agents.filter((a) => [a.name, a.agency, a.email, a.slug].some((f) => f.toLowerCase().includes(query)))
     : agents
 
+  const col = COLUMNS.find((c) => c.key === sortKey)!
+  const sorted = [...filtered].sort((a, b) => {
+    const va = col.value(a)
+    const vb = col.value(b)
+    const cmp =
+      typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb), undefined, { sensitivity: 'base' })
+    return sortDir === 'asc' ? cmp : -cmp
+  })
+
+  const toggleSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir(key === 'leads' ? 'desc' : 'asc')
+    }
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-slate-900">Agents ({filtered.length})</h2>
+        <h2 className="text-sm font-semibold text-slate-900">Agents ({sorted.length})</h2>
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -45,15 +79,22 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-500">
             <tr>
-              <th className="text-left font-medium px-3 py-2">Agent</th>
-              <th className="text-left font-medium px-3 py-2">Email</th>
-              <th className="text-left font-medium px-3 py-2">Plan</th>
-              <th className="text-left font-medium px-3 py-2">Status</th>
-              <th className="text-right font-medium px-3 py-2">Leads (C / I)</th>
+              {COLUMNS.map((c) => (
+                <th key={c.key} className={`font-medium px-3 py-2 ${c.align === 'right' ? 'text-right' : 'text-left'}`}>
+                  <button
+                    onClick={() => toggleSort(c.key)}
+                    className={`inline-flex items-center gap-1 hover:text-slate-900 ${c.align === 'right' ? 'flex-row-reverse' : ''}`}
+                  >
+                    {c.label}
+                    {sortKey === c.key &&
+                      (sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />)}
+                  </button>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {filtered.map((a) => (
+            {sorted.map((a) => (
               <tr key={a.id} className="border-t border-slate-100">
                 <td className="px-3 py-2">
                   <div className="font-medium text-slate-900">{a.name || '(no name)'}</div>
@@ -71,7 +112,7 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-3 py-8 text-center text-slate-400">No agents found.</td>
               </tr>
