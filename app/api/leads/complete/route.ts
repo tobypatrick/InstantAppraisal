@@ -66,7 +66,16 @@ export async function POST(request: NextRequest) {
       .eq('user_id', lead.agent_id)
       .maybeSingle()
 
-    const isActive = ['active', 'trialing'].includes(billing?.subscription_status ?? '')
+    // The public demo account (slug 'demo') is exempt from the subscription and
+    // report-cap checks, so the demo page always works no matter how much it is used.
+    const { data: agentProfile } = await supabase
+      .from('profiles')
+      .select('slug')
+      .eq('id', lead.agent_id)
+      .maybeSingle()
+    const isDemo = agentProfile?.slug === 'demo'
+
+    const isActive = isDemo || ['active', 'trialing'].includes(billing?.subscription_status ?? '')
     if (!isActive) {
       return NextResponse.json(
         { error: 'subscription_inactive', message: 'Agent subscription is not active' },
@@ -77,7 +86,7 @@ export async function POST(request: NextRequest) {
     const reportLimit = TIER_LIMITS[billing?.subscription_tier ?? ''] ?? 0
     const { data: usageCount } = await supabase.rpc('get_monthly_report_count', { p_agent_id: lead.agent_id })
     const currentUsage = usageCount ?? 0
-    const limitBlocked = currentUsage >= reportLimit
+    const limitBlocked = !isDemo && currentUsage >= reportLimit
 
     // Always complete the lead (capture contact details) — even when the agent
     // is over their limit — so they still receive the lead and can follow up.
