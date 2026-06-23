@@ -80,6 +80,9 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title,
     description,
+    // Agent landing pages are shareable but should not be indexed by search
+    // engines (reinforced by the X-Robots-Tag header in proxy.ts).
+    robots: { index: false, follow: false },
     alternates: { canonical: url },
     openGraph: {
       type: 'website',

@@ -68,6 +68,20 @@ export async function proxy(request: NextRequest) {
     hostname.startsWith('staging-admin.') ||
     devDomain === 'admin'
 
+  // Per-host robots.txt. Dashboard/admin are auth-gated and blocked entirely.
+  // The agent host ALLOWS crawling on purpose — its pages carry an
+  // X-Robots-Tag: noindex header (set below) so Google crawls them, sees the
+  // noindex, and keeps them out of search (a plain disallow can leave bare URLs
+  // listed). The marketing host falls through to app/robots.ts.
+  if (url.pathname === '/robots.txt') {
+    if (isDashboard || isAdmin) {
+      return new NextResponse('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain' } })
+    }
+    if (isAgent) {
+      return new NextResponse('User-agent: *\nAllow: /\n', { headers: { 'content-type': 'text/plain' } })
+    }
+  }
+
   if (isDashboard) {
     // API routes manage their own auth (Authorization header / RLS) and must
     // never be redirected to the login page — the redirect returns HTML, which
@@ -110,6 +124,8 @@ export async function proxy(request: NextRequest) {
       url.pathname = `/agent${url.pathname}`
       supabaseResponse = NextResponse.rewrite(url)
     }
+    // Keep agent landing pages out of search engines.
+    supabaseResponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
   } else if (isAdmin) {
     // API routes manage their own auth — never redirect them to the login page.
     if (url.pathname.startsWith('/api/')) {
