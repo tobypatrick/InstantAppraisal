@@ -10,7 +10,7 @@ export default async function MarketingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('slug')
+    .select('slug, accent_color')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -30,7 +30,7 @@ export default async function MarketingPage() {
 
           <section className="space-y-4">
             <h2 className="text-sm font-semibold text-slate-900">Campaign Links</h2>
-            <MarketingKit agentSlug={profile.slug} />
+            <MarketingKit agentSlug={profile.slug} accentColor={profile.accent_color || '#10b981'} />
           </section>
         </>
       ) : (

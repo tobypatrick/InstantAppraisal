@@ -48,6 +48,17 @@ export function getContrastTextColor(hexColor: string): string {
 }
 
 /**
+ * Foreground colour for a QR code on a white background. Uses the brand colour
+ * when it is dark enough to scan reliably; falls back to dark slate for very
+ * light colours that would be hard to read.
+ */
+export function getQrColor(hexColor: string): string {
+  const rgb = hexToRgb(hexColor);
+  if (!rgb) return "#0f172a";
+  return getLuminance(rgb.r, rgb.g, rgb.b) < 0.5 ? hexColor : "#0f172a";
+}
+
+/**
  * Validate hex color format
  */
 export function isValidHexColor(color: string): boolean {

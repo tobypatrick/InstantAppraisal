@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { getAgentPageUrl } from '@/lib/subdomain'
+import { getQrColor } from '@/lib/color-utils'
 
 interface MarketingKitProps {
   agentSlug: string
+  accentColor?: string
 }
 
 interface Campaign {
@@ -41,7 +43,7 @@ const MEDIUM_OPTIONS = [
   { value: 'referral', label: 'Referral' },
 ]
 
-export function MarketingKit({ agentSlug }: MarketingKitProps) {
+export function MarketingKit({ agentSlug, accentColor = '#10b981' }: MarketingKitProps) {
   const [campaignName, setCampaignName] = useState('')
   const [source, setSource] = useState('facebook')
   const [medium, setMedium] = useState('social')
@@ -51,6 +53,7 @@ export function MarketingKit({ agentSlug }: MarketingKitProps) {
 
   const baseUrl = getAgentPageUrl(agentSlug)
   const storageKey = `marketing-campaigns-${agentSlug}`
+  const qrColor = getQrColor(accentColor)
 
   // Persist campaigns per-agent in localStorage so they survive refresh/navigation.
   // Load once on mount; only start saving after load so the initial empty state
@@ -134,7 +137,7 @@ export function MarketingKit({ agentSlug }: MarketingKitProps) {
         <CardContent>
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="bg-white p-4 rounded-lg border">
-              <QRCodeSVG value={baseUrl} size={140} level="H" data-qr={baseUrl} fgColor="#0f172a" />
+              <QRCodeSVG value={baseUrl} size={140} level="H" data-qr={baseUrl} fgColor={qrColor} />
             </div>
             <div className="flex-1 space-y-3">
               <div className="bg-slate-50 rounded px-3 py-2 font-mono text-xs break-all text-slate-700">{baseUrl}</div>
@@ -201,7 +204,7 @@ export function MarketingKit({ agentSlug }: MarketingKitProps) {
               <CardContent className="py-4">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
                   <div className="bg-white p-2 rounded border shrink-0">
-                    <QRCodeSVG value={campaign.url} size={80} level="H" data-qr={campaign.url} fgColor="#0f172a" />
+                    <QRCodeSVG value={campaign.url} size={80} level="H" data-qr={campaign.url} fgColor={qrColor} />
                   </div>
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-center gap-2">
