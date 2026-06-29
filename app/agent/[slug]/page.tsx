@@ -20,12 +20,13 @@ export default async function AgentLandingPage({ params }: PageProps) {
 
   const raw = data[0]
   // Resolve storage path → full public URL if not already a full URL
-  let agencyLogoUrl = raw.agency_logo_url || null
-  if (agencyLogoUrl && !agencyLogoUrl.startsWith('http')) {
-    const { data: { publicUrl } } = supabase.storage.from('agent-assets').getPublicUrl(agencyLogoUrl)
-    agencyLogoUrl = publicUrl
+  const resolveAsset = (path: string | null) => {
+    if (!path || path.startsWith('http')) return path
+    return supabase.storage.from('agent-assets').getPublicUrl(path).data.publicUrl
   }
-  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', agency_logo_url: agencyLogoUrl }
+  const agencyLogoUrl = resolveAsset(raw.agency_logo_url || null)
+  const profilePictureUrl = resolveAsset(raw.profile_picture_url || null)
+  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', agency_logo_url: agencyLogoUrl, profile_picture_url: profilePictureUrl }
   const gtmId: string | null = profile.google_tag_manager_id || null
   const pixelId: string | null = profile.facebook_pixel_id || null
 

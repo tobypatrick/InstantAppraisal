@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Phone, ArrowRight, MapPin, Home, Eye } from "lucide-react";
+import { User, Mail, Phone, ArrowRight, MapPin, Home, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,19 +198,28 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentC
                   key={value}
                   type="button"
                   onClick={() => handleChange("interest_level", value)}
-                  className="p-3 rounded border transition-all bg-white"
+                  className="relative p-3 rounded-lg border-2 transition-all bg-white"
                   style={selected ? {
                     borderColor: accentColor,
-                    backgroundColor: `${accentColor}1a`,
+                    backgroundColor: `${accentColor}14`,
                     color: accentColor,
                   } : {
-                    borderColor: 'hsl(var(--border))',
+                    borderColor: '#e2e8f0',
+                    backgroundColor: '#ffffff',
                     color: 'hsl(var(--muted-foreground))',
                   }}
                   disabled={isLoading}
                 >
-                  <Icon className="h-4 w-4 mx-auto mb-1.5" strokeWidth={1.5} />
-                  <span className="text-xs font-medium">{value}</span>
+                  {selected && (
+                    <span
+                      className="absolute top-1.5 right-1.5 inline-flex items-center justify-center rounded-full"
+                      style={{ backgroundColor: accentColor, width: '18px', height: '18px' }}
+                    >
+                      <Check className="text-white" style={{ width: '12px', height: '12px' }} strokeWidth={3} />
+                    </span>
+                  )}
+                  <Icon className="h-5 w-5 mx-auto mb-1.5" strokeWidth={selected ? 2 : 1.5} />
+                  <span className={`text-xs ${selected ? 'font-semibold' : 'font-medium'}`}>{value}</span>
                 </button>
               )
             })}

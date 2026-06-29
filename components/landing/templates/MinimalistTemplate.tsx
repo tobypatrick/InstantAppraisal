@@ -58,6 +58,15 @@ export function MinimalistTemplate({
 
           {/* Hero Section */}
           <div className="landing-fade-in-down text-center mb-8 md:mb-10">
+            {profile.profile_picture_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.profile_picture_url}
+                alt={profile.full_name || 'Your agent'}
+                className="w-20 h-20 rounded-full object-cover mx-auto mb-5"
+                style={{ border: `3px solid ${accentColor}` }}
+              />
+            )}
             {/* Trust badge */}
             <div
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-5 ${mutedTextClass}`}
