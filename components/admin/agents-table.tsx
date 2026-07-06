@@ -11,6 +11,7 @@ export interface AdminAgent {
   slug: string
   status: string
   tier: string
+  isAgentGrowth: boolean
   leadsComplete: number
   leadsIncomplete: number
 }
@@ -34,14 +35,16 @@ const COLUMNS: { key: SortKey; label: string; align?: 'right'; value: (a: AdminA
 ]
 
 export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
+  const [rows, setRows] = useState(agents)
   const [q, setQ] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('leads')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [saving, setSaving] = useState<string | null>(null)
 
   const query = q.trim().toLowerCase()
   const filtered = query
-    ? agents.filter((a) => [a.name, a.agency, a.email, a.slug].some((f) => f.toLowerCase().includes(query)))
-    : agents
+    ? rows.filter((a) => [a.name, a.agency, a.email, a.slug].some((f) => f.toLowerCase().includes(query)))
+    : rows
 
   const col = COLUMNS.find((c) => c.key === sortKey)!
   const sorted = [...filtered].sort((a, b) => {
@@ -55,11 +58,28 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
   })
 
   const toggleSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
+    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else {
       setSortKey(key)
       setSortDir(key === 'leads' ? 'desc' : 'asc')
+    }
+  }
+
+  const toggleGrowth = async (id: string, value: boolean) => {
+    const prev = rows
+    setRows((rs) => rs.map((a) => (a.id === id ? { ...a, isAgentGrowth: value } : a)))
+    setSaving(id)
+    try {
+      const res = await fetch('/api/admin/agent-growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, value }),
+      })
+      if (!res.ok) throw new Error('save failed')
+    } catch {
+      setRows(prev) // revert on failure
+    } finally {
+      setSaving(null)
     }
   }
 
@@ -91,6 +111,7 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                   </button>
                 </th>
               ))}
+              <th className="text-center font-medium px-3 py-2">Agent Growth</th>
             </tr>
           </thead>
           <tbody>
@@ -103,18 +124,31 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                 <td className="px-3 py-2 text-slate-600">{a.email}</td>
                 <td className="px-3 py-2 text-slate-600 capitalize">{a.tier || '—'}</td>
                 <td className="px-3 py-2">
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[a.status] || STATUS_STYLES.none}`}>
-                    {a.status}
-                  </span>
+                  {a.isAgentGrowth ? (
+                    <span className="inline-block rounded-full px-2 py-0.5 text-xs bg-purple-50 text-purple-700">agent growth</span>
+                  ) : (
+                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[a.status] || STATUS_STYLES.none}`}>
+                      {a.status}
+                    </span>
+                  )}
                 </td>
                 <td className="px-3 py-2 text-right text-slate-600">
                   {a.leadsComplete} / {a.leadsIncomplete}
+                </td>
+                <td className="px-3 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={a.isAgentGrowth}
+                    disabled={saving === a.id}
+                    onChange={(e) => toggleGrowth(a.id, e.target.checked)}
+                    className="h-4 w-4 accent-emerald-600 cursor-pointer disabled:opacity-50"
+                  />
                 </td>
               </tr>
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-slate-400">No agents found.</td>
+                <td colSpan={6} className="px-3 py-8 text-center text-slate-400">No agents found.</td>
               </tr>
             )}
           </tbody>

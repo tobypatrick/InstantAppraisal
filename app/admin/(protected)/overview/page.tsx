@@ -35,7 +35,7 @@ export default async function AdminOverviewPage({
   const [usersRes, profilesRes, billingRes, leadsRes, rolesRes] = await Promise.all([
     supabase.auth.admin.listUsers({ perPage: 1000 }),
     supabase.from('profiles').select('id, full_name, agency_name, slug'),
-    supabase.from('billing').select('user_id, subscription_status, subscription_tier'),
+    supabase.from('billing').select('user_id, subscription_status, subscription_tier, is_agent_growth'),
     supabase.from('leads').select('agent_id, status, created_at'),
     supabase.from('user_roles').select('user_id').eq('role', 'admin'),
   ])
@@ -73,18 +73,31 @@ export default async function AdminOverviewPage({
     .filter((u) => !adminIds.has(u.id))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  const activeSubscriptions = agentUsers.filter((u) => billingMap[u.id]?.subscription_status === 'active').length
-  const trials = agentUsers.filter((u) => billingMap[u.id]?.subscription_status === 'trialing').length
+  // Agent Growth accounts are free and pulled out of the paid figures entirely.
+  const isAG = (id: string) => billingMap[id]?.is_agent_growth === true
+
+  const activeSubscriptions = agentUsers.filter((u) => !isAG(u.id) && billingMap[u.id]?.subscription_status === 'active').length
+  const trials = agentUsers.filter((u) => !isAG(u.id) && billingMap[u.id]?.subscription_status === 'trialing').length
+  const agentGrowth = agentUsers.filter((u) => isAG(u.id)).length
+
   const mrr = agentUsers.reduce((sum, u) => {
+    if (isAG(u.id)) return sum
     const b = billingMap[u.id]
     return b?.subscription_status === 'active' ? sum + (TIER_MRR[b.subscription_tier || ''] || 0) : sum
+  }, 0)
+  const trialValue = agentUsers.reduce((sum, u) => {
+    if (isAG(u.id)) return sum
+    const b = billingMap[u.id]
+    return b?.subscription_status === 'trialing' ? sum + (TIER_MRR[b.subscription_tier || ''] || 0) : sum
   }, 0)
 
   const metrics = [
     { label: 'Agents', value: agentUsers.length.toLocaleString() },
     { label: 'Active Subscriptions', value: activeSubscriptions.toLocaleString() },
     { label: 'Trials', value: trials.toLocaleString() },
+    { label: 'Agent Growth', value: agentGrowth.toLocaleString() },
     { label: 'MRR', value: `$${mrr.toLocaleString()}` },
+    { label: 'Trial Value', value: `$${trialValue.toLocaleString()}` },
     { label: `Leads Complete (${range.label})`, value: leadsComplete.toLocaleString() },
     { label: `Leads Incomplete (${range.label})`, value: leadsIncomplete.toLocaleString() },
   ]
@@ -101,6 +114,7 @@ export default async function AdminOverviewPage({
       slug: p?.slug || '',
       status: b?.subscription_status || 'none',
       tier: b?.subscription_tier || '',
+      isAgentGrowth: b?.is_agent_growth === true,
       leadsComplete: l.complete,
       leadsIncomplete: l.incomplete,
     }
@@ -128,7 +142,7 @@ export default async function AdminOverviewPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {metrics.map((m) => (
           <div key={m.label} className="bg-white border border-slate-200 rounded-lg p-4">
             <p className="text-xs text-slate-500">{m.label}</p>

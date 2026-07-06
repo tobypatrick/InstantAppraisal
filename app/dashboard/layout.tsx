@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       .maybeSingle(),
     supabase
       .from('billing')
-      .select('subscription_status')
+      .select('subscription_status, is_agent_growth')
       .eq('user_id', user.id)
       .maybeSingle(),
     supabase
@@ -38,7 +38,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // Block inactive subscriptions — admins always get access
   const subscriptionStatus = billingResult.data?.subscription_status ?? null
-  const isActive = isAdmin || ['active', 'trialing'].includes(subscriptionStatus ?? '')
+  const isActive = isAdmin || billingResult.data?.is_agent_growth === true || ['active', 'trialing'].includes(subscriptionStatus ?? '')
   if (!isActive) redirect('/subscription-expired')
 
   // Resolve storage paths → full public URLs
