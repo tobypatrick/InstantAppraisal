@@ -98,8 +98,8 @@ export default async function AdminOverviewPage({
     { label: 'Agent Growth', value: agentGrowth.toLocaleString() },
     { label: 'MRR', value: `$${mrr.toLocaleString()}` },
     { label: 'Trial Value', value: `$${trialValue.toLocaleString()}` },
-    { label: `Leads Complete (${range.label})`, value: leadsComplete.toLocaleString() },
-    { label: `Leads Incomplete (${range.label})`, value: leadsIncomplete.toLocaleString() },
+    { label: 'Leads Complete', value: leadsComplete.toLocaleString() },
+    { label: 'Leads Incomplete', value: leadsIncomplete.toLocaleString() },
   ]
 
   const agents: AdminAgent[] = agentUsers.map((u) => {
