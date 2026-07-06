@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 
 export interface AdminAgent {
@@ -26,15 +27,16 @@ const STATUS_STYLES: Record<string, string> = {
 
 type SortKey = 'name' | 'email' | 'tier' | 'status' | 'leads'
 
-const COLUMNS: { key: SortKey; label: string; align?: 'right'; value: (a: AdminAgent) => string | number }[] = [
-  { key: 'name', label: 'Agent', value: (a) => a.name || a.agency || a.slug },
-  { key: 'email', label: 'Email', value: (a) => a.email },
-  { key: 'tier', label: 'Plan', value: (a) => a.tier },
-  { key: 'status', label: 'Status', value: (a) => a.status },
-  { key: 'leads', label: 'Leads (C / I)', align: 'right', value: (a) => a.leadsComplete + a.leadsIncomplete },
+const COLUMNS: { key: SortKey; label: string; align?: 'right'; width: string; value: (a: AdminAgent) => string | number }[] = [
+  { key: 'name', label: 'Agent', width: '24%', value: (a) => a.name || a.agency || a.slug },
+  { key: 'email', label: 'Email', width: '26%', value: (a) => a.email },
+  { key: 'tier', label: 'Plan', width: '11%', value: (a) => a.tier },
+  { key: 'status', label: 'Status', width: '15%', value: (a) => a.status },
+  { key: 'leads', label: 'Leads (C / I)', align: 'right', width: '12%', value: (a) => a.leadsComplete + a.leadsIncomplete },
 ]
 
 export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
+  const router = useRouter()
   const [rows, setRows] = useState(agents)
   const [q, setQ] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('leads')
@@ -76,6 +78,7 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
         body: JSON.stringify({ userId: id, value }),
       })
       if (!res.ok) throw new Error('save failed')
+      router.refresh() // re-run the server metrics so Trials/Trial Value/MRR update
     } catch {
       setRows(prev) // revert on failure
     } finally {
@@ -96,11 +99,15 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
       </div>
 
       <div className="overflow-x-auto border border-slate-200 rounded-lg bg-white">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
           <thead className="bg-slate-50 text-slate-500">
             <tr>
               {COLUMNS.map((c) => (
-                <th key={c.key} className={`font-medium px-3 py-2 ${c.align === 'right' ? 'text-right' : 'text-left'}`}>
+                <th
+                  key={c.key}
+                  style={{ width: c.width }}
+                  className={`font-medium px-3 py-2 ${c.align === 'right' ? 'text-right' : 'text-left'}`}
+                >
                   <button
                     onClick={() => toggleSort(c.key)}
                     className={`inline-flex items-center gap-1 hover:text-slate-900 ${c.align === 'right' ? 'flex-row-reverse' : ''}`}
@@ -111,18 +118,18 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                   </button>
                 </th>
               ))}
-              <th className="text-center font-medium px-3 py-2">Agent Growth</th>
+              <th style={{ width: '12%' }} className="text-center font-medium px-3 py-2">Agent Growth</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((a) => (
               <tr key={a.id} className="border-t border-slate-100">
                 <td className="px-3 py-2">
-                  <div className="font-medium text-slate-900">{a.name || '(no name)'}</div>
-                  <div className="text-xs text-slate-500">{a.agency || a.slug}</div>
+                  <div className="font-medium text-slate-900 truncate">{a.name || '(no name)'}</div>
+                  <div className="text-xs text-slate-500 truncate">{a.agency || a.slug}</div>
                 </td>
-                <td className="px-3 py-2 text-slate-600">{a.email}</td>
-                <td className="px-3 py-2 text-slate-600 capitalize">{a.tier || '—'}</td>
+                <td className="px-3 py-2 text-slate-600 truncate" title={a.email}>{a.email}</td>
+                <td className="px-3 py-2 text-slate-600 capitalize truncate">{a.tier || '—'}</td>
                 <td className="px-3 py-2">
                   {a.isAgentGrowth ? (
                     <span className="inline-block rounded-full px-2 py-0.5 text-xs bg-purple-50 text-purple-700">agent growth</span>
