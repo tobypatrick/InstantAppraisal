@@ -1,5 +1,8 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { AgentsTable, type AdminAgent } from '@/components/admin/agents-table'
+import { LeadsTable, type AdminLead } from '@/components/admin/leads-table'
+import { MonthlyBars, type AgentMonth, type LeadMonth } from '@/components/admin/monthly-bars'
+import { MonthPicker } from '@/components/admin/month-picker'
 
 export const metadata = { title: 'Overview | Admin' }
 
@@ -16,14 +19,50 @@ const RANGES = [
   { key: 'all', label: 'All time', days: null as number | null },
 ]
 
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+const monthKeyOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+
+// Contiguous list of "YYYY-MM" keys from the earliest data month to now.
+function monthSpan(earliest: Date, now: Date): string[] {
+  const out: string[] = []
+  let y = earliest.getFullYear()
+  let m = earliest.getMonth()
+  const ey = now.getFullYear()
+  const em = now.getMonth()
+  while (y < ey || (y === ey && m <= em)) {
+    out.push(`${y}-${String(m + 1).padStart(2, '0')}`)
+    if (++m > 11) {
+      m = 0
+      y++
+    }
+  }
+  return out
+}
+
+const formatDate = (d: Date) => `${d.getDate()} ${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`
+
 export default async function AdminOverviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ range?: string }>
+  searchParams: Promise<{ range?: string; month?: string }>
 }) {
-  const { range: rangeParam } = await searchParams
-  const range = RANGES.find((r) => r.key === rangeParam) ?? RANGES[1] // default 30 days
-  const cutoff = range.days === null ? null : Date.now() - range.days * 24 * 60 * 60 * 1000
+  const { range: rangeParam, month: monthParam } = await searchParams
+
+  // A specific month (?month=YYYY-MM) beats the 7/30/90/all toggle.
+  const monthMatch = monthParam && /^\d{4}-\d{2}$/.test(monthParam) ? monthParam : null
+  const range = monthMatch ? null : RANGES.find((r) => r.key === rangeParam) ?? RANGES[1] // default 30 days
+
+  let windowStart: number | null = null // inclusive
+  let windowEnd: number | null = null // exclusive
+  if (monthMatch) {
+    const [y, m] = monthMatch.split('-').map(Number)
+    windowStart = new Date(y, m - 1, 1).getTime()
+    windowEnd = new Date(y, m, 1).getTime()
+  } else if (range && range.days !== null) {
+    windowStart = Date.now() - range.days * 24 * 60 * 60 * 1000
+  }
 
   // Service-role client: admin needs to read every account's data, bypassing RLS.
   const supabase = createServiceClient(
@@ -36,7 +75,7 @@ export default async function AdminOverviewPage({
     supabase.auth.admin.listUsers({ perPage: 1000 }),
     supabase.from('profiles').select('id, full_name, agency_name, slug'),
     supabase.from('billing').select('user_id, subscription_status, subscription_tier, is_agent_growth'),
-    supabase.from('leads').select('agent_id, status, created_at'),
+    supabase.from('leads').select('id, agent_id, status, created_at, address'),
     supabase.from('user_roles').select('user_id').eq('role', 'admin'),
   ])
 
@@ -48,12 +87,18 @@ export default async function AdminOverviewPage({
 
   const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]))
   const billingMap = Object.fromEntries(billing.map((b) => [b.user_id, b]))
+  const emailMap = Object.fromEntries(users.map((u) => [u.id, u.email || '']))
 
-  // Lead figures respect the selected time range.
-  const leads =
-    cutoff === null
-      ? allLeads
-      : allLeads.filter((l) => l.created_at && new Date(l.created_at).getTime() >= cutoff)
+  const inWindow = (iso: string | null) => {
+    if (!iso) return windowStart === null && windowEnd === null
+    const t = new Date(iso).getTime()
+    if (windowStart !== null && t < windowStart) return false
+    if (windowEnd !== null && t >= windowEnd) return false
+    return true
+  }
+
+  // Lead figures respect the selected window (range toggle or specific month).
+  const leads = allLeads.filter((l) => inWindow(l.created_at))
 
   const leadsPerAgent: Record<string, { complete: number; incomplete: number }> = {}
   let leadsComplete = 0
@@ -120,6 +165,66 @@ export default async function AdminOverviewPage({
     }
   })
 
+  // Full leads list (respects the window), newest first as the default sort.
+  const leadRows: AdminLead[] = leads.map((l) => {
+    const p = l.agent_id ? profileMap[l.agent_id] : null
+    const ts = l.created_at ? new Date(l.created_at).getTime() : 0
+    return {
+      id: l.id,
+      address: l.address || '',
+      dateLabel: l.created_at ? formatDate(new Date(l.created_at)) : '—',
+      ts,
+      status: l.status || '',
+      agentName: p?.full_name || p?.agency_name || '',
+      agentEmail: (l.agent_id && emailMap[l.agent_id]) || '',
+    }
+  })
+
+  // By-month charts: every month with data, from the first signup/lead to now.
+  const allTimes: number[] = [
+    ...agentUsers.map((u) => new Date(u.created_at).getTime()),
+    ...allLeads.filter((l) => l.created_at).map((l) => new Date(l.created_at!).getTime()),
+  ]
+  const now = new Date()
+  const earliest = allTimes.length ? new Date(Math.min(...allTimes)) : now
+  const span = monthSpan(earliest, now)
+
+  const agentCounts: Record<string, number> = {}
+  for (const u of agentUsers) {
+    const k = monthKeyOf(new Date(u.created_at))
+    agentCounts[k] = (agentCounts[k] || 0) + 1
+  }
+  const leadCounts: Record<string, { complete: number; incomplete: number }> = {}
+  for (const l of allLeads) {
+    if (!l.created_at) continue
+    const k = monthKeyOf(new Date(l.created_at))
+    const bucket = (leadCounts[k] ||= { complete: 0, incomplete: 0 })
+    if (l.status === 'complete') bucket.complete++
+    else bucket.incomplete++
+  }
+
+  const toMeta = (k: string) => {
+    const [y, m] = k.split('-').map(Number)
+    return { short: MONTH_SHORT[m - 1], year: y }
+  }
+  const agentsByMonth: AgentMonth[] = span.map((k) => ({ key: k, ...toMeta(k), count: agentCounts[k] || 0 }))
+  const leadsByMonth: LeadMonth[] = span.map((k) => ({
+    key: k,
+    ...toMeta(k),
+    complete: leadCounts[k]?.complete || 0,
+    incomplete: leadCounts[k]?.incomplete || 0,
+  }))
+
+  // Month dropdown options, newest first.
+  const monthOptions = [...span].reverse().map((k) => {
+    const [y, m] = k.split('-').map(Number)
+    return { key: k, label: `${MONTH_LONG[m - 1]} ${y}` }
+  })
+
+  const periodLabel = monthMatch
+    ? monthOptions.find((o) => o.key === monthMatch)?.label ?? monthMatch
+    : range?.label ?? '30 days'
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -127,18 +232,21 @@ export default async function AdminOverviewPage({
           <h1 className="text-xl font-semibold text-slate-900">Overview</h1>
           <p className="text-sm text-slate-500 mt-1">Platform metrics and agents.</p>
         </div>
-        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm">
-          {RANGES.map((r) => (
-            <a
-              key={r.key}
-              href={`?range=${r.key}`}
-              className={`px-3 py-1 rounded-md transition-colors ${
-                r.key === range.key ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              {r.label}
-            </a>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm">
+            {RANGES.map((r) => (
+              <a
+                key={r.key}
+                href={`?range=${r.key}`}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  !monthMatch && r.key === range?.key ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {r.label}
+              </a>
+            ))}
+          </div>
+          <MonthPicker months={monthOptions} active={monthMatch} />
         </div>
       </div>
 
@@ -151,7 +259,17 @@ export default async function AdminOverviewPage({
         ))}
       </div>
 
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-slate-900">Trends</h2>
+        <MonthlyBars agents={agentsByMonth} leads={leadsByMonth} />
+      </section>
+
       <AgentsTable agents={agents} />
+
+      <div className="space-y-1">
+        <p className="text-xs text-slate-500">Showing leads for: {periodLabel}</p>
+        <LeadsTable leads={leadRows} />
+      </div>
     </div>
   )
 }
