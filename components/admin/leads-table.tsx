@@ -21,18 +21,43 @@ const COLUMNS: { key: SortKey; label: string; width: string }[] = [
   { key: 'agent', label: 'Agent', width: '38%' },
 ]
 
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
 export function LeadsTable({ leads }: { leads: AdminLead[] }) {
   const [q, setQ] = useState('')
+  const [dateFilter, setDateFilter] = useState('all') // 'all' | '7' | '30' | '90' | 'm:YYYY-MM'
   const [sortKey, setSortKey] = useState<SortKey>('date')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  // Months present in the data, newest first, for the date dropdown.
+  const monthOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const l of leads) {
+      if (!l.ts) continue
+      const d = new Date(l.ts)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      if (!seen.has(key)) seen.set(key, `${MONTHS_LONG[d.getMonth()]} ${d.getFullYear()}`)
+    }
+    return [...seen.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1)).map(([key, label]) => ({ key, label }))
+  }, [leads])
+
+  const dated = useMemo(() => {
+    if (dateFilter === 'all') return leads
+    if (dateFilter.startsWith('m:')) {
+      const [y, m] = dateFilter.slice(2).split('-').map(Number)
+      const start = new Date(y, m - 1, 1).getTime()
+      const end = new Date(y, m, 1).getTime()
+      return leads.filter((l) => l.ts >= start && l.ts < end)
+    }
+    const cutoff = Date.now() - Number(dateFilter) * 24 * 60 * 60 * 1000
+    return leads.filter((l) => l.ts >= cutoff)
+  }, [leads, dateFilter])
 
   const sorted = useMemo(() => {
     const query = q.trim().toLowerCase()
     const filtered = query
-      ? leads.filter((l) =>
-          [l.address, l.agentName, l.agentEmail].some((f) => f.toLowerCase().includes(query))
-        )
-      : leads
+      ? dated.filter((l) => [l.address, l.agentName, l.agentEmail].some((f) => f.toLowerCase().includes(query)))
+      : dated
     return [...filtered].sort((a, b) => {
       let cmp: number
       if (sortKey === 'date') cmp = a.ts - b.ts
@@ -40,7 +65,7 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
       else cmp = (a.agentName || a.agentEmail).localeCompare(b.agentName || b.agentEmail, undefined, { sensitivity: 'base' })
       return sortDir === 'asc' ? cmp : -cmp
     })
-  }, [leads, q, sortKey, sortDir])
+  }, [dated, q, sortKey, sortDir])
 
   const toggleSort = (key: SortKey) => {
     if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -52,14 +77,29 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-slate-900">Leads ({sorted.length})</h2>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search address, agent..."
-          className="h-9 w-64 max-w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+          >
+            <option value="all">All dates</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            {monthOptions.map((m) => (
+              <option key={m.key} value={`m:${m.key}`}>{m.label}</option>
+            ))}
+          </select>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search address, agent..."
+            className="h-9 w-64 max-w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+          />
+        </div>
       </div>
 
       <div className="overflow-x-auto border border-slate-200 rounded-lg bg-white">
@@ -97,7 +137,7 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-3 py-8 text-center text-slate-400">No leads in this period.</td>
+                <td colSpan={3} className="px-3 py-8 text-center text-slate-400">No leads found.</td>
               </tr>
             )}
           </tbody>

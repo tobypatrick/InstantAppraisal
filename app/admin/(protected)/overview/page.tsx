@@ -165,8 +165,8 @@ export default async function AdminOverviewPage({
     }
   })
 
-  // Full leads list (respects the window), newest first as the default sort.
-  const leadRows: AdminLead[] = leads.map((l) => {
+  // Full leads list — always every lead; it has its own date control.
+  const leadRows: AdminLead[] = allLeads.map((l) => {
     const p = l.agent_id ? profileMap[l.agent_id] : null
     const ts = l.created_at ? new Date(l.created_at).getTime() : 0
     return {
@@ -218,10 +218,6 @@ export default async function AdminOverviewPage({
     return { key: k, label: `${MONTH_LONG[m - 1]} ${y}` }
   })
 
-  const periodLabel = monthMatch
-    ? monthOptions.find((o) => o.key === monthMatch)?.label ?? monthMatch
-    : range?.label ?? '30 days'
-
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -260,10 +256,7 @@ export default async function AdminOverviewPage({
 
       <AgentsTable agents={agents} />
 
-      <div className="space-y-1">
-        <p className="text-xs text-slate-500">Showing leads for: {periodLabel}</p>
-        <LeadsTable leads={leadRows} />
-      </div>
+      <LeadsTable leads={leadRows} />
     </div>
   )
 }
