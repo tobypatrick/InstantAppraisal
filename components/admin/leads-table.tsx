@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ChevronUp, ChevronDown } from 'lucide-react'
 
 export interface AdminLead {
   id: string
@@ -13,21 +12,19 @@ export interface AdminLead {
   agentEmail: string
 }
 
-type SortKey = 'address' | 'date' | 'agent'
-
-const COLUMNS: { key: SortKey; label: string; width: string }[] = [
-  { key: 'address', label: 'Address', width: '44%' },
-  { key: 'date', label: 'Date', width: '18%' },
-  { key: 'agent', label: 'Agent', width: '38%' },
-]
-
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+const SORTS: { key: string; label: string }[] = [
+  { key: 'date-desc', label: 'Newest first' },
+  { key: 'date-asc', label: 'Oldest first' },
+  { key: 'address-asc', label: 'Address A–Z' },
+  { key: 'agent-asc', label: 'Agent A–Z' },
+]
 
 export function LeadsTable({ leads }: { leads: AdminLead[] }) {
   const [q, setQ] = useState('')
   const [dateFilter, setDateFilter] = useState('all') // 'all' | '7' | '30' | '90' | 'm:YYYY-MM'
-  const [sortKey, setSortKey] = useState<SortKey>('date')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [sort, setSort] = useState('date-desc')
 
   // Months present in the data, newest first, for the date dropdown.
   const monthOptions = useMemo(() => {
@@ -53,44 +50,41 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
     return leads.filter((l) => l.ts >= cutoff)
   }, [leads, dateFilter])
 
-  const sorted = useMemo(() => {
+  const rows = useMemo(() => {
     const query = q.trim().toLowerCase()
     const filtered = query
       ? dated.filter((l) => [l.address, l.agentName, l.agentEmail].some((f) => f.toLowerCase().includes(query)))
       : dated
+    const [key, dir] = sort.split('-')
     return [...filtered].sort((a, b) => {
       let cmp: number
-      if (sortKey === 'date') cmp = a.ts - b.ts
-      else if (sortKey === 'address') cmp = a.address.localeCompare(b.address, undefined, { sensitivity: 'base' })
+      if (key === 'date') cmp = a.ts - b.ts
+      else if (key === 'address') cmp = a.address.localeCompare(b.address, undefined, { sensitivity: 'base' })
       else cmp = (a.agentName || a.agentEmail).localeCompare(b.agentName || b.agentEmail, undefined, { sensitivity: 'base' })
-      return sortDir === 'asc' ? cmp : -cmp
+      return dir === 'asc' ? cmp : -cmp
     })
-  }, [dated, q, sortKey, sortDir])
+  }, [dated, q, sort])
 
-  const toggleSort = (key: SortKey) => {
-    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    else {
-      setSortKey(key)
-      setSortDir(key === 'date' ? 'desc' : 'asc')
-    }
-  }
+  const selectClass =
+    'h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10'
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-slate-900">Leads ({sorted.length})</h2>
+        <h2 className="text-sm font-semibold text-slate-900">Leads ({rows.length})</h2>
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-          >
+          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className={selectClass}>
             <option value="all">All dates</option>
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
             <option value="90">Last 90 days</option>
             {monthOptions.map((m) => (
               <option key={m.key} value={`m:${m.key}`}>{m.label}</option>
+            ))}
+          </select>
+          <select value={sort} onChange={(e) => setSort(e.target.value)} className={selectClass}>
+            {SORTS.map((s) => (
+              <option key={s.key} value={s.key}>{s.label}</option>
             ))}
           </select>
           <input
@@ -102,47 +96,28 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto border border-slate-200 rounded-lg bg-white">
-        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
-              {COLUMNS.map((c) => (
-                <th key={c.key} style={{ width: c.width }} className="font-medium px-3 py-2 text-left">
-                  <button onClick={() => toggleSort(c.key)} className="inline-flex items-center gap-1 hover:text-slate-900">
-                    {c.label}
-                    {sortKey === c.key &&
-                      (sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />)}
-                  </button>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((l) => (
-              <tr key={l.id} className="border-t border-slate-100">
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-slate-900 truncate" title={l.address}>{l.address || '(no address)'}</span>
-                    {l.status === 'complete' && (
-                      <span className="shrink-0 inline-block rounded-full px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700">complete</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{l.dateLabel}</td>
-                <td className="px-3 py-2">
-                  <div className="font-medium text-slate-900 truncate" title={l.agentName}>{l.agentName || '(unknown)'}</div>
-                  <div className="text-xs text-slate-500 truncate" title={l.agentEmail}>{l.agentEmail}</div>
-                </td>
-              </tr>
-            ))}
-            {sorted.length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-3 py-8 text-center text-slate-400">No leads found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ul className="border border-slate-200 rounded-lg bg-white divide-y divide-slate-100">
+        {rows.map((l) => (
+          <li key={l.id} className="px-4 py-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-slate-900 font-medium">{l.address || '(no address)'}</span>
+                  {l.status === 'complete' && (
+                    <span className="inline-block rounded-full px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700">complete</span>
+                  )}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">
+                  {l.agentName || '(unknown agent)'}
+                  {l.agentEmail && <span className="text-slate-400"> · {l.agentEmail}</span>}
+                </div>
+              </div>
+              <div className="text-xs text-slate-500 whitespace-nowrap shrink-0 pt-0.5">{l.dateLabel}</div>
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 && <li className="px-4 py-8 text-center text-sm text-slate-400">No leads found.</li>}
+      </ul>
     </div>
   )
 }
