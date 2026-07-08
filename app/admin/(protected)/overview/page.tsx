@@ -203,17 +203,14 @@ export default async function AdminOverviewPage({
     else bucket.incomplete++
   }
 
-  const toMeta = (k: string) => {
+  const agentsByMonth: AgentMonth[] = span.map((k) => {
     const [y, m] = k.split('-').map(Number)
-    return { short: MONTH_SHORT[m - 1], year: y }
-  }
-  const agentsByMonth: AgentMonth[] = span.map((k) => ({ key: k, ...toMeta(k), count: agentCounts[k] || 0 }))
-  const leadsByMonth: LeadMonth[] = span.map((k) => ({
-    key: k,
-    ...toMeta(k),
-    complete: leadCounts[k]?.complete || 0,
-    incomplete: leadCounts[k]?.incomplete || 0,
-  }))
+    return { year: y, month: m, count: agentCounts[k] || 0 }
+  })
+  const leadsByMonth: LeadMonth[] = span.map((k) => {
+    const [y, m] = k.split('-').map(Number)
+    return { year: y, month: m, complete: leadCounts[k]?.complete || 0, incomplete: leadCounts[k]?.incomplete || 0 }
+  })
 
   // Month dropdown options, newest first.
   const monthOptions = [...span].reverse().map((k) => {
@@ -233,7 +230,7 @@ export default async function AdminOverviewPage({
           <p className="text-sm text-slate-500 mt-1">Platform metrics and agents.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm">
+          <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm h-9 items-center">
             {RANGES.map((r) => (
               <a
                 key={r.key}
@@ -259,10 +256,7 @@ export default async function AdminOverviewPage({
         ))}
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-slate-900">Trends</h2>
-        <MonthlyBars agents={agentsByMonth} leads={leadsByMonth} />
-      </section>
+      <MonthlyBars agents={agentsByMonth} leads={leadsByMonth} />
 
       <AgentsTable agents={agents} />
 

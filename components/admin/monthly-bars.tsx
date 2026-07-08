@@ -1,67 +1,77 @@
-// Server-rendered by-month bar charts for the admin overview.
-// No chart library — plain divs so the admin bundle stays small.
-// Both charts span every month with data (first signup / first lead → now).
+'use client'
 
-export type AgentMonth = { key: string; short: string; year: number; count: number }
-export type LeadMonth = { key: string; short: string; year: number; complete: number; incomplete: number }
+import { useState } from 'react'
 
-function YearLabel({ index, year, prevYear }: { index: number; year: number; prevYear: number | null }) {
-  // Show the year once, under the first bar of each year.
-  const show = index === 0 || year !== prevYear
-  return <span className="block text-[10px] leading-none text-slate-400 h-3">{show ? year : ''}</span>
+// Per-month buckets from the server (contiguous, zero-filled). The client
+// regroups them into month / quarter / year on the fly for the toggle.
+export type AgentMonth = { year: number; month: number; count: number }
+export type LeadMonth = { year: number; month: number; complete: number; incomplete: number }
+
+const SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+type Grain = 'month' | 'quarter' | 'year'
+const GRAINS: { key: Grain; label: string }[] = [
+  { key: 'month', label: 'Month' },
+  { key: 'quarter', label: 'Quarter' },
+  { key: 'year', label: 'Year' },
+]
+
+type Bucket = { key: string; label: string; year: number; sort: number; count: number; complete: number; incomplete: number }
+
+function bucketOf(year: number, month: number, grain: Grain) {
+  if (grain === 'year') return { key: `${year}`, label: `${year}`, sort: year * 100 }
+  if (grain === 'quarter') {
+    const q = Math.floor((month - 1) / 3) + 1
+    return { key: `${year}-Q${q}`, label: `Q${q}`, sort: year * 100 + q }
+  }
+  return { key: `${year}-${month}`, label: SHORT[month - 1], sort: year * 100 + month }
 }
 
-function AgentsChart({ data }: { data: AgentMonth[] }) {
-  const max = Math.max(1, ...data.map((d) => d.count))
+function group(rows: (AgentMonth | LeadMonth)[], grain: Grain): Bucket[] {
+  const map = new Map<string, Bucket>()
+  for (const r of rows) {
+    const b = bucketOf(r.year, r.month, grain)
+    let e = map.get(b.key)
+    if (!e) {
+      e = { key: b.key, label: b.label, year: r.year, sort: b.sort, count: 0, complete: 0, incomplete: 0 }
+      map.set(b.key, e)
+    }
+    e.count += (r as AgentMonth).count || 0
+    e.complete += (r as LeadMonth).complete || 0
+    e.incomplete += (r as LeadMonth).incomplete || 0
+  }
+  return [...map.values()].sort((a, b) => a.sort - b.sort)
+}
+
+type Bar = { key: string; label: string; year: number; total: number; title: string; segments: { value: number; className: string }[] }
+
+// The chart scale tops out at the largest bar in the period, so the tallest
+// bar always reaches the top of the chart.
+function Chart({ bars, grain }: { bars: Bar[]; grain: Grain }) {
+  const max = Math.max(1, ...bars.map((b) => b.total))
   return (
     <div className="overflow-x-auto">
       <div className="flex items-end gap-1 h-40 min-w-full">
-        {data.map((d) => (
-          <div key={d.key} className="flex-1 flex flex-col justify-end items-center min-w-[22px]" title={`${d.short} ${d.year}: ${d.count} new`}>
-            <span className="text-[10px] leading-none text-slate-500 mb-1 h-3">{d.count || ''}</span>
-            <div className="w-full rounded-t bg-slate-800" style={{ height: `${(d.count / max) * 100}%` }} />
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-1 mt-1 min-w-full">
-        {data.map((d, i) => (
-          <div key={d.key} className="flex-1 flex flex-col items-center min-w-[22px]">
-            <span className="text-[10px] leading-none text-slate-500">{d.short}</span>
-            <YearLabel index={i} year={d.year} prevYear={i > 0 ? data[i - 1].year : null} />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function LeadsChart({ data }: { data: LeadMonth[] }) {
-  const max = Math.max(1, ...data.map((d) => d.complete + d.incomplete))
-  return (
-    <div className="overflow-x-auto">
-      <div className="flex items-end gap-1 h-40 min-w-full">
-        {data.map((d) => {
-          const total = d.complete + d.incomplete
-          return (
-            <div
-              key={d.key}
-              className="flex-1 flex flex-col justify-end items-center min-w-[22px]"
-              title={`${d.short} ${d.year}: ${d.complete} complete, ${d.incomplete} incomplete`}
-            >
-              <span className="text-[10px] leading-none text-slate-500 mb-1 h-3">{total || ''}</span>
-              <div className="w-full rounded-t overflow-hidden flex flex-col justify-end" style={{ height: '100%' }}>
-                <div className="w-full bg-slate-300" style={{ height: `${(d.incomplete / max) * 100}%` }} />
-                <div className="w-full bg-emerald-500" style={{ height: `${(d.complete / max) * 100}%` }} />
+        {bars.map((b) => (
+          <div key={b.key} title={b.title} className="flex-1 h-full flex flex-col justify-end items-center min-w-[26px]">
+            {b.total > 0 && (
+              <div className="w-full rounded-t overflow-hidden flex flex-col justify-end" style={{ height: `${(b.total / max) * 100}%` }}>
+                {b.segments.map((s, i) => (
+                  <div key={i} className={s.className} style={{ height: `${(s.value / b.total) * 100}%` }} />
+                ))}
               </div>
-            </div>
-          )
-        })}
+            )}
+          </div>
+        ))}
       </div>
       <div className="flex gap-1 mt-1 min-w-full">
-        {data.map((d, i) => (
-          <div key={d.key} className="flex-1 flex flex-col items-center min-w-[22px]">
-            <span className="text-[10px] leading-none text-slate-500">{d.short}</span>
-            <YearLabel index={i} year={d.year} prevYear={i > 0 ? data[i - 1].year : null} />
+        {bars.map((b, i) => (
+          <div key={b.key} className="flex-1 flex flex-col items-center min-w-[26px]">
+            <span className="text-[10px] leading-none text-slate-500">{b.label}</span>
+            {grain !== 'year' && (
+              <span className="text-[10px] leading-none text-slate-400 h-3 mt-0.5">
+                {i === 0 || b.year !== bars[i - 1].year ? b.year : ''}
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -70,23 +80,63 @@ function LeadsChart({ data }: { data: LeadMonth[] }) {
 }
 
 export function MonthlyBars({ agents, leads }: { agents: AgentMonth[]; leads: LeadMonth[] }) {
+  const [grain, setGrain] = useState<Grain>('month')
+
+  const agentBars: Bar[] = group(agents, grain).map((b) => ({
+    key: b.key,
+    label: b.label,
+    year: b.year,
+    total: b.count,
+    title: `${b.label} ${b.year}: ${b.count} new`,
+    segments: [{ value: b.count, className: 'bg-slate-800' }],
+  }))
+
+  const leadBars: Bar[] = group(leads, grain).map((b) => ({
+    key: b.key,
+    label: b.label,
+    year: b.year,
+    total: b.complete + b.incomplete,
+    title: `${b.label} ${b.year}: ${b.complete} complete, ${b.incomplete} incomplete`,
+    segments: [
+      { value: b.incomplete, className: 'bg-slate-300' },
+      { value: b.complete, className: 'bg-emerald-500' },
+    ],
+  }))
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      <div className="bg-white border border-slate-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-slate-900">New agents by month</h3>
-        <p className="text-xs text-slate-500 mb-3">Sign-ups per month, all time.</p>
-        <AgentsChart data={agents} />
-      </div>
-      <div className="bg-white border border-slate-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">Leads by month</h3>
-          <div className="flex items-center gap-3 text-[11px] text-slate-500">
-            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-500" />Complete</span>
-            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-slate-300" />Incomplete</span>
-          </div>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-900">Trends</h2>
+        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm h-9 items-center">
+          {GRAINS.map((g) => (
+            <button
+              key={g.key}
+              onClick={() => setGrain(g.key)}
+              className={`px-3 py-1 rounded-md transition-colors ${
+                g.key === grain ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
         </div>
-        <p className="text-xs text-slate-500 mb-3">Leads captured per month, all time.</p>
-        <LeadsChart data={leads} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="bg-white border border-slate-200 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">New agents</h3>
+          <Chart bars={agentBars} grain={grain} />
+        </div>
+        <div className="bg-white border border-slate-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-900">Leads</h3>
+            <div className="flex items-center gap-3 text-[11px] text-slate-500">
+              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-500" />Complete</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-slate-300" />Incomplete</span>
+            </div>
+          </div>
+          <Chart bars={leadBars} grain={grain} />
+        </div>
       </div>
     </div>
   )

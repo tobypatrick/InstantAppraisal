@@ -19,7 +19,7 @@ export function MonthPicker({
       onChange={(e) => {
         if (e.target.value) router.push(`?month=${e.target.value}`)
       }}
-      className={`h-8 rounded-md border px-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 ${
+      className={`h-9 rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 ${
         active ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600'
       }`}
     >
