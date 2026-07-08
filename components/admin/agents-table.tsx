@@ -106,7 +106,9 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                 <th
                   key={c.key}
                   style={{ width: c.width }}
-                  className={`font-medium px-3 py-2 ${c.align === 'right' ? 'text-right' : 'text-left'}`}
+                  className={`font-medium px-3 py-2 ${c.align === 'right' ? 'text-right' : 'text-left'} ${
+                    c.key === 'email' ? 'hidden sm:table-cell' : ''
+                  }`}
                 >
                   <button
                     onClick={() => toggleSort(c.key)}
@@ -127,8 +129,9 @@ export function AgentsTable({ agents }: { agents: AdminAgent[] }) {
                 <td className="px-3 py-2">
                   <div className="font-medium text-slate-900 truncate">{a.name || '(no name)'}</div>
                   <div className="text-xs text-slate-500 truncate">{a.agency || a.slug}</div>
+                  <div className="text-xs text-slate-500 truncate sm:hidden" title={a.email}>{a.email}</div>
                 </td>
-                <td className="px-3 py-2 text-slate-600 truncate" title={a.email}>{a.email}</td>
+                <td className="px-3 py-2 text-slate-600 truncate hidden sm:table-cell" title={a.email}>{a.email}</td>
                 <td className="px-3 py-2 text-slate-600 capitalize truncate">{a.tier || '—'}</td>
                 <td className="px-3 py-2">
                   {a.isAgentGrowth ? (
