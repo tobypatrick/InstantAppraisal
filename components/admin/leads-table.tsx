@@ -8,6 +8,10 @@ export interface AdminLead {
   dateLabel: string
   ts: number
   status: string
+  leadName: string
+  leadPhone: string
+  leadEmail: string
+  source: string
   agentName: string
   agentEmail: string
 }
@@ -53,7 +57,11 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase()
     const filtered = query
-      ? dated.filter((l) => [l.address, l.agentName, l.agentEmail].some((f) => f.toLowerCase().includes(query)))
+      ? dated.filter((l) =>
+          [l.address, l.leadName, l.leadPhone, l.leadEmail, l.source, l.agentName, l.agentEmail].some((f) =>
+            f.toLowerCase().includes(query)
+          )
+        )
       : dated
     const [key, dir] = sort.split('-')
     return [...filtered].sort((a, b) => {
@@ -90,7 +98,7 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search address, agent..."
+            placeholder="Search address, name, phone, source..."
             className="h-9 w-64 max-w-full rounded-md border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10"
           />
         </div>
@@ -100,16 +108,23 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
         {rows.map((l) => (
           <li key={l.id} className="px-4 py-3">
             <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-slate-900 font-medium">{l.address || '(no address)'}</span>
                   {l.status === 'complete' && (
                     <span className="inline-block rounded-full px-1.5 py-0.5 text-[10px] bg-emerald-50 text-emerald-700">complete</span>
                   )}
                 </div>
-                <div className="text-xs text-slate-500 mt-1">
-                  {l.agentName || '(unknown agent)'}
-                  {l.agentEmail && <span className="text-slate-400"> · {l.agentEmail}</span>}
+                {(l.leadName || l.leadPhone || l.leadEmail) && (
+                  <div className="text-xs text-slate-600 flex flex-wrap gap-x-2 gap-y-0.5">
+                    {l.leadName && <span className="font-medium">{l.leadName}</span>}
+                    {l.leadPhone && <a href={`tel:${l.leadPhone}`} className="text-slate-500 hover:text-slate-900">{l.leadPhone}</a>}
+                    {l.leadEmail && <a href={`mailto:${l.leadEmail}`} className="text-slate-500 hover:text-slate-900 truncate">{l.leadEmail}</a>}
+                  </div>
+                )}
+                <div className="text-xs text-slate-500 flex flex-wrap gap-x-2">
+                  <span>Agent: {l.agentName || '(unknown)'}</span>
+                  <span className="text-slate-400">Source: {l.source || 'direct'}</span>
                 </div>
               </div>
               <div className="text-xs text-slate-500 whitespace-nowrap shrink-0 pt-0.5">{l.dateLabel}</div>

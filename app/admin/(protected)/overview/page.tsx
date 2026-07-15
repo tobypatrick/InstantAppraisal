@@ -75,7 +75,7 @@ export default async function AdminOverviewPage({
     supabase.auth.admin.listUsers({ perPage: 1000 }),
     supabase.from('profiles').select('id, full_name, agency_name, slug'),
     supabase.from('billing').select('user_id, subscription_status, subscription_tier, is_agent_growth'),
-    supabase.from('leads').select('id, agent_id, status, created_at, address'),
+    supabase.from('leads').select('id, agent_id, status, created_at, address, contact_name, contact_phone, contact_email, utm_source'),
     supabase.from('user_roles').select('user_id').eq('role', 'admin'),
   ])
 
@@ -175,6 +175,10 @@ export default async function AdminOverviewPage({
       dateLabel: l.created_at ? formatDate(new Date(l.created_at)) : '—',
       ts,
       status: l.status || '',
+      leadName: l.contact_name || '',
+      leadPhone: l.contact_phone || '',
+      leadEmail: l.contact_email || '',
+      source: l.utm_source || '',
       agentName: p?.full_name || p?.agency_name || '',
       agentEmail: (l.agent_id && emailMap[l.agent_id]) || '',
     }
