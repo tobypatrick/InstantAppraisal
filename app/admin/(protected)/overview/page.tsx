@@ -179,6 +179,7 @@ export default async function AdminOverviewPage({
       leadPhone: l.contact_phone || '',
       leadEmail: l.contact_email || '',
       source: l.utm_source || '',
+      agentId: l.agent_id || '',
       agentName: p?.full_name || p?.agency_name || '',
       agentEmail: (l.agent_id && emailMap[l.agent_id]) || '',
     }

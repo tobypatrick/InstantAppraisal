@@ -12,9 +12,13 @@ export interface AdminLead {
   leadPhone: string
   leadEmail: string
   source: string
+  agentId: string
   agentName: string
   agentEmail: string
 }
+
+// Leads with no agent_id are grouped under one option rather than dropped.
+const NO_AGENT = '__none__'
 
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -28,7 +32,26 @@ const SORTS: { key: string; label: string }[] = [
 export function LeadsTable({ leads }: { leads: AdminLead[] }) {
   const [q, setQ] = useState('')
   const [dateFilter, setDateFilter] = useState('all') // 'all' | '7' | '30' | '90' | 'm:YYYY-MM'
+  const [agentFilter, setAgentFilter] = useState('all') // 'all' | agentId | NO_AGENT
   const [sort, setSort] = useState('date-desc')
+
+  // Agents present in the data, A–Z, for the agent dropdown. Built from every lead so the
+  // options don't come and go as the date filter changes.
+  const agentOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const l of leads) {
+      const key = l.agentId || NO_AGENT
+      if (seen.has(key)) continue
+      seen.set(key, key === NO_AGENT ? '(unknown)' : l.agentName || l.agentEmail || '(unknown)')
+    }
+    return [...seen.entries()]
+      .map(([key, label]) => ({ key, label }))
+      .sort((a, b) => {
+        if (a.key === NO_AGENT) return 1
+        if (b.key === NO_AGENT) return -1
+        return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+      })
+  }, [leads])
 
   // Months present in the data, newest first, for the date dropdown.
   const monthOptions = useMemo(() => {
@@ -54,15 +77,21 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
     return leads.filter((l) => l.ts >= cutoff)
   }, [leads, dateFilter])
 
+  const byAgent = useMemo(() => {
+    if (agentFilter === 'all') return dated
+    if (agentFilter === NO_AGENT) return dated.filter((l) => !l.agentId)
+    return dated.filter((l) => l.agentId === agentFilter)
+  }, [dated, agentFilter])
+
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase()
     const filtered = query
-      ? dated.filter((l) =>
+      ? byAgent.filter((l) =>
           [l.address, l.leadName, l.leadPhone, l.leadEmail, l.source, l.agentName, l.agentEmail].some((f) =>
             f.toLowerCase().includes(query)
           )
         )
-      : dated
+      : byAgent
     const [key, dir] = sort.split('-')
     return [...filtered].sort((a, b) => {
       let cmp: number
@@ -71,7 +100,7 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
       else cmp = (a.agentName || a.agentEmail).localeCompare(b.agentName || b.agentEmail, undefined, { sensitivity: 'base' })
       return dir === 'asc' ? cmp : -cmp
     })
-  }, [dated, q, sort])
+  }, [byAgent, q, sort])
 
   const selectClass =
     'h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900/10'
@@ -81,6 +110,16 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-slate-900">Leads ({rows.length})</h2>
         <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={agentFilter}
+            onChange={(e) => setAgentFilter(e.target.value)}
+            className={`${selectClass} max-w-[14rem]`}
+          >
+            <option value="all">All agents</option>
+            {agentOptions.map((a) => (
+              <option key={a.key} value={a.key}>{a.label}</option>
+            ))}
+          </select>
           <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className={selectClass}>
             <option value="all">All dates</option>
             <option value="7">Last 7 days</option>
