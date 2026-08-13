@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export interface AdminLead {
   id: string
@@ -34,6 +34,24 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
   const [dateFilter, setDateFilter] = useState('all') // 'all' | '7' | '30' | '90' | 'm:YYYY-MM'
   const [agentFilter, setAgentFilter] = useState('all') // 'all' | agentId | NO_AGENT
   const [sort, setSort] = useState('date-desc')
+
+  // Restore the agent filter from ?agent= so a filtered view is linkable. Done on mount
+  // rather than in the initial state so server and client render the same thing.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('agent')
+    if (fromUrl) setAgentFilter(fromUrl)
+  }, [])
+
+  // Write the filter back to the URL without a navigation. The page is force-dynamic, so a
+  // real router push would refetch every lead just to change a client-side filter.
+  const changeAgent = (value: string) => {
+    setAgentFilter(value)
+    const params = new URLSearchParams(window.location.search)
+    if (value === 'all') params.delete('agent')
+    else params.set('agent', value)
+    const qs = params.toString()
+    window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname)
+  }
 
   // Agents present in the data, A–Z, for the agent dropdown. Built from every lead so the
   // options don't come and go as the date filter changes.
@@ -112,7 +130,7 @@ export function LeadsTable({ leads }: { leads: AdminLead[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={agentFilter}
-            onChange={(e) => setAgentFilter(e.target.value)}
+            onChange={(e) => changeAgent(e.target.value)}
             className={`${selectClass} max-w-[14rem]`}
           >
             <option value="all">All agents</option>
