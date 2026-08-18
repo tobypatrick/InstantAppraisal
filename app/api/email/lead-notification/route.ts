@@ -167,6 +167,9 @@ export async function POST(request: NextRequest) {
     let body: string
     let ctaText: string
     let ctaUrl: string
+    // Hitting Reply on a lead notification should reach the homeowner, not us. Falls back to
+    // the team inbox for partial searches, where we have no contact email yet.
+    let replyTo = 'team@instantappraisal.co'
 
     if (notificationType === 'partial') {
       subject = `New Address Search — ${leadData.address}`
@@ -179,6 +182,7 @@ export async function POST(request: NextRequest) {
       const leadPhone = leadData.contact_phone || ''
       const interestLevel = leadData.interest_level || ''
 
+      if (leadEmail) replyTo = leadEmail
       subject = `Action needed — lead captured, report limit reached — ${leadData.address}`
       body = buildLimitBlockedEmail(firstName, leadName, leadEmail, leadPhone, leadAddress, formattedDate, utmSource, interestLevel)
       ctaText = 'Upgrade Here'
@@ -190,6 +194,7 @@ export async function POST(request: NextRequest) {
       const reportUrl = leadData.report_url || null
       const interestLevel = leadData.interest_level || ''
 
+      if (leadEmail) replyTo = leadEmail
       subject = `Instant Appraisal Completed — ${leadData.address}`
       body = buildCompleteEmail(
         firstName, leadName, leadEmail, leadPhone, leadAddress,
@@ -205,7 +210,7 @@ export async function POST(request: NextRequest) {
     const resend = new Resend(apiKey)
     const { error: sendError } = await resend.emails.send({
       from: `Instant Appraisal <hello@${fromDomain}>`,
-      replyTo: 'team@instantappraisal.co',
+      replyTo,
       to: [agentEmail],
       subject,
       html,
