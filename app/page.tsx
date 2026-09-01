@@ -3,7 +3,7 @@ import {
   Database, BarChart3, Palette, ArrowRight, Shield, Zap, Database as Db,
   CheckCircle, TrendingUp, Home, Clock, Users, LayoutGrid, DollarSign,
   GraduationCap, ChevronDown, Star, MousePointerClick, FileText, Bell,
-  Webhook, Globe, Lock, Mail, Filter, Tag, Download, Eye,
+  Webhook, Globe, Lock, Mail, Filter, Tag, Download, Eye, KeyRound, Building2, ToggleRight,
 } from 'lucide-react'
 import { LeadAgentLogo } from '@/components/ui/LeadAgentLogo'
 import { MarketingHeader } from '@/components/marketing/marketing-header'
@@ -137,6 +137,13 @@ const REPORT_SECTIONS = [
   { icon: GraduationCap, label: 'Nearby Schools', desc: 'Primary and secondary schools within the catchment' },
 ]
 
+const BDM_POINTS = [
+  { icon: KeyRound, label: 'Built for winning managements', desc: 'Every enquiry is a landlord telling you they own an investment property and want to know what it earns.' },
+  { icon: ToggleRight, label: 'One toggle, not a second tool', desc: 'Switch your landing page to rental in your settings. Same link, same dashboard, same lead feed.' },
+  { icon: TrendingUp, label: 'The same PropTrack report', desc: 'It already carries the rental figure, comparable leases and suburb median rent. Nothing extra to buy.' },
+  { icon: DollarSign, label: 'No extra cost', desc: 'Included in Pro and Elite at the same price. Sales agents and BDMs in one agency each get their own page.' },
+]
+
 const PRICING_PLANS = [
   {
     name: 'Pro',
@@ -173,6 +180,10 @@ const PRICING_PLANS = [
 ]
 
 const FAQS = [
+  {
+    q: 'Can I use this for rental appraisals instead of sales?',
+    a: 'Yes. In your settings you can switch your landing page to rental appraisals, which is built for property management BDMs growing a rent roll. The address search and the PropTrack report are the same, read for rent rather than sale, and it is included in both plans at no extra cost. Sales agents and BDMs in the same agency each have their own account and their own page.',
+  },
   {
     q: 'What is InstantAppraisal?',
     a: 'InstantAppraisal is a lead generation tool for licensed real estate agents. It gives you a branded landing page where homeowners can enter their address and instantly receive a real PropTrack property report in exchange for their contact details.',
@@ -701,6 +712,51 @@ export default function HomePage() {
               <MousePointerClick className="h-4 w-4" strokeWidth={2} />
               View Live Demo
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── For BDMs — rental appraisals ── */}
+      <section id="property-management" className="py-28 border-t border-sky-900/30" style={{ background: 'linear-gradient(135deg, #082f49 0%, #18181b 45%)' }}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
+              <div>
+                <p className="text-sky-400 text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Building2 className="h-3.5 w-3.5" strokeWidth={2} />
+                  For Property Management
+                </p>
+                <h2 className="text-3xl md:text-4xl font-semibold text-white mb-5 tracking-tight leading-tight">
+                  Grow your rent roll the same way
+                </h2>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                  Every BDM has the same problem. The landlords worth chasing stay invisible until their property is already on the market. A free rental appraisal gives them a reason to put their hand up first.
+                </p>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                  Switch your landing page to rental and the same address search returns the same PropTrack report, read for rent instead of sale. You get the address, the contact details and a landlord who came to you.
+                </p>
+                <Link
+                  href="/auth/signup"
+                  className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 transition-colors text-sm font-semibold"
+                >
+                  Start your free trial
+                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              </div>
+
+              <div className="grid gap-3">
+                {BDM_POINTS.map(({ icon: Icon, label, desc }) => (
+                  <div
+                    key={label}
+                    className="bg-sky-950/30 border border-sky-900/30 rounded-lg p-4 hover:border-sky-800/50 hover:bg-sky-950/50 transition-colors"
+                  >
+                    <Icon className="h-4 w-4 mb-2 text-sky-400" strokeWidth={1.5} />
+                    <p className="text-xs font-medium text-white mb-1">{label}</p>
+                    <p className="text-[11px] leading-relaxed text-sky-700/90">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

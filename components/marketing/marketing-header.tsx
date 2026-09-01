@@ -9,6 +9,7 @@ import { getAgentPageUrl } from '@/lib/subdomain'
 const NAV_LINKS = [
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Features', href: '#features' },
+  { label: 'For BDMs', href: '#property-management' },
   { label: 'Pricing', href: '#pricing' },
   // Live demo lives on the agent subdomain (env-aware: my.* / staging-my.*)
   { label: 'Demo', href: getAgentPageUrl('demo') },
