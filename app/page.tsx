@@ -285,6 +285,13 @@ export default function HomePage() {
                 </Link>
               </div>
               <p className="text-zinc-500 text-sm">30-day free trial · Cancel anytime</p>
+              <Link
+                href={rentalDemoUrl}
+                className="inline-flex items-center gap-1.5 text-sm text-sky-400 hover:text-sky-300 transition-colors"
+              >
+                <KeyRound className="h-3.5 w-3.5" strokeWidth={1.75} />
+                Property management BDM? See the rental demo
+              </Link>
               <Link href="/auth/login" className="text-zinc-500 hover:text-white text-sm transition-colors">
                 Already have an account?{' '}
                 <span className="font-medium text-zinc-400">Go to Dashboard</span>

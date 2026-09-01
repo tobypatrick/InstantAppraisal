@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { label: 'Pricing', href: '#pricing' },
   // Live demo lives on the agent subdomain (env-aware: my.* / staging-my.*)
   { label: 'Demo', href: getAgentPageUrl('demo') },
+  { label: 'Rental Demo', href: `${getAgentPageUrl('demo')}?variant=rental` },
 ]
 
 export function MarketingHeader() {
