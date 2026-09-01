@@ -7,10 +7,24 @@ import { variantCopy } from '@/lib/landing-variants'
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ variant?: string }>
 }
 
-export default async function AgentLandingPage({ params }: PageProps) {
+// The demo account can be previewed in either variant so one profile serves
+// both demos. Scoped to the demo slug on purpose: a real agent's page must
+// never render someone else's wording because a link carried ?variant=.
+// Keeping it on the one profile also means the rental demo inherits its
+// LeadConnector webhook, notification email, pixel and billing exemption
+// rather than being a second account that drifts.
+const DEMO_SLUG = 'demo'
+function resolveVariant(slug: string, profileVariant: string | null | undefined, override: string | undefined) {
+  if (slug === DEMO_SLUG && override === 'rental') return 'rental'
+  return profileVariant || 'sales'
+}
+
+export default async function AgentLandingPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { variant: variantOverride } = await searchParams
   const supabase = await createClient()
 
   const { data, error } = await supabase.rpc('get_public_profile', { profile_slug: slug })
@@ -27,7 +41,7 @@ export default async function AgentLandingPage({ params }: PageProps) {
   }
   const agencyLogoUrl = resolveAsset(raw.agency_logo_url || null)
   const profilePictureUrl = resolveAsset(raw.profile_picture_url || null)
-  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', landing_variant: raw.landing_variant || 'sales', agency_logo_url: agencyLogoUrl, profile_picture_url: profilePictureUrl }
+  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', landing_variant: resolveVariant(slug, raw.landing_variant, variantOverride), agency_logo_url: agencyLogoUrl, profile_picture_url: profilePictureUrl }
   const gtmId: string | null = profile.google_tag_manager_id || null
   const pixelId: string | null = profile.facebook_pixel_id || null
 
@@ -50,8 +64,9 @@ export default async function AgentLandingPage({ params }: PageProps) {
   )
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { variant: variantOverride } = await searchParams
   const supabase = await createClient()
   const { data } = await supabase.rpc('get_public_profile', { profile_slug: slug })
   const profile = data?.[0]
@@ -61,7 +76,7 @@ export async function generateMetadata({ params }: PageProps) {
   const agentName = profile?.full_name || null
   const agencyName = profile?.agency_name || null
   const brand = [agentName, agencyName].filter(Boolean).join(' · ')
-  const copy = variantCopy(profile?.landing_variant)
+  const copy = variantCopy(resolveVariant(slug, profile?.landing_variant, variantOverride))
   const title = brand ? `${copy.metaTitle} | ${brand}` : copy.metaTitle
   const fromName = agentName || agencyName
   const description = `Get a free, instant ${copy.metaDescriptionNoun}${fromName ? ` from ${fromName}` : ''} — no obligation, powered by PropTrack data.`

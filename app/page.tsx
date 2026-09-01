@@ -12,6 +12,8 @@ import { getAgentPageUrl } from '@/lib/subdomain'
 // Live demo lives on the agent subdomain (env-aware: my.* in prod,
 // staging-my.* in staging). The old marketing /demo page redirects here.
 const demoUrl = getAgentPageUrl('demo')
+// Same demo profile, rental variant. See app/demo/rental/page.tsx.
+const rentalDemoUrl = `${getAgentPageUrl('demo')}?variant=rental`
 
 export const metadata = {
   title: 'Property Appraisals for Real Estate Agents | InstantAppraisal',
@@ -702,16 +704,25 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <p className="text-zinc-950 font-bold text-xl mb-1">Want to see the homeowner experience?</p>
+              <p className="text-zinc-950 font-bold text-xl mb-1">Want to see it from their side?</p>
               <p className="text-emerald-900 text-sm">Walk through the full flow: branded page, address search, report preview, and lead capture.</p>
             </div>
-            <Link
-              href={demoUrl}
-              className="shrink-0 inline-flex items-center gap-2 bg-zinc-950 text-white font-semibold px-8 h-12 rounded hover:bg-zinc-800 transition-colors text-sm"
-            >
-              <MousePointerClick className="h-4 w-4" strokeWidth={2} />
-              View Live Demo
-            </Link>
+            <div className="shrink-0 flex flex-wrap items-center gap-3">
+              <Link
+                href={demoUrl}
+                className="inline-flex items-center gap-2 bg-zinc-950 text-white font-semibold px-6 h-12 rounded hover:bg-zinc-800 transition-colors text-sm"
+              >
+                <MousePointerClick className="h-4 w-4" strokeWidth={2} />
+                Sales Demo
+              </Link>
+              <Link
+                href={rentalDemoUrl}
+                className="inline-flex items-center gap-2 border border-zinc-950/30 text-zinc-950 font-semibold px-6 h-12 rounded hover:bg-zinc-950/10 transition-colors text-sm"
+              >
+                <KeyRound className="h-4 w-4" strokeWidth={2} />
+                Rental Demo
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -735,13 +746,22 @@ export default function HomePage() {
                 <p className="text-zinc-400 text-sm leading-relaxed mb-4">
                   Switch your landing page to rental and the same address search returns the same PropTrack report, read for rent instead of sale. You get the address, the contact details and a landlord who came to you.
                 </p>
-                <Link
-                  href="/auth/signup"
-                  className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 transition-colors text-sm font-semibold"
-                >
-                  Start your free trial
-                  <ArrowRight className="h-4 w-4" strokeWidth={2} />
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href={rentalDemoUrl}
+                    className="inline-flex items-center gap-2 bg-sky-500 text-zinc-950 font-semibold px-6 h-11 rounded hover:bg-sky-400 transition-colors text-sm"
+                  >
+                    <MousePointerClick className="h-4 w-4" strokeWidth={2} />
+                    See the rental demo
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 transition-colors text-sm font-semibold"
+                  >
+                    Start your free trial
+                    <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                  </Link>
+                </div>
               </div>
 
               <div className="grid gap-3">
