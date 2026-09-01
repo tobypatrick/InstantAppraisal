@@ -58,6 +58,25 @@ export interface VariantCopy {
   /** Dashboard settings control */
   settingsLabel: string
   settingsDescription: string
+  /**
+   * Email copy. "Property report" is deliberately NOT varied (Toby, 2 Sept
+   * 2026) — the PropTrack document is a property report either way.
+   */
+  email: {
+    /** To the owner: confirmation they requested an appraisal */
+    confirmSubject: string
+    confirmThanks: string
+    confirmDiscuss: string
+    confirmContents: string
+    /** To the agent or BDM: a completed lead */
+    notifyCompleted: string
+    notifyLeadType: string
+    notifyOwnerNoun: string
+    notifyPartialSearch: string
+    notifyProspectTip: string
+    /** To the agent or BDM: over the monthly cap */
+    limitOwnersPlural: string
+  }
 }
 
 const SALES: VariantCopy = {
@@ -82,6 +101,20 @@ const SALES: VariantCopy = {
   metaDescriptionNoun: 'property value update',
   settingsLabel: 'Sales appraisals',
   settingsDescription: 'For sales agents. The page asks homeowners what their property is worth to sell.',
+  email: {
+    confirmSubject: 'Your Instant Property Appraisal',
+    confirmThanks: 'a property appraisal',
+    confirmDiscuss: "your property's value",
+    confirmContents:
+      "your estimated value range, recent comparable sales in your area, and local market insights — everything you need to understand your property's current market position",
+    notifyCompleted: 'A homeowner has completed an instant appraisal on your page.',
+    notifyLeadType: 'This is a warm seller lead',
+    notifyOwnerNoun: 'A homeowner',
+    notifyPartialSearch: 'a property valuation',
+    notifyProspectTip:
+      'This is a market activity signal. Consider a letterbox drop, door knock, or check if it is a nearby listing you could prospect.',
+    limitOwnersPlural: 'Your homeowners',
+  },
 }
 
 const RENTAL: VariantCopy = {
@@ -105,7 +138,21 @@ const RENTAL: VariantCopy = {
   metaTitle: 'Instant, Free Rental Appraisal',
   metaDescriptionNoun: 'rental value update',
   settingsLabel: 'Rental appraisals',
-  settingsDescription: 'For property managers. The page asks owners what their property is worth to rent.',
+  settingsDescription: 'For property management BDMs. The page asks owners what their property is worth to rent.',
+  email: {
+    confirmSubject: 'Your Instant Rental Appraisal',
+    confirmThanks: 'a rental appraisal',
+    confirmDiscuss: 'what your property could rent for',
+    confirmContents:
+      'your estimated rent range, recent comparable rentals in your area, and local market insights — everything you need to understand what your property could earn',
+    notifyCompleted: 'An owner has completed a rental appraisal on your page.',
+    notifyLeadType: 'This is a warm landlord lead',
+    notifyOwnerNoun: 'An owner',
+    notifyPartialSearch: 'a rental appraisal',
+    notifyProspectTip:
+      'This is a market activity signal. Consider a letterbox drop or door knock, or check whether it is a nearby rental you could approach.',
+    limitOwnersPlural: 'Your owners',
+  },
 }
 
 const COPY: Record<LandingVariant, VariantCopy> = { sales: SALES, rental: RENTAL }

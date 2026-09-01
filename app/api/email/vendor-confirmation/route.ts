@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { variantCopy } from '@/lib/landing-variants'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { buildEmail, escapeHtml } from '@/lib/email-template'
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, agency_name, phone_number, notification_email, send_vendor_email')
+      .select('full_name, agency_name, phone_number, notification_email, send_vendor_email, landing_variant')
       .eq('id', agent_id)
       .single()
 
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
     const contactPhone = profile?.phone_number || ''
     const vendorFirstName = escapeHtml(lead.contact_name?.split(' ')[0]) || 'there'
     const address = escapeHtml(lead.address)
+    const copy = variantCopy((profile as { landing_variant?: string } | null)?.landing_variant).email
 
     let contactLines = ''
     if (contactPhone) {
@@ -67,10 +69,10 @@ export async function POST(request: NextRequest) {
     const hasReport = !!lead.report_url
     const body = `
       <p style="margin:0 0 16px 0;">Hi ${vendorFirstName},</p>
-      <p style="margin:0 0 16px 0;">Thanks for requesting a property appraisal for <strong>${address}</strong>.</p>
-      <p style="margin:0 0 16px 0;">${agentName}${agencyPart} will be in touch with you shortly to discuss your property's value and answer any questions you may have.</p>
+      <p style="margin:0 0 16px 0;">Thanks for requesting ${copy.confirmThanks} for <strong>${address}</strong>.</p>
+      <p style="margin:0 0 16px 0;">${agentName}${agencyPart} will be in touch with you shortly to discuss ${copy.confirmDiscuss} and answer any questions you may have.</p>
       ${hasReport
-        ? `<p style="margin:0 0 16px 0;">Your PropTrack property report includes your estimated value range, recent comparable sales in your area, and local market insights — everything you need to understand your property's current market position.</p>`
+        ? `<p style="margin:0 0 16px 0;">Your PropTrack property report includes ${copy.confirmContents}.</p>`
         : ''}
       ${contactLines ? `<p style="margin:0 0 8px 0;color:#6b7280;font-size:14px;">In the meantime, you can reach ${agentName} directly:</p>${contactLines}` : ''}
     `
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
       from: `${agentName} via InstantAppraisal <hello@${fromDomain}>`,
       to: [lead.contact_email],
       replyTo: contactEmail || undefined,
-      subject: `Your Instant Property Appraisal — ${lead.address}`,
+      subject: `${copy.confirmSubject} — ${lead.address}`,
       html,
     })
 

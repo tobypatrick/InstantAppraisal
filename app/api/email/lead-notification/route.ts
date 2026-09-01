@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { variantCopy, normaliseVariant, type LandingVariant } from '@/lib/landing-variants'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { buildEmail, escapeHtml, formatAEST } from '@/lib/email-template'
 
-function buildPartialEmail(firstName: string, address: string, date: string, utmSource: string): string {
+function buildPartialEmail(firstName: string, address: string, date: string, utmSource: string, variant: LandingVariant): string {
+  const copy = variantCopy(variant).email
   return `
     <p style="margin:0 0 16px 0;">Hey ${firstName},</p>
-    <p style="margin:0 0 16px 0;">Someone searched for a property valuation on your Instant Appraisal page but didn't complete the form. No contact details were captured.</p>
+    <p style="margin:0 0 16px 0;">Someone searched for ${copy.notifyPartialSearch} on your Instant Appraisal page but didn't complete the form. No contact details were captured.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px 0;">
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Property</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${address}</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Source</td><td style="padding:8px 0;font-size:16px;color:#333333;">${utmSource}</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Date</td><td style="padding:8px 0;font-size:16px;color:#333333;">${date}</td></tr>
     </table>
-    <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6;">This is a market activity signal. Consider a letterbox drop, door knock, or check if it is a nearby listing you could prospect.</p>`
+    <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6;">${copy.notifyProspectTip}</p>`
 }
 
 // Renders the homeowner's stated interest, emphasising "Looking to Sell" since
@@ -36,8 +38,10 @@ function buildCompleteEmail(
   date: string,
   utmSource: string,
   limitReached = false,
-  interestLevel = ''
+  interestLevel = '',
+  variant: LandingVariant = 'sales'
 ): string {
+  const copy = variantCopy(variant).email
   const linkStyle = 'color:#10B981;text-decoration:underline;'
   const emailCell = leadEmail
     ? `<a href="mailto:${escapeHtml(leadEmail)}" style="${linkStyle}">${escapeHtml(leadEmail)}</a>`
@@ -54,7 +58,7 @@ function buildCompleteEmail(
 
   return `
     <p style="margin:0 0 16px 0;">Hey ${firstName},</p>
-    <p style="margin:0 0 24px 0;">A homeowner has completed an instant appraisal on your page. This is a warm seller lead — follow up promptly.</p>
+    <p style="margin:0 0 24px 0;">${copy.notifyCompleted} ${copy.notifyLeadType} — follow up promptly.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 8px 0;">
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
       ${emailCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${emailCell}</td></tr>` : ''}
@@ -78,15 +82,17 @@ function buildLimitBlockedEmail(
   address: string,
   date: string,
   utmSource: string,
-  interestLevel = ''
+  interestLevel = '',
+  variant: LandingVariant = 'sales'
 ): string {
+  const blockedCopy = variantCopy(variant).email
   const linkStyle = 'color:#10B981;text-decoration:underline;'
   const emailCell = leadEmail ? `<a href="mailto:${escapeHtml(leadEmail)}" style="${linkStyle}">${escapeHtml(leadEmail)}</a>` : ''
   const phoneCell = leadPhone ? `<a href="tel:${escapeHtml(leadPhone)}" style="${linkStyle}">${escapeHtml(leadPhone)}</a>` : ''
 
   return `
     <p style="margin:0 0 16px 0;">Hey ${firstName},</p>
-    <p style="margin:0 0 16px 0;">A homeowner just completed an appraisal on your page — but you've hit your monthly report limit, so <strong>they did not receive their report</strong>.</p>
+    <p style="margin:0 0 16px 0;">${blockedCopy.notifyOwnerNoun} just completed an appraisal on your page — but you've hit your monthly report limit, so <strong>they did not receive their report</strong>.</p>
     <p style="margin:0 0 24px 0;">Reach out to them directly so they don't go cold, and upgrade your plan to start sending reports again.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 8px 0;">
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
@@ -147,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, slug, notification_email')
+      .select('full_name, slug, notification_email, landing_variant')
       .eq('id', agentId)
       .single()
 
@@ -162,6 +168,7 @@ export async function POST(request: NextRequest) {
     const leadAddress = escapeHtml(leadData.address)
     const utmSource = escapeHtml(leadData.utm_source) || 'Direct'
     const formattedDate = formatAEST(leadData.created_at || new Date().toISOString())
+    const variant = normaliseVariant((profile as { landing_variant?: string } | null)?.landing_variant)
 
     let subject: string
     let body: string
@@ -173,7 +180,7 @@ export async function POST(request: NextRequest) {
 
     if (notificationType === 'partial') {
       subject = `New Address Search — ${leadData.address}`
-      body = buildPartialEmail(firstName, leadAddress, formattedDate, utmSource)
+      body = buildPartialEmail(firstName, leadAddress, formattedDate, utmSource, variant)
       ctaText = 'View All Leads'
       ctaUrl = 'https://dashboard.instantappraisal.co/leads'
     } else if (notificationType === 'limit_blocked') {
@@ -184,7 +191,7 @@ export async function POST(request: NextRequest) {
 
       if (leadEmail) replyTo = leadEmail
       subject = `Action needed — lead captured, report limit reached — ${leadData.address}`
-      body = buildLimitBlockedEmail(firstName, leadName, leadEmail, leadPhone, leadAddress, formattedDate, utmSource, interestLevel)
+      body = buildLimitBlockedEmail(firstName, leadName, leadEmail, leadPhone, leadAddress, formattedDate, utmSource, interestLevel, variant)
       ctaText = 'Upgrade Here'
       ctaUrl = 'https://dashboard.instantappraisal.co/billing'
     } else {
@@ -198,7 +205,7 @@ export async function POST(request: NextRequest) {
       subject = `Instant Appraisal Completed — ${leadData.address}`
       body = buildCompleteEmail(
         firstName, leadName, leadEmail, leadPhone, leadAddress,
-        reportUrl, formattedDate, utmSource, limitReached, interestLevel
+        reportUrl, formattedDate, utmSource, limitReached, interestLevel, variant
       )
       ctaText = 'View Lead'
       ctaUrl = `https://dashboard.instantappraisal.co/leads?highlight=${leadId}`

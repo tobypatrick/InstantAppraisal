@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { variantCopy } from '@/lib/landing-variants'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { buildEmail, escapeHtml } from '@/lib/email-template'
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     )
 
     const [profileRes, billingRes, userRes] = await Promise.all([
-      supabase.from('profiles').select('full_name').eq('id', agent_id).single(),
+      supabase.from('profiles').select('full_name, landing_variant').eq('id', agent_id).single(),
       supabase.from('billing').select('subscription_tier').eq('user_id', agent_id).single(),
       supabase.auth.admin.getUserById(agent_id),
     ])
@@ -40,12 +41,14 @@ export async function POST(request: NextRequest) {
     const tierLabel = TIER_LABELS[tier] || tier
     const limit = TIER_LIMITS[tier] || 0
 
+    const emailCopy = variantCopy((profileRes.data as { landing_variant?: string } | null)?.landing_variant).email
+
     const isElite = tier === 'elite'
     const upgradeUrl = 'https://dashboard.instantappraisal.co/billing'
 
     const body = `
       <p style="margin:0 0 16px 0;">Hi ${agentName},</p>
-      <p style="margin:0 0 16px 0;">You've used all <strong>${limit} property reports</strong> on your ${tierLabel} plan this month. Your homeowners are still being captured as leads, but they will not receive a PropTrack report until your usage resets next month or you upgrade your plan.</p>
+      <p style="margin:0 0 16px 0;">You've used all <strong>${limit} property reports</strong> on your ${tierLabel} plan this month. ${emailCopy.limitOwnersPlural} are still being captured as leads, but they will not receive a PropTrack report until your usage resets next month or you upgrade your plan.</p>
       ${isElite
         ? `<p style="margin:0 0 16px 0;">Your usage will reset at the start of next billing period.</p>`
         : `<p style="margin:0 0 16px 0;">Upgrade to Elite for <strong>100 reports per month</strong> and priority email support.</p>`}
