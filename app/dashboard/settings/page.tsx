@@ -13,6 +13,7 @@ import { BrandingSection } from '@/components/settings/BrandingSection'
 import { BusinessInfoSection } from '@/components/settings/BusinessInfoSection'
 import { SlugSection } from '@/components/settings/SlugSection'
 import { LightCard, LightCardHeader } from '@/components/dashboard/LightCard'
+import { LANDING_VARIANTS, variantCopy, normaliseVariant, type LandingVariant } from '@/lib/landing-variants'
 
 interface FormData {
   full_name: string
@@ -30,6 +31,7 @@ interface FormData {
   google_tag_manager_id: string
   notification_email: string
   send_vendor_email: boolean
+  landing_variant: LandingVariant
 }
 
 const DEFAULT_FORM: FormData = {
@@ -48,6 +50,7 @@ const DEFAULT_FORM: FormData = {
   google_tag_manager_id: '',
   notification_email: '',
   send_vendor_email: true,
+  landing_variant: 'sales',
 }
 
 export default function SettingsPage() {
@@ -55,6 +58,9 @@ export default function SettingsPage() {
   const [profileId, setProfileId] = useState<string | null>(null)
   const [slugError, setSlugError] = useState('')
   const [saving, setSaving] = useState(false)
+  // If the profile never loaded, the form is showing empty defaults rather than
+  // the user's real settings. Saving then would blank their profile, so block it.
+  const [loadFailed, setLoadFailed] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -63,10 +69,15 @@ export default function SettingsPage() {
       setProfileId(user.id)
       supabase
         .from('profiles')
-        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email, send_vendor_email')
+        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email, send_vendor_email, landing_variant')
         .eq('id', user.id)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error || !data) {
+            setLoadFailed(true)
+            toast.error('Could not load your settings. Refresh before making changes.')
+            return
+          }
           if (data) {
             setFormData({
               full_name: data.full_name || '',
@@ -84,6 +95,7 @@ export default function SettingsPage() {
               google_tag_manager_id: data.google_tag_manager_id || '',
               notification_email: (data as any).notification_email || '',
               send_vendor_email: (data as any).send_vendor_email ?? true,
+              landing_variant: normaliseVariant((data as any).landing_variant),
             })
           }
         })
@@ -103,6 +115,10 @@ export default function SettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!profileId) return
+    if (loadFailed) {
+      toast.error('Your settings did not load, so saving would overwrite them. Refresh the page.')
+      return
+    }
 
     if (formData.slug && !validateSlug(formData.slug)) {
       setSlugError('URL must be at least 3 characters and can only contain lowercase letters, numbers, and hyphens')
@@ -125,7 +141,6 @@ export default function SettingsPage() {
           agency_name: formData.agency_name || null,
           phone_number: formData.phone_number || null,
           vsl_youtube_url: formData.vsl_youtube_url || null,
-          selected_template: 'data_hub',
           slug: formData.slug || null,
           agency_logo_url: formData.agency_logo_url || null,
           profile_picture_url: formData.profile_picture_url || null,
@@ -137,6 +152,7 @@ export default function SettingsPage() {
           google_tag_manager_id: formData.google_tag_manager_id || null,
           notification_email: formData.notification_email || null,
           send_vendor_email: formData.send_vendor_email,
+          landing_variant: formData.landing_variant,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profileId)
@@ -190,6 +206,46 @@ export default function SettingsPage() {
             onChange={(field, value) => handleChange(field, value)}
           />
         </div>
+
+        <LightCard>
+          <LightCardHeader
+            icon={<Layout className="h-4 w-4" strokeWidth={1.25} />}
+            title="Landing Page Type"
+            description="Choose whether your page asks about selling or renting. The PropTrack report is the same either way."
+          />
+          <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Landing page type">
+            {LANDING_VARIANTS.map((v) => {
+              const variant = variantCopy(v)
+              const selected = formData.landing_variant === v
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setFormData((prev) => ({ ...prev, landing_variant: v }))}
+                  className={`text-left rounded-lg border p-4 transition-colors ${
+                    selected
+                      ? 'border-emerald-500 bg-emerald-50/60 ring-1 ring-emerald-500'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-2 mb-1">
+                    <span
+                      className={`h-3.5 w-3.5 rounded-full border flex-shrink-0 ${
+                        selected ? 'border-emerald-600 bg-emerald-600' : 'border-slate-300'
+                      }`}
+                    />
+                    <span className="text-sm font-semibold text-slate-900">{variant.settingsLabel}</span>
+                  </span>
+                  <span className="block text-xs leading-snug text-slate-500 pl-[1.375rem]">
+                    {variant.settingsDescription}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </LightCard>
 
         <LightCard>
           <LightCardHeader icon={<Layout className="h-4 w-4" strokeWidth={1.25} />} title="Landing Page Video" description="Add a YouTube video to your landing page." />

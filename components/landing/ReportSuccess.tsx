@@ -1,6 +1,7 @@
 import { CheckCircle, FileText, Download, Clock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getContrastTextColor } from "@/lib/color-utils";
+import { variantCopy, type LandingVariant } from "@/lib/landing-variants";
 
 interface ReportSuccessProps {
   reportUrl: string | null;
@@ -9,6 +10,7 @@ interface ReportSuccessProps {
   gracefulFailure?: boolean;
   gracefulFailureMessage?: string;
   leadId?: string | null;
+  landingVariant?: LandingVariant;
 }
 
 export function ReportSuccess({
@@ -18,7 +20,9 @@ export function ReportSuccess({
   gracefulFailure = false,
   gracefulFailureMessage,
   leadId,
+  landingVariant = "sales",
 }: ReportSuccessProps) {
+  const copy = variantCopy(landingVariant);
   const textColorClass = getContrastTextColor(pageBgColor);
   const mutedTextClass = textColorClass === "text-white"
     ? "text-white/60"
@@ -64,7 +68,7 @@ export function ReportSuccess({
                 What happens next?
               </p>
               <p className={`text-xs ${mutedTextClass} mt-1`}>
-                Your details have been securely saved. {agentName ? `${agentName} will` : "An agent will"} contact you shortly with your personalised property report.
+                Your details have been securely saved. {agentName ? `${agentName} will` : "An agent will"} contact you shortly with your {copy.successPendingReport}.
               </p>
             </div>
           </div>
@@ -115,7 +119,7 @@ export function ReportSuccess({
             <FileText className="h-5 w-5 text-accent" strokeWidth={1.5} />
           </div>
           <div className="text-left">
-            <p className="font-medium text-foreground text-sm">Property Appraisal Report</p>
+            <p className="font-medium text-foreground text-sm">{copy.successReportLabel}</p>
             <p className="text-xs text-muted-foreground">Powered by PropTrack data</p>
           </div>
         </div>

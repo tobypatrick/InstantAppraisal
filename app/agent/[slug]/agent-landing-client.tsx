@@ -8,6 +8,7 @@ import { LimitReachedModal } from '@/components/landing/LimitReachedModal'
 import { DEFAULT_HEADER_COLOR, DEFAULT_PAGE_COLOR, DEFAULT_ACCENT_COLOR } from '@/lib/color-utils'
 import { extractUTMParams } from '@/lib/utm-utils'
 import type { PublicProfile } from '@/hooks/useAgentProfile'
+import { normaliseVariant } from '@/lib/landing-variants'
 
 type CaptureStep = 'address' | 'contact' | 'loading' | 'success'
 
@@ -177,11 +178,15 @@ export function AgentLandingClient({ profile }: Props) {
   const headerBgColor = profile.header_bg_color || DEFAULT_HEADER_COLOR
   const pageBgColor = profile.page_bg_color || DEFAULT_PAGE_COLOR
   const accentColor = profile.accent_color || DEFAULT_ACCENT_COLOR
+  // Falls back to 'sales' if the column/RPC field is missing, so the page is
+  // safe to deploy before the landing_variant migration is applied.
+  const variant = normaliseVariant(profile.landing_variant)
 
   return (
     <>
       <MinimalistTemplate
         profile={profile}
+        variant={variant}
         headerBgColor={headerBgColor}
         pageBgColor={pageBgColor}
         accentColor={accentColor}

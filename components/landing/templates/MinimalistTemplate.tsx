@@ -4,10 +4,12 @@ import { VideoEmbed } from "./shared/VideoEmbed";
 import { PoweredByAttribution } from "./shared/PoweredByAttribution";
 import { ReportPreview } from "./shared/ReportPreview";
 import { getContrastTextColor, hexToRgba } from "@/lib/color-utils";
+import { variantCopy } from "@/lib/landing-variants";
 import type { TemplateProps } from "./shared/TemplateTypes";
 
 export function MinimalistTemplate({
   profile,
+  variant,
   headerBgColor,
   pageBgColor,
   accentColor,
@@ -24,6 +26,7 @@ export function MinimalistTemplate({
   gracefulFailureMessage,
   leadId,
 }: TemplateProps) {
+  const copy = variantCopy(variant);
   const textColorClass = getContrastTextColor(pageBgColor);
   const mutedTextClass = textColorClass === "text-white"
     ? "text-white/60"
@@ -83,10 +86,10 @@ export function MinimalistTemplate({
             </div>
 
             <h1 className={`text-3xl md:text-5xl font-bold ${textColorClass} mb-4 tracking-tight leading-[1.1]`}>
-              Discover Your Property's<br />New Market Value
+              {copy.heroTitle[0]}<br />{copy.heroTitle[1]}
             </h1>
             <p className={`${mutedTextClass} text-sm md:text-base max-w-md mx-auto leading-relaxed`}>
-              Get a <strong>free, no-obligation</strong> property report in 30 seconds.
+              Get a <strong>{copy.heroSubtitleStrong}</strong> {copy.heroSubtitle}
             </p>
 
             <div className="mt-5 space-y-1">
@@ -97,7 +100,7 @@ export function MinimalistTemplate({
                 </p>
               )}
               <p className={`${mutedTextClass} text-xs opacity-75`}>
-                Used by 800+ homeowners this week
+                {copy.socialProof}
               </p>
             </div>
           </div>
@@ -120,6 +123,7 @@ export function MinimalistTemplate({
               isGracefulFailure={isGracefulFailure}
               gracefulFailureMessage={gracefulFailureMessage}
               leadId={leadId}
+              landingVariant={variant}
             />
           </div>
         </div>
@@ -130,6 +134,7 @@ export function MinimalistTemplate({
             textColorClass={textColorClass}
             mutedTextClass={mutedTextClass}
             accentColor={accentColor}
+            variant={variant}
           />
         )}
 
