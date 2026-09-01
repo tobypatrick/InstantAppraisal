@@ -58,6 +58,9 @@ export default function SettingsPage() {
   const [profileId, setProfileId] = useState<string | null>(null)
   const [slugError, setSlugError] = useState('')
   const [saving, setSaving] = useState(false)
+  // If the profile never loaded, the form is showing empty defaults rather than
+  // the user's real settings. Saving then would blank their profile, so block it.
+  const [loadFailed, setLoadFailed] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -69,7 +72,12 @@ export default function SettingsPage() {
         .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email, send_vendor_email, landing_variant')
         .eq('id', user.id)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error || !data) {
+            setLoadFailed(true)
+            toast.error('Could not load your settings. Refresh before making changes.')
+            return
+          }
           if (data) {
             setFormData({
               full_name: data.full_name || '',
@@ -107,6 +115,10 @@ export default function SettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!profileId) return
+    if (loadFailed) {
+      toast.error('Your settings did not load, so saving would overwrite them. Refresh the page.')
+      return
+    }
 
     if (formData.slug && !validateSlug(formData.slug)) {
       setSlugError('URL must be at least 3 characters and can only contain lowercase letters, numbers, and hyphens')
