@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { createClient } from '@/lib/supabase/server'
 import { getAgentPageUrl } from '@/lib/subdomain'
 import { AgentLandingClient } from './agent-landing-client'
+import { variantCopy } from '@/lib/landing-variants'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -26,7 +27,7 @@ export default async function AgentLandingPage({ params }: PageProps) {
   }
   const agencyLogoUrl = resolveAsset(raw.agency_logo_url || null)
   const profilePictureUrl = resolveAsset(raw.profile_picture_url || null)
-  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', agency_logo_url: agencyLogoUrl, profile_picture_url: profilePictureUrl }
+  const profile = { ...raw, selected_template: raw.selected_template || 'minimalist', landing_variant: raw.landing_variant || 'sales', agency_logo_url: agencyLogoUrl, profile_picture_url: profilePictureUrl }
   const gtmId: string | null = profile.google_tag_manager_id || null
   const pixelId: string | null = profile.facebook_pixel_id || null
 
@@ -60,11 +61,10 @@ export async function generateMetadata({ params }: PageProps) {
   const agentName = profile?.full_name || null
   const agencyName = profile?.agency_name || null
   const brand = [agentName, agencyName].filter(Boolean).join(' · ')
-  const title = brand
-    ? `Instant, Free Property Report | ${brand}`
-    : 'Instant, Free Property Report'
+  const copy = variantCopy(profile?.landing_variant)
+  const title = brand ? `${copy.metaTitle} | ${brand}` : copy.metaTitle
   const fromName = agentName || agencyName
-  const description = `Get a free, instant property value update${fromName ? ` from ${fromName}` : ''} — no obligation, powered by PropTrack data.`
+  const description = `Get a free, instant ${copy.metaDescriptionNoun}${fromName ? ` from ${fromName}` : ''} — no obligation, powered by PropTrack data.`
 
   // Resolve a branded preview image: agency logo → agent headshot → site default.
   const resolveAsset = (path: string | null | undefined): string | null => {

@@ -11,6 +11,7 @@ export interface PublicProfile {
   agency_logo_url: string | null
   vsl_youtube_url: string | null
   selected_template: string
+  landing_variant: string
   slug: string | null
   header_bg_color?: string | null
   page_bg_color?: string | null
@@ -28,7 +29,11 @@ export function useAgentProfile(slug: string | undefined) {
       const { data, error } = await supabase.rpc('get_public_profile', { profile_slug: slug })
       if (error) throw error
       if (!data || data.length === 0) return null
-      return { ...data[0], selected_template: data[0].selected_template || 'minimalist' } as PublicProfile
+      return {
+        ...data[0],
+        selected_template: data[0].selected_template || 'minimalist',
+        landing_variant: data[0].landing_variant || 'sales',
+      } as PublicProfile
     },
     enabled: !!slug,
   })
