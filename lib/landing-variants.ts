@@ -34,6 +34,14 @@ export type ReportCardIcon =
   | 'users'
   | 'school'
 
+export type InterestIcon = 'building' | 'key' | 'door' | 'house' | 'eye'
+
+export interface InterestOption {
+  /** Stored verbatim in leads.interest_level. Must match the DB CHECK. */
+  value: string
+  icon: InterestIcon
+}
+
 export interface ReportCard {
   icon: ReportCardIcon
   label: string
@@ -49,6 +57,13 @@ export interface VariantCopy {
   /** Report preview grid */
   reportEyebrow: string
   reportCards: readonly ReportCard[]
+  /** Contact form */
+  interestQuestion: string
+  interestOptions: readonly InterestOption[]
+  /** The option worth flagging to the agent or BDM as hot */
+  hotInterest: string
+  /** Pre-selected option, or '' to force a choice */
+  defaultInterest: string
   /** Success step */
   successReportLabel: string
   successPendingReport: string
@@ -95,6 +110,13 @@ const SALES: VariantCopy = {
     { icon: 'users', label: 'Potential Buyers', desc: 'Live buyer demand from realestate.com.au' },
     { icon: 'school', label: 'Nearby Schools', desc: 'Schools within the catchment area' },
   ],
+  interestQuestion: "What's your situation?",
+  interestOptions: [
+    { value: 'Looking to Sell', icon: 'house' },
+    { value: 'Just Interested', icon: 'eye' },
+  ],
+  hotInterest: 'Looking to Sell',
+  defaultInterest: 'Just Interested',
   successReportLabel: 'Property Appraisal Report',
   successPendingReport: 'personalised property report',
   metaTitle: 'Instant, Free Property Report',
@@ -133,6 +155,18 @@ const RENTAL: VariantCopy = {
     { icon: 'users', label: 'Tenant Demand', desc: 'Live renter demand from realestate.com.au' },
     { icon: 'school', label: 'Nearby Schools', desc: 'Schools within the catchment area' },
   ],
+  interestQuestion: 'How is the property currently used?',
+  interestOptions: [
+    { value: 'Tenanted, managed by an agency', icon: 'building' },
+    { value: 'Tenanted, I manage it myself', icon: 'key' },
+    { value: 'Vacant or between tenants', icon: 'door' },
+    { value: 'I live in it', icon: 'house' },
+  ],
+  hotInterest: 'Vacant or between tenants',
+  // No honest neutral answer here, unlike "Just Interested" on the sales side.
+  // Pre-selecting one would file a factual claim the owner never made, so the
+  // rental form requires a choice.
+  defaultInterest: '',
   successReportLabel: 'Rental Appraisal Report',
   successPendingReport: 'personalised rental appraisal',
   metaTitle: 'Instant, Free Rental Appraisal',

@@ -3,7 +3,16 @@ import { createClient } from '@supabase/supabase-js'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const TIER_LIMITS: Record<string, number> = { pro: 20, elite: 100 }
-const VALID_INTEREST = ['Looking to Sell', 'Just Interested']
+const VALID_INTEREST = [
+  // sales
+  'Looking to Sell',
+  'Just Interested',
+  // rental — see lib/landing-variants.ts and leads_interest_level_check
+  'Tenanted, managed by an agency',
+  'Tenanted, I manage it myself',
+  'Vacant or between tenants',
+  'I live in it',
+]
 
 interface CompleteBody {
   lead_id: string
