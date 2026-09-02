@@ -17,12 +17,13 @@ function buildPartialEmail(firstName: string, address: string, date: string, utm
     <p style="margin:0;color:#6b7280;font-size:14px;line-height:1.6;">${copy.notifyProspectTip}</p>`
 }
 
-// Renders the homeowner's stated interest, emphasising "Looking to Sell" since
-// that's the hot signal an agent should jump on.
-function interestRow(interestLevel: string): string {
+// Renders the owner's stated interest, emphasising the variant's hot signal:
+// "Looking to Sell" for a sales agent, "Vacant or between tenants" for a BDM,
+// since a vacant property is costing the owner money every week.
+function interestRow(interestLevel: string, variant: LandingVariant = 'sales'): string {
   if (!interestLevel) return ''
   const value =
-    interestLevel === 'Looking to Sell'
+    interestLevel === variantCopy(variant).hotInterest
       ? `<span style="color:#10B981;font-weight:600;">🔥 ${escapeHtml(interestLevel)}</span>`
       : escapeHtml(interestLevel)
   return `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Interest</td><td style="padding:8px 0;font-size:16px;color:#333333;">${value}</td></tr>`
@@ -63,7 +64,7 @@ function buildCompleteEmail(
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
       ${emailCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${emailCell}</td></tr>` : ''}
       ${phoneCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:16px;color:#333333;">${phoneCell}</td></tr>` : ''}
-      ${interestRow(interestLevel)}
+      ${interestRow(interestLevel, variant)}
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Property</td><td style="padding:8px 0;font-size:16px;color:#333333;">${address}</td></tr>
       ${reportRow}
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Source</td><td style="padding:8px 0;font-size:16px;color:#333333;">${utmSource}</td></tr>
@@ -98,7 +99,7 @@ function buildLimitBlockedEmail(
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Name</td><td style="padding:8px 0;font-size:16px;font-weight:500;color:#333333;">${leadName}</td></tr>
       ${emailCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Email</td><td style="padding:8px 0;font-size:16px;color:#333333;">${emailCell}</td></tr>` : ''}
       ${phoneCell ? `<tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Phone</td><td style="padding:8px 0;font-size:16px;color:#333333;">${phoneCell}</td></tr>` : ''}
-      ${interestRow(interestLevel)}
+      ${interestRow(interestLevel, variant)}
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Property</td><td style="padding:8px 0;font-size:16px;color:#333333;">${address}</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Source</td><td style="padding:8px 0;font-size:16px;color:#333333;">${utmSource}</td></tr>
       <tr><td style="padding:8px 0;color:#6b7280;font-size:14px;width:80px;vertical-align:top;">Date</td><td style="padding:8px 0;font-size:16px;color:#333333;">${date}</td></tr>

@@ -1,11 +1,20 @@
 import { useState } from "react";
-import { User, Mail, Phone, ArrowRight, MapPin, Home, Eye, Check } from "lucide-react";
+import { User, Mail, Phone, ArrowRight, MapPin, Home, Eye, Check, Building2, KeyRound, DoorOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getContrastTextColor } from "@/lib/color-utils";
 import type { LeadFormData } from "@/hooks/useLeadCapture";
 import { validateContactForm } from "@/lib/validation";
+import { variantCopy, type LandingVariant, type InterestIcon } from "@/lib/landing-variants";
+
+const INTEREST_ICONS: Record<InterestIcon, typeof Home> = {
+  building: Building2,
+  key: KeyRound,
+  door: DoorOpen,
+  house: Home,
+  eye: Eye,
+};
 
 interface ContactFormProps {
   address: string;
@@ -13,14 +22,16 @@ interface ContactFormProps {
   isLoading: boolean;
   pageBgColor: string;
   accentColor?: string;
+  landingVariant?: LandingVariant;
 }
 
-export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentColor = "#10b981" }: ContactFormProps) {
+export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentColor = "#10b981", landingVariant = "sales" }: ContactFormProps) {
+  const copy = variantCopy(landingVariant);
   const [formData, setFormData] = useState<LeadFormData>({
     contact_name: "",
     contact_email: "",
     contact_phone: "",
-    interest_level: "Just Interested",
+    interest_level: copy.defaultInterest,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -185,13 +196,11 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentC
         {/* Interest Level Toggle */}
         <div className="space-y-1.5 pt-1">
           <Label className={`${mutedTextClass} text-xs`}>
-            What's your situation?
+            {copy.interestQuestion}
           </Label>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { value: "Looking to Sell", icon: Home },
-              { value: "Just Interested", icon: Eye },
-            ].map(({ value, icon: Icon }) => {
+            {copy.interestOptions.map(({ value, icon }) => {
+              const Icon = INTEREST_ICONS[icon];
               const selected = formData.interest_level === value
               return (
                 <button
@@ -224,6 +233,9 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentC
               )
             })}
           </div>
+          {errors.interest_level && (
+            <p className="text-xs text-destructive">{errors.interest_level}</p>
+          )}
         </div>
 
         {/* Terms & Conditions Checkbox */}

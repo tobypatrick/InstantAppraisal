@@ -73,6 +73,7 @@ export function FormSteps({
             isLoading={isContactLoading}
             pageBgColor={pageBgColor}
             accentColor={accentColor}
+            landingVariant={landingVariant}
           />
         </div>
       )}

@@ -33,7 +33,16 @@ export const contactFormSchema = z.object({
     .refine((val) => /^[0-9+\-\s()]+$/.test(val), {
       message: "Phone number can only contain numbers, +, -, spaces, and parentheses",
     }),
-  interest_level: z.enum(["Looking to Sell", "Just Interested"]),
+  // Both variants. Kept in step with lib/landing-variants.ts and the
+  // leads_interest_level_check constraint.
+  interest_level: z.enum([
+    "Looking to Sell",
+    "Just Interested",
+    "Tenanted, managed by an agency",
+    "Tenanted, I manage it myself",
+    "Vacant or between tenants",
+    "I live in it",
+  ], { message: "Please choose one" }),
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
