@@ -10,13 +10,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 const STAGING_URL = 'https://snobwvwwgvksbxjpxbhv.supabase.co'
-// Accounts that survive a reset. The two demo accounts are public-facing and
-// linked from the marketing site, so wiping them breaks the live demos.
-const KEEP_EMAILS = [
-  'team+test@instantappraisal.co',
-  'team+demosales@instantappraisal.co',
-  'team+demorental@instantappraisal.co',
-]
+// The test account, and the wrong-project canary. Its absence aborts the run.
+const KEEP_EMAIL = 'team+test@instantappraisal.co'
+
+// The public demo accounts survive a reset too, since the marketing site links
+// straight at them. Matched on SLUG rather than email deliberately: the slug is
+// what makes an account a public demo, and it cannot silently drift the way a
+// hardcoded address can when someone changes the login on an account.
+const KEEP_SLUGS = ['demo-sales', 'demo-rental']
 const KEY = process.env.STAGING_SERVICE_ROLE_KEY
 
 if (!STAGING_URL.includes('snobwvwwgvksbxjpxbhv')) {
@@ -34,6 +35,7 @@ const admin = createClient(STAGING_URL, KEY, { auth: { persistSession: false } }
 const keepIds = []
 let primaryKeepId = null
 const deleteIds = []
+
 for (let page = 1; ; page++) {
   const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 })
   if (error) {
@@ -42,22 +44,36 @@ for (let page = 1; ; page++) {
   }
   if (!data.users.length) break
   for (const u of data.users) {
-    const email = u.email?.toLowerCase()
-    if (KEEP_EMAILS.some((e) => e.toLowerCase() === email)) {
+    if (u.email?.toLowerCase() === KEEP_EMAIL.toLowerCase()) {
       keepIds.push(u.id)
-      if (email === KEEP_EMAILS[0].toLowerCase()) primaryKeepId = u.id
+      primaryKeepId = u.id
     } else deleteIds.push(u.id)
   }
   if (data.users.length < 200) break
 }
 
-// Wrong-project guard, unchanged in spirit from the original. It keys on the
-// FIRST email only: the demo accounts may legitimately not exist yet, so their
-// absence must not be read as "this is the wrong project", and their presence
-// must not excuse the test account being missing.
+// Wrong-project guard, unchanged from the original.
 if (!primaryKeepId) {
-  console.error(`ABORT: ${KEEP_EMAILS[0]} not found — wrong project? Refusing to wipe accounts.`)
+  console.error(`ABORT: ${KEEP_EMAIL} not found — wrong project? Refusing to wipe accounts.`)
   process.exit(1)
+}
+
+// Now rescue the demo accounts by slug. Done as a second pass because the slug
+// lives on profiles, not on the auth user.
+const { data: demoProfiles, error: demoErr } = await admin
+  .from('profiles')
+  .select('id, slug')
+  .in('slug', KEEP_SLUGS)
+if (demoErr) {
+  console.error(`ABORT: could not read demo profiles (${demoErr.message}) — refusing to wipe.`)
+  process.exit(1)
+}
+for (const prof of demoProfiles ?? []) {
+  if (keepIds.includes(prof.id)) continue
+  keepIds.push(prof.id)
+  const idx = deleteIds.indexOf(prof.id)
+  if (idx !== -1) deleteIds.splice(idx, 1)
+  console.log(`  keeping demo account ${prof.slug}`)
 }
 
 console.log(`Keeping ${keepIds.length} account(s); deleting ${deleteIds.length} other account(s)…`)

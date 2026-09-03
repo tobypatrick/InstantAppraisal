@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/server'
 import { getAgentPageUrl } from '@/lib/subdomain'
@@ -16,6 +16,12 @@ interface PageProps {
 
 export default async function AgentLandingPage({ params }: PageProps) {
   const { slug } = await params
+
+  // The sales demo was renamed from 'demo' to 'demo-sales' on 3 Sept 2026 when
+  // the rental demo got its own account. Existing ads and inbound links point
+  // at the old slug, so it redirects rather than 404s.
+  if (slug === 'demo') redirect(getAgentPageUrl('demo-sales'))
+
   const supabase = await createClient()
 
   const { data, error } = await supabase.rpc('get_public_profile', { profile_slug: slug })

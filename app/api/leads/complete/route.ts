@@ -77,13 +77,14 @@ export async function POST(request: NextRequest) {
 
     // The public demo accounts are exempt from the subscription and report-cap
     // checks, so the demo pages always work no matter how much they are used.
-    // 'demo' is kept for the legacy account until it is retired.
+    // The old 'demo' slug is gone: that account WAS renamed to demo-sales, and
+    // the agent page redirects the old slug.
     const { data: agentProfile } = await supabase
       .from('profiles')
       .select('slug')
       .eq('id', lead.agent_id)
       .maybeSingle()
-    const isDemo = ['demo', 'demo-sales', 'demo-rental'].includes(agentProfile?.slug ?? '')
+    const isDemo = ['demo-sales', 'demo-rental'].includes(agentProfile?.slug ?? '')
 
     // Demo and Agent Growth accounts are exempt from the subscription + cap checks.
     const isExempt = isDemo || billing?.is_agent_growth === true
