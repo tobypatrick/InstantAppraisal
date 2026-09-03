@@ -169,7 +169,14 @@ export async function POST(request: NextRequest) {
     const leadAddress = escapeHtml(leadData.address)
     const utmSource = escapeHtml(leadData.utm_source) || 'Direct'
     const formattedDate = formatAEST(leadData.created_at || new Date().toISOString())
-    const variant = normaliseVariant((profile as { landing_variant?: string } | null)?.landing_variant)
+    // The lead records the variant it was captured under. Prefer it over the
+    // profile: the demo renders rental from a sales profile, and an account
+    // that switches variant must not retroactively re-word old leads' emails.
+    // NULL means captured before the column existed, so fall back.
+    const variant = normaliseVariant(
+      (leadData as { landing_variant?: string | null }).landing_variant
+        ?? (profile as { landing_variant?: string } | null)?.landing_variant
+    )
 
     let subject: string
     let body: string
