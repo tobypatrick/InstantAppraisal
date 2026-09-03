@@ -75,14 +75,15 @@ export async function POST(request: NextRequest) {
       .eq('user_id', lead.agent_id)
       .maybeSingle()
 
-    // The public demo account (slug 'demo') is exempt from the subscription and
-    // report-cap checks, so the demo page always works no matter how much it is used.
+    // The public demo accounts are exempt from the subscription and report-cap
+    // checks, so the demo pages always work no matter how much they are used.
+    // 'demo' is kept for the legacy account until it is retired.
     const { data: agentProfile } = await supabase
       .from('profiles')
       .select('slug')
       .eq('id', lead.agent_id)
       .maybeSingle()
-    const isDemo = agentProfile?.slug === 'demo'
+    const isDemo = ['demo', 'demo-sales', 'demo-rental'].includes(agentProfile?.slug ?? '')
 
     // Demo and Agent Growth accounts are exempt from the subscription + cap checks.
     const isExempt = isDemo || billing?.is_agent_growth === true

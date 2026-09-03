@@ -3,12 +3,14 @@ import { getAgentPageUrl } from '@/lib/subdomain'
 
 // The rental demo for property management BDMs.
 //
-// Deliberately the SAME demo profile as /demo, rendered in the rental variant,
-// rather than a second demo account. The profile carries the LeadConnector
-// webhook, notification email, pixel and GTM ids, the vendor-email toggle and
-// the billing row that lets reports generate, so sharing one account is what
-// keeps the two demos behaving identically. A second account would be a copy of
-// all of that, and copies drift.
+// Its own account (slug demo-rental) with landing_variant set to rental, so the
+// demo exercises the real toggle rather than a preview flag. Superseded the
+// earlier ?variant=rental override on the shared demo profile, Toby 3 Sept 2026,
+// because that never reached the email routes and could not show the backend.
+//
+// The two demo accounts must be kept in step by hand: branding, LeadConnector
+// webhook, notification email, pixel and GTM. See supabase/reset-staging.mjs,
+// which protects both from a staging reset.
 export default function RentalDemoRedirect() {
-  redirect(`${getAgentPageUrl('demo')}?variant=rental`)
+  redirect(getAgentPageUrl('demo-rental'))
 }

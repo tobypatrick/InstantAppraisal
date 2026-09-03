@@ -26,7 +26,7 @@ export interface SubscriptionError {
   limit?: number
 }
 
-export function useLeadCapture(agentId: string, utmParams?: UTMParams, landingVariant: 'sales' | 'rental' = 'sales') {
+export function useLeadCapture(agentId: string, utmParams?: UTMParams) {
   const [currentLeadId, setCurrentLeadId] = useState<string | null>(null)
   const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null)
   const [rateLimitError, setRateLimitError] = useState<RateLimitError | null>(null)
@@ -62,7 +62,6 @@ export function useLeadCapture(agentId: string, utmParams?: UTMParams, landingVa
           utm_source: utmParams?.utm_source,
           utm_medium: utmParams?.utm_medium,
           utm_campaign: utmParams?.utm_campaign,
-          landing_variant: landingVariant,
         }),
       })
       const data = await res.json().catch(() => null)

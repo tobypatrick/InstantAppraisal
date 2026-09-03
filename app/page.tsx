@@ -11,9 +11,8 @@ import { getAgentPageUrl } from '@/lib/subdomain'
 
 // Live demo lives on the agent subdomain (env-aware: my.* in prod,
 // staging-my.* in staging). The old marketing /demo page redirects here.
-const demoUrl = getAgentPageUrl('demo')
-// Same demo profile, rental variant. See app/demo/rental/page.tsx.
-const rentalDemoUrl = `${getAgentPageUrl('demo')}?variant=rental`
+const demoUrl = getAgentPageUrl('demo-sales')
+const rentalDemoUrl = getAgentPageUrl('demo-rental')
 
 export const metadata = {
   title: 'Property Appraisals for Real Estate Agents | InstantAppraisal',

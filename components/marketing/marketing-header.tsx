@@ -12,8 +12,8 @@ const NAV_LINKS = [
   { label: 'For BDMs', href: '#property-management' },
   { label: 'Pricing', href: '#pricing' },
   // Live demo lives on the agent subdomain (env-aware: my.* / staging-my.*)
-  { label: 'Demo', href: getAgentPageUrl('demo') },
-  { label: 'Rental Demo', href: `${getAgentPageUrl('demo')}?variant=rental` },
+  { label: 'Demo', href: getAgentPageUrl('demo-sales') },
+  { label: 'Rental Demo', href: getAgentPageUrl('demo-rental') },
 ]
 
 export function MarketingHeader() {

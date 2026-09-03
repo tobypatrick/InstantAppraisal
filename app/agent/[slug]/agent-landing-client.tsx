@@ -25,7 +25,7 @@ export function AgentLandingClient({ profile }: Props) {
   const [gracefulFailureMessage, setGracefulFailureMessage] = useState('')
 
   const utmParams = useMemo(() => extractUTMParams(searchParams), [searchParams])
-  const leadCapture = useLeadCapture(profile.id, utmParams, normaliseVariant(profile.landing_variant))
+  const leadCapture = useLeadCapture(profile.id, utmParams)
 
   // Guards against a double form submit (e.g. double-click) firing the
   // complete-lead + report flow twice, which double-charges the agent's

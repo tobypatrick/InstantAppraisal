@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { agent_id, address, utm_source, utm_medium, utm_campaign, landing_variant } = await request.json()
+    const { agent_id, address, utm_source, utm_medium, utm_campaign } = await request.json()
 
     if (!agent_id || !UUID_RE.test(agent_id)) {
       return NextResponse.json({ error: 'Invalid agent ID' }, { status: 400 })
@@ -57,23 +57,20 @@ export async function POST(request: NextRequest) {
 
     const { data: agent } = await supabase
       .from('profiles')
-      .select('id, slug, landing_variant')
+      .select('id, landing_variant')
       .eq('id', agent_id)
       .maybeSingle()
     if (!agent) {
       return NextResponse.json({ error: 'Agent not found' }, { status: 404 })
     }
 
-    // The variant the visitor actually saw, resolved here rather than trusted
-    // from the client. Mirrors the rule in app/agent/[slug]/page.tsx: only the
-    // demo account may be previewed in the other variant, so only there can the
-    // client's value differ from the profile's. Anywhere else a forged
-    // ?variant= would otherwise change a real agent's email wording.
-    const agentRow = agent as { slug?: string | null; landing_variant?: string | null }
-    const capturedVariant =
-      agentRow.slug === 'demo' && landing_variant === 'rental'
-        ? 'rental'
-        : normaliseVariant(agentRow.landing_variant)
+    // Stamp the lead with the variant it was captured under, read from the
+    // profile rather than the client so a forged value cannot change a real
+    // agent's email wording. The lead keeps this even if the account later
+    // switches variant, so past leads are never re-worded retroactively.
+    const capturedVariant = normaliseVariant(
+      (agent as { landing_variant?: string | null }).landing_variant
+    )
 
     const { data: lead, error } = await supabase
       .from('leads')

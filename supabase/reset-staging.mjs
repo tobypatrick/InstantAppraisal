@@ -10,7 +10,13 @@
 import { createClient } from '@supabase/supabase-js'
 
 const STAGING_URL = 'https://snobwvwwgvksbxjpxbhv.supabase.co'
-const KEEP_EMAIL = 'team+test@instantappraisal.co'
+// Accounts that survive a reset. The two demo accounts are public-facing and
+// linked from the marketing site, so wiping them breaks the live demos.
+const KEEP_EMAILS = [
+  'team+test@instantappraisal.co',
+  'team+demosales@instantappraisal.co',
+  'team+demorental@instantappraisal.co',
+]
 const KEY = process.env.STAGING_SERVICE_ROLE_KEY
 
 if (!STAGING_URL.includes('snobwvwwgvksbxjpxbhv')) {
@@ -25,7 +31,8 @@ if (!KEY) {
 const admin = createClient(STAGING_URL, KEY, { auth: { persistSession: false } })
 
 // 1. Find the keep account and collect everyone else (paginated).
-let keepId = null
+const keepIds = []
+let primaryKeepId = null
 const deleteIds = []
 for (let page = 1; ; page++) {
   const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 })
@@ -35,22 +42,30 @@ for (let page = 1; ; page++) {
   }
   if (!data.users.length) break
   for (const u of data.users) {
-    if (u.email?.toLowerCase() === KEEP_EMAIL.toLowerCase()) keepId = u.id
-    else deleteIds.push(u.id)
+    const email = u.email?.toLowerCase()
+    if (KEEP_EMAILS.some((e) => e.toLowerCase() === email)) {
+      keepIds.push(u.id)
+      if (email === KEEP_EMAILS[0].toLowerCase()) primaryKeepId = u.id
+    } else deleteIds.push(u.id)
   }
   if (data.users.length < 200) break
 }
 
-if (!keepId) {
-  console.error(`ABORT: ${KEEP_EMAIL} not found — wrong project? Refusing to wipe accounts.`)
+// Wrong-project guard, unchanged in spirit from the original. It keys on the
+// FIRST email only: the demo accounts may legitimately not exist yet, so their
+// absence must not be read as "this is the wrong project", and their presence
+// must not excuse the test account being missing.
+if (!primaryKeepId) {
+  console.error(`ABORT: ${KEEP_EMAILS[0]} not found — wrong project? Refusing to wipe accounts.`)
   process.exit(1)
 }
 
-console.log(`Keeping ${KEEP_EMAIL} (${keepId}); deleting ${deleteIds.length} other account(s)…`)
+console.log(`Keeping ${keepIds.length} account(s); deleting ${deleteIds.length} other account(s)…`)
 
 // 2. Delete dependent data for everyone except the keep account (children first).
+const keepList = `(${keepIds.join(',')})`
 const wipe = async (table, col) => {
-  const { error } = await admin.from(table).delete().neq(col, keepId)
+  const { error } = await admin.from(table).delete().not(col, 'in', keepList)
   if (error) console.error(`  ${table} cleanup failed:`, error.message)
 }
 await wipe('analytics', 'agent_id')
@@ -72,4 +87,4 @@ for (const id of deleteIds) {
 const rl = await admin.from('rate_limits').delete().not('id', 'is', null)
 if (rl.error) console.warn('  rate_limits not cleared:', rl.error.message)
 
-console.log(`✅ Reset complete — deleted ${deleted} account(s), kept ${KEEP_EMAIL}.`)
+console.log(`✅ Reset complete — deleted ${deleted} account(s), kept ${keepIds.length}.`)
