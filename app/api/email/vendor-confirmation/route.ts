@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const { data: lead } = await supabase
       .from('leads')
-      .select('contact_email, contact_name, address, status, report_url')
+      .select('contact_email, contact_name, address, status, report_url, landing_variant')
       .eq('id', lead_id)
       .single()
 
@@ -56,7 +56,12 @@ export async function POST(request: NextRequest) {
     const contactPhone = profile?.phone_number || ''
     const vendorFirstName = escapeHtml(lead.contact_name?.split(' ')[0]) || 'there'
     const address = escapeHtml(lead.address)
-    const copy = variantCopy((profile as { landing_variant?: string } | null)?.landing_variant).email
+    // Prefer the variant the lead was captured under. See the lead-notification
+    // route for why the profile alone is wrong.
+    const copy = variantCopy(
+      (lead as { landing_variant?: string | null }).landing_variant
+        ?? (profile as { landing_variant?: string } | null)?.landing_variant
+    ).email
 
     let contactLines = ''
     if (contactPhone) {
