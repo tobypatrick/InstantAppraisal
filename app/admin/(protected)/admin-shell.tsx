@@ -14,9 +14,17 @@ export function AdminShell({ email, children }: { email: string; children: React
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LeadAgentLogo height={26} />
-            <span className="text-xs uppercase tracking-wide text-emerald-700 bg-emerald-50 rounded px-1.5 py-0.5">Admin</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <LeadAgentLogo height={26} />
+              <span className="text-xs uppercase tracking-wide text-emerald-700 bg-emerald-50 rounded px-1.5 py-0.5">Admin</span>
+            </div>
+            {/* A second page means the shell finally needs nav. Without it the
+                feature-request queue exists and nobody can reach it. */}
+            <nav className="flex items-center gap-3 text-sm">
+              <a href="/overview" className="text-slate-600 hover:text-slate-900">Overview</a>
+              <a href="/feature-requests" className="text-slate-600 hover:text-slate-900">Feature requests</a>
+            </nav>
           </div>
           <div className="flex items-center gap-3 text-sm text-slate-500">
             <span className="hidden sm:inline">{email}</span>
