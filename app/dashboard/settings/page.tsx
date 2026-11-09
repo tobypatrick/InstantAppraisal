@@ -13,7 +13,7 @@ import { BrandingSection } from '@/components/settings/BrandingSection'
 import { BusinessInfoSection } from '@/components/settings/BusinessInfoSection'
 import { SlugSection } from '@/components/settings/SlugSection'
 import { LightCard, LightCardHeader } from '@/components/dashboard/LightCard'
-import { LANDING_VARIANTS, variantCopy, normaliseVariant, type LandingVariant } from '@/lib/landing-variants'
+import { LANDING_VARIANTS, variantCopy, normaliseVariant, type LandingVariant, socialProofLine, DEFAULT_SOCIAL_PROOF_COUNT, MAX_SOCIAL_PROOF_COUNT } from '@/lib/landing-variants'
 
 interface FormData {
   full_name: string
@@ -32,6 +32,7 @@ interface FormData {
   notification_email: string
   send_vendor_email: boolean
   landing_variant: LandingVariant
+  social_proof_count: string
 }
 
 const DEFAULT_FORM: FormData = {
@@ -51,6 +52,7 @@ const DEFAULT_FORM: FormData = {
   notification_email: '',
   send_vendor_email: true,
   landing_variant: 'sales',
+  social_proof_count: '',
 }
 
 export default function SettingsPage() {
@@ -69,7 +71,7 @@ export default function SettingsPage() {
       setProfileId(user.id)
       supabase
         .from('profiles')
-        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email, send_vendor_email, landing_variant')
+        .select('full_name, agency_name, phone_number, vsl_youtube_url, slug, agency_logo_url, profile_picture_url, header_bg_color, page_bg_color, accent_color, facebook_pixel_id, leadconnector_webhook_url, google_tag_manager_id, notification_email, send_vendor_email, landing_variant, social_proof_count')
         .eq('id', user.id)
         .maybeSingle()
         .then(({ data, error }) => {
@@ -96,6 +98,7 @@ export default function SettingsPage() {
               notification_email: (data as any).notification_email || '',
               send_vendor_email: (data as any).send_vendor_email ?? true,
               landing_variant: normaliseVariant((data as any).landing_variant),
+              social_proof_count: (data as any).social_proof_count == null ? '' : String((data as any).social_proof_count),
             })
           }
         })
@@ -153,6 +156,7 @@ export default function SettingsPage() {
           notification_email: formData.notification_email || null,
           send_vendor_email: formData.send_vendor_email,
           landing_variant: formData.landing_variant,
+          social_proof_count: formData.social_proof_count === '' ? null : Number(formData.social_proof_count),
           updated_at: new Date().toISOString(),
         })
         .eq('id', profileId)
@@ -245,6 +249,33 @@ export default function SettingsPage() {
               )
             })}
           </div>
+        </LightCard>
+
+        <LightCard>
+          <LightCardHeader
+            icon={<Layout className="h-4 w-4" strokeWidth={1.25} />}
+            title="Weekly Usage Line"
+            description={`Your page says "${socialProofLine(variantCopy(formData.landing_variant), formData.social_proof_count === '' ? null : Number(formData.social_proof_count))}". Enter the number that's right for your area, or leave it blank for ${DEFAULT_SOCIAL_PROOF_COUNT}.`}
+          />
+          <label htmlFor="social_proof_count" className="block text-xs font-medium text-slate-700 mb-1.5">Number shown</label>
+          <input
+            id="social_proof_count"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={MAX_SOCIAL_PROOF_COUNT}
+            step={1}
+            placeholder={String(DEFAULT_SOCIAL_PROOF_COUNT)}
+            value={formData.social_proof_count}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, '')
+              const n = Number(digits)
+              if (digits === '' || (n >= 1 && n <= MAX_SOCIAL_PROOF_COUNT)) {
+                setFormData((prev) => ({ ...prev, social_proof_count: digits }))
+              }
+            }}
+            className="w-32 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+          />
         </LightCard>
 
         <LightCard>

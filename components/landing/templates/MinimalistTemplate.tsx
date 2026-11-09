@@ -4,7 +4,7 @@ import { VideoEmbed } from "./shared/VideoEmbed";
 import { PoweredByAttribution } from "./shared/PoweredByAttribution";
 import { ReportPreview } from "./shared/ReportPreview";
 import { getContrastTextColor, hexToRgba } from "@/lib/color-utils";
-import { variantCopy } from "@/lib/landing-variants";
+import { variantCopy, socialProofLine } from "@/lib/landing-variants";
 import type { TemplateProps } from "./shared/TemplateTypes";
 
 export function MinimalistTemplate({
@@ -100,7 +100,7 @@ export function MinimalistTemplate({
                 </p>
               )}
               <p className={`${mutedTextClass} text-xs opacity-75`}>
-                {copy.socialProof}
+                {socialProofLine(copy, profile.social_proof_count)}
               </p>
             </div>
           </div>
