@@ -5,6 +5,7 @@ import { PoweredByAttribution } from "./shared/PoweredByAttribution";
 import { ReportPreview } from "./shared/ReportPreview";
 import { getContrastTextColor, hexToRgba } from "@/lib/color-utils";
 import type { TemplateProps } from "./shared/TemplateTypes";
+import { socialProofLine } from "@/lib/social-proof";
 
 export function MinimalistTemplate({
   profile,
@@ -97,7 +98,7 @@ export function MinimalistTemplate({
                 </p>
               )}
               <p className={`${mutedTextClass} text-xs opacity-75`}>
-                Used by 800+ homeowners this week
+                {socialProofLine(profile.social_proof_count)}
               </p>
             </div>
           </div>

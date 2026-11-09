@@ -11,6 +11,7 @@ export interface PublicProfile {
   agency_logo_url: string | null
   vsl_youtube_url: string | null
   selected_template: string
+  social_proof_count?: number | null
   slug: string | null
   header_bg_color?: string | null
   page_bg_color?: string | null
