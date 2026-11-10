@@ -12,6 +12,7 @@ export interface PublicProfile {
   vsl_youtube_url: string | null
   selected_template: string
   landing_variant: string
+  social_proof_count?: number | null
   slug: string | null
   header_bg_color?: string | null
   page_bg_color?: string | null

@@ -53,6 +53,7 @@ export interface VariantCopy {
   heroTitle: readonly [string, string]
   heroSubtitle: string
   heroSubtitleStrong: string
+  /** `{count}` is replaced by the agent's own number, see socialProofLine */
   socialProof: string
   /** Report preview grid */
   reportEyebrow: string
@@ -98,7 +99,7 @@ const SALES: VariantCopy = {
   heroTitle: ["Discover Your Property's", 'New Market Value'],
   heroSubtitle: 'property report in 30 seconds.',
   heroSubtitleStrong: 'free, no-obligation',
-  socialProof: 'Used by 800+ homeowners this week',
+  socialProof: 'Used by {count}+ homeowners this week',
   reportEyebrow: "What's in your free report",
   reportCards: [
     { icon: 'trending', label: 'Estimated Value', desc: 'Instant valuation with confidence rating' },
@@ -143,7 +144,7 @@ const RENTAL: VariantCopy = {
   heroTitle: ["Discover Your Property's", 'Rental Value'],
   heroSubtitle: 'rental appraisal in 30 seconds.',
   heroSubtitleStrong: 'free, no-obligation',
-  socialProof: 'Used by 800+ property owners this week',
+  socialProof: 'Used by {count}+ property owners this week',
   reportEyebrow: "What's in your free rental appraisal",
   reportCards: [
     { icon: 'trending', label: 'Estimated Rent', desc: 'Instant rental estimate with confidence rating' },
@@ -190,6 +191,14 @@ const RENTAL: VariantCopy = {
 }
 
 const COPY: Record<LandingVariant, VariantCopy> = { sales: SALES, rental: RENTAL }
+
+/** Shown until an agent sets their own number under Dashboard, Settings. */
+export const DEFAULT_SOCIAL_PROOF_COUNT = 800
+export const MAX_SOCIAL_PROOF_COUNT = 99999
+
+export function socialProofLine(copy: VariantCopy, count: number | null | undefined): string {
+  return copy.socialProof.replace('{count}', String(count ?? DEFAULT_SOCIAL_PROOF_COUNT))
+}
 
 export function variantCopy(variant: string | null | undefined): VariantCopy {
   return COPY[normaliseVariant(variant)]
