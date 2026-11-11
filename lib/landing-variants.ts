@@ -161,7 +161,7 @@ const RENTAL: VariantCopy = {
     { icon: 'users', label: 'Tenant Demand', desc: 'Live renter demand from realestate.com.au' },
     { icon: 'school', label: 'Nearby Schools', desc: 'Schools within the catchment area' },
   ],
-  previewFigure: '$650 / week',
+  previewFigure: '$999 / week',
   previewReveal: 'Complete the form to reveal your estimated rent.',
   interestQuestion: 'How is the property currently used?',
   interestOptions: [
