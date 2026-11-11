@@ -59,6 +59,9 @@ export interface VariantCopy {
   reportEyebrow: string
   reportCards: readonly ReportCard[]
   /** Contact form */
+  /** Blurred placeholder figure above the form. Never a real estimate. */
+  previewFigure: string
+  previewReveal: string
   interestQuestion: string
   interestOptions: readonly InterestOption[]
   /** The option worth flagging to the agent or BDM as hot */
@@ -111,6 +114,8 @@ const SALES: VariantCopy = {
     { icon: 'users', label: 'Potential Buyers', desc: 'Live buyer demand from realestate.com.au' },
     { icon: 'school', label: 'Nearby Schools', desc: 'Schools within the catchment area' },
   ],
+  previewFigure: '$1,250,000',
+  previewReveal: 'Complete the form to reveal your property value.',
   interestQuestion: "What's your situation?",
   interestOptions: [
     { value: 'Looking to Sell', icon: 'house' },
@@ -156,6 +161,8 @@ const RENTAL: VariantCopy = {
     { icon: 'users', label: 'Tenant Demand', desc: 'Live renter demand from realestate.com.au' },
     { icon: 'school', label: 'Nearby Schools', desc: 'Schools within the catchment area' },
   ],
+  previewFigure: '$650 / week',
+  previewReveal: 'Complete the form to reveal your estimated rent.',
   interestQuestion: 'How is the property currently used?',
   interestOptions: [
     { value: 'Tenanted, managed by an agency', icon: 'building' },

@@ -103,11 +103,11 @@ export function ContactForm({ address, onSubmit, isLoading, pageBgColor, accentC
             style={{ filter: 'blur(8px)' }}
             aria-hidden="true"
           >
-            $1,250,000
+            {copy.previewFigure}
           </span>
         </div>
         <p className={`${mutedTextClass} text-xs mb-4`}>
-          Complete the form to reveal your property value.
+          {copy.previewReveal}
         </p>
         <h2 className={`text-xl font-semibold ${textColorClass} mb-1 tracking-tight`}>
           Almost There
