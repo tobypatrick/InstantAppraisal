@@ -28,7 +28,8 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: CLI 3.x changed db push to target the local DB by default (10 Nov 2026 failure).
+          version: 3.1.0
 
       - name: Determine target project
         id: target
@@ -47,5 +48,5 @@ jobs:
         env:
           DB_PASSWORD: ${{ github.ref_name == 'main' && secrets.PROD_DB_PASSWORD || secrets.STAGING_DB_PASSWORD }}
         run: |
-          supabase link --project-ref ${{ steps.target.outputs.ref }} --password "$DB_PASSWORD"
-          supabase db push --password "$DB_PASSWORD"
+          supabase link --project-ref ${{ steps.target.outputs.ref }}
+          supabase db push --remote --password "$DB_PASSWORD" --yes
